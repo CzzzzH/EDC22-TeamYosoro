@@ -1,15 +1,30 @@
 #include <Arduino.h>
-#include <FlexTimer2.h>
 #include "statemachine.h"
+#include <MsTimer2.h>
 
 StateMachine& sm = StateMachine::getInstance();
 const int PWM_pin1 = 11;
+
+void Interrupt_10ms()
+{
+	static int count = 0;
+	if (count == 50)
+	{
+		Serial.write("Interrupt_500ms");
+		count = 0;
+	}
+	count++;
+}
 
 void setup()
 {
 	// put your setup code here, to run once:
 	pinMode(PWM_pin1, OUTPUT);
 	Serial.begin(9600);
+
+	//Timer Interrupt 10ms
+	MsTimer2::set(10, Interrupt_10ms);
+	MsTimer2::start();
 }
 
 void loop()
@@ -22,4 +37,3 @@ void loop()
 	}
 	Serial.write("aaa\n");
 }
-
