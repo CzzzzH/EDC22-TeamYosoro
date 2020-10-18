@@ -1,10 +1,12 @@
 #include <Arduino.h>
+#include "statemachine.h"
 #include <MsTimer2.h>
 #include <string.h>
 #include "TimerInterrupt.hpp"
 
 const int PWM_1_A = 11;
 const int PWM_1_B = 10;
+StateMachine &sm = StateMachine::getInstance();
 
 const int encoderA = 21;
 const int encoderB = 20;
