@@ -1,6 +1,8 @@
 #include <Arduino.h>
+#include "statemachine.h"
 #include <MsTimer2.h>
 
+StateMachine& sm = StateMachine::getInstance();
 const int PWM_pin1 = 11;
 
 void Interrupt_10ms()
