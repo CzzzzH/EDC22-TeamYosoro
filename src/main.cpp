@@ -1,39 +1,53 @@
 #include <Arduino.h>
 #include "statemachine.h"
 #include <MsTimer2.h>
+#include <string.h>
+#include "TimerInterrupt.hpp"
 
-StateMachine& sm = StateMachine::getInstance();
-const int PWM_pin1 = 11;
+const int PWM_1_A = 11;
+const int PWM_1_B = 10;
+StateMachine &sm = StateMachine::getInstance();
 
-void Interrupt_10ms()
-{
-	static int count = 0;
-	if (count == 50)
-	{
-		Serial.write("Interrupt_500ms");
-		count = 0;
-	}
-	count++;
-}
+const int encoderA = 21;
+const int encoderB = 20;
+
+int encoderA_counter = 0;
+int encoderB_counter = 0;
 
 void setup()
 {
 	// put your setup code here, to run once:
-	pinMode(PWM_pin1, OUTPUT);
+	pinMode(PWM_1_A, OUTPUT);
+	pinMode(PWM_1_B, OUTPUT);
 	Serial.begin(9600);
 
 	//Timer Interrupt 10ms
 	MsTimer2::set(10, Interrupt_10ms);
 	MsTimer2::start();
+	add_100ms([] {
+		// encoder
+		Serial.println(encoderA_counter);
+		Serial.println(encoderB_counter);
+		Serial.println();
+		encoderA_counter = 0;
+		encoderB_counter = 0;
+	});
+
+	// Encoder input
+	pinMode(encoderA, INPUT);
+	pinMode(encoderB, INPUT);
+
+	// External Interrupt
+	attachInterrupt(
+		2, [] { encoderA_counter++; }, RISING);
+	attachInterrupt(
+		3, [] { encoderB_counter++; }, RISING);
 }
 
 void loop()
 {
 	// put your main code here, to run repeatedly:
-	for (int i = 0; i < 256; i += 10)
-	{
-		analogWrite(PWM_pin1, i);
-		delay(100);
-	}
-	Serial.write("aaa\n");
+	analogWrite(PWM_1_A, 100);
+	analogWrite(PWM_1_B, 0);
+	delay(200);
 }
