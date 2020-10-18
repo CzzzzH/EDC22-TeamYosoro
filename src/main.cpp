@@ -1,5 +1,8 @@
 #include <Arduino.h>
+#include <FlexTimer2.h>
+#include "statemachine.h"
 
+StateMachine& sm = StateMachine::getInstance();
 const int PWM_pin1 = 11;
 
 void setup()
@@ -19,3 +22,4 @@ void loop()
 	}
 	Serial.write("aaa\n");
 }
+
