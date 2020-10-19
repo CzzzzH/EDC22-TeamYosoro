@@ -18,8 +18,8 @@ const int left_back_encoder_B = 20;
 const int right_back_encoder_A = 19;
 const int right_back_encoder_B = 18;
 
-int left_encoder_counter = 0;
-int right_encoder_counter = 0;
+double left_encoder_counter = 0;
+double right_encoder_counter = 0;
 
 void initialize_motor_control_pin()
 {

@@ -4,11 +4,16 @@
 #include <string.h>
 #include "TimerInterrupt.hpp"
 #include "motor_control.hpp"
+#include "PID.hpp"
 
 StateMachine &sm = StateMachine::getInstance();
 
+PID pid = PID(
+	1.1, 0.1, 0.1, [](double d) { setRightPWM(d); }, &right_encoder_counter);
+
 void setup()
 {
+
 	initialize_motor_control_pin();
 	Serial.begin(9600);
 
@@ -16,6 +21,8 @@ void setup()
 	MsTimer2::set(10, Interrupt_10ms);
 	MsTimer2::start();
 	add_100ms([] {
+		PID::run();
+
 		// encoder
 		Serial.println(right_encoder_counter);
 		//Serial.println(encoderB_counter);
@@ -28,6 +35,7 @@ void setup()
 void loop()
 {
 	// put your main code here, to run repeatedly:
-	setRightPWM(100);
+	// setRightPWM(150);
+	pid.target = 110;
 	delay(200);
 }
