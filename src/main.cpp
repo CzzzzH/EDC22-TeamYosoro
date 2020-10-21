@@ -9,11 +9,10 @@
 StateMachine &sm = StateMachine::getInstance();
 
 PID pid = PID(
-	1.1, 0.1, 0.1, [](double d) { setRightPWM(d); }, &right_encoder_counter);
+	1.1, 0.01, 0.01, [](double d) { setRightPWM(d); }, &right_encoder_counter);
 
 void setup()
 {
-
 	initialize_motor_control_pin();
 	Serial.begin(9600);
 
@@ -22,11 +21,10 @@ void setup()
 	MsTimer2::start();
 	add_100ms([] {
 		PID::run();
-
 		// encoder
-		Serial.println(right_encoder_counter);
+		// Serial.println(right_encoder_counter);
 		//Serial.println(encoderB_counter);
-		Serial.println();
+		// Serial.println();
 		right_encoder_counter = 0;
 		left_encoder_counter = 0;
 	});

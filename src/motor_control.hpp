@@ -70,20 +70,22 @@ void setLeftPWM(const int &pwm)
 
 void setRightPWM(const int &pwm)
 {
-	if (pwm > 0)
+	int pwm_tmp = std::min(pwm, 255);
+	pwm_tmp = std::max(pwm_tmp, -255);
+	if (pwm_tmp > 0)
 	{
-		analogWrite(right_back_pin_A, pwm);
+		analogWrite(right_back_pin_A, pwm_tmp);
 		analogWrite(right_back_pin_B, 0);
 
-		analogWrite(right_front_pin_A, pwm);
+		analogWrite(right_front_pin_A, pwm_tmp);
 		analogWrite(right_front_pin_B, 0);
 	}
 	else
 	{
 		analogWrite(right_back_pin_A, 0);
-		analogWrite(right_back_pin_B, -pwm);
+		analogWrite(right_back_pin_B, -pwm_tmp);
 
 		analogWrite(right_front_pin_A, 0);
-		analogWrite(right_front_pin_B, -pwm);
+		analogWrite(right_front_pin_B, -pwm_tmp);
 	}
 }
