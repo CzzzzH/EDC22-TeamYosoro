@@ -1,21 +1,39 @@
 #include <Arduino.h>
+#include "statemachine.h"
+#include <MsTimer2.h>
+#include <string.h>
+#include "TimerInterrupt.hpp"
+#include "motor_control.hpp"
+#include "PID.hpp"
 
-const int PWM_pin1 = 11;
+StateMachine &sm = StateMachine::getInstance();
+
+PID pid = PID(
+	1.1, 0.01, 0.01, [](double d) { setRightPWM(d); }, &right_encoder_counter);
 
 void setup()
 {
-	// put your setup code here, to run once:
-	pinMode(PWM_pin1, OUTPUT);
+	initialize_motor_control_pin();
 	Serial.begin(9600);
+
+	//Timer Interrupt 10ms
+	MsTimer2::set(10, Interrupt_10ms);
+	MsTimer2::start();
+	add_100ms([] {
+		PID::run();
+		// encoder
+		// Serial.println(right_encoder_counter);
+		//Serial.println(encoderB_counter);
+		// Serial.println();
+		right_encoder_counter = 0;
+		left_encoder_counter = 0;
+	});
 }
 
 void loop()
 {
 	// put your main code here, to run repeatedly:
-	for (int i = 0; i < 256; i += 10)
-	{
-		analogWrite(PWM_pin1, i);
-		delay(100);
-	}
-	Serial.write("aaa\n");
+	// setRightPWM(150);
+	pid.target = 110;
+	delay(200);
 }
