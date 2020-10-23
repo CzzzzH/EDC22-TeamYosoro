@@ -8,16 +8,16 @@ void servoCtl::angleReach()
   int16_t change;
   while (angleTmp != angNow)
   {
-      change = (angNow > angMemory) ? 1 : -1;
-	  angleTmp = angleTmp + change;
-	  myServo.write(angleTmp);
-	  delay(delayT);
+    change = (angNow > angMemory) ? 1 : -1;
+    angleTmp = angleTmp + change;
+    myServo.write(angleTmp);
+    delay(delayT);
   }
 }
 servoCtl::servoCtl(void)
 {
-	angMemory = 90;
-	angNow = 90;
+  angMemory = 90;
+  angNow = 90;
 }
 void servoCtl::changeAngle(int16_t ang)
 {
