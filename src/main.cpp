@@ -5,47 +5,49 @@
 #include <Encoder.h>
 #include "TimerInterrupt.hpp"
 #include "motor_control.hpp"
-// #include "PID.hpp"
 #include <PID_v1.h>
+#include <SoftwareSerial.h>
+#include <JY61.hpp>
 
 StateMachine &sm = StateMachine::getInstance();
 
 double Output;
 double Setpoint;
-PID myPID(&right_encoder_counter, &Output, &Setpoint, 1.6, 0.0005, 0.0005, DIRECT);
+PID myPID(&encoder::counter.right, &Output, &Setpoint, 2, 0.05, 0.05, DIRECT);
 
-// PID pid = PID(
-// 	0.1, 0.01, 0.01, [](int d) { setRightPWM(d); }, &right_encoder_counter);
+Encoder rightEnc(encoder::right_pin.A, encoder::right_pin.B);
+Encoder leftEnc(encoder::left_pin.A, encoder::left_pin.B);
 
-Encoder rightEnc(right_back_encoder_A, right_back_encoder_B);
-Encoder leftEnc(left_back_encoder_A, left_back_encoder_B);
+TimerInterrupt timer1(3, [] {
+	encoder::counter.right = rightEnc.read();
+	encoder::counter.left = leftEnc.read();
+
+	// Serial.print("right:  ");
+	// Serial.print(encoder::counter.right);
+	// Serial.print("\t\tleft:   ");
+	// Serial.println(encoder::counter.left);
+
+	// Motor::setRightPWM(250);
+	// Motor::setLeftPWM(250);
+
+	rightEnc.write(0);
+	leftEnc.write(0);
+});
+
+TimerInterrupt timer2(50, [] {
+	JY61_read();
+	// JY61_print();
+});
 
 void setup()
 {
-	initialize_motor_control_pin();
+	Motor::initialize();
 	Serial.begin(9600);
+	JY61_serial.begin(115200);
+	// delay(2000);
 
 	//Timer Interrupt 10ms
-	MsTimer2::set(10, Interrupt_10ms);
-	MsTimer2::start();
-	add_10ms([] {
-		right_encoder_counter = rightEnc.read();
-		left_encoder_counter = leftEnc.read();
-
-		Serial.print("right:  ");
-		Serial.println(right_encoder_counter);
-		// Serial.print("\t\tleft:   ");
-		// Serial.println(left_encoder_counter);
-
-		setRightPWM(Output);
-
-		// encoder
-		// Serial.println(right_encoder_counter);
-		//Serial.println(encoderB_counter);
-		// Serial.println();
-		rightEnc.write(0);
-		leftEnc.write(0);
-	});
+	TimerInterrupt::initialize(10);
 
 	myPID.SetMode(AUTOMATIC);
 	myPID.SetSampleTime(10);
@@ -55,8 +57,8 @@ void loop()
 {
 	// put your main code here, to run repeatedly:
 	// setRightPWM(100);
-	Setpoint = 60;
-	myPID.Compute();
+	Setpoint = 100;
+	// myPID.Compute();
 
 	// delay(200);
 }

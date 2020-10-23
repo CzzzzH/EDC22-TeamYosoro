@@ -1,39 +1,46 @@
+#include <map>
 #include <list>
+#include <MsTimer2.h>
 
-typedef void (*Func)(void);
-
-std::list<Func> exec_10ms = std::list<Func>();
-std::list<Func> exec_100ms = std::list<Func>();
-
-void Interrupt_100ms()
+class TimerInterrupt
 {
-	for (auto func : exec_100ms)
-		func();
-}
+public:
+	typedef void (*Func)(void);
 
-void Interrupt_10ms()
-{
-	static int count = 0;
-
-	for (auto func : exec_10ms)
-		func();
-
-	if (count == 10)
+private:
+	static std::list<TimerInterrupt *> timer_list;
+	static void unit_interrupt()
 	{
-		Interrupt_100ms();
-		count = 0;
+		for (auto timer : timer_list)
+			timer->execute();
 	}
-	count++;
-}
 
-void add_10ms(Func func)
-{
-	exec_10ms.push_back(func);
-}
+	unsigned int count = 0;
+	unsigned int times = 1;
+	Func func;
 
-void add_100ms(Func func)
-{
-	exec_100ms.push_back(func);
-}
+public:
+	static void initialize(unsigned long interval)
+	{
+		MsTimer2::set(interval, unit_interrupt);
+		MsTimer2::start();
+	}
 
+	TimerInterrupt(unsigned int times, Func func) : times(times), func(func)
+	{
+		timer_list.push_back(this);
+	}
 
+	void execute()
+	{
+		this->count = this->count + 1;
+		if (count >= times)
+		{
+			func();
+			count = 0;
+		}
+	}
+};
+
+std::list<TimerInterrupt *>
+	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();
