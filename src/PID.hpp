@@ -41,16 +41,26 @@ public:
 		{
 			PID *pid = pair.second;
 			double error = pid->target - *(pid->monitor_value);
+			Serial.print("pid target : ");
 			Serial.print(pid->target);
 			Serial.print("    ");
+
+			Serial.print("pid monitor value : ");
 			Serial.print(*(pid->monitor_value));
 			Serial.print("    ");
+
 			pid->error_sum += error;
 			pid->error_sum = std::min(100000.0, pid->error_sum);
+
+			Serial.print("pid error sum : ");
 			Serial.print(pid->error_sum);
 			Serial.print("    ");
+
+			Serial.print("pid input : ");
+			Serial.print(pid->P * error + pid->I * pid->error_sum + pid->D * (error - pid->last_error));
+			Serial.print("    ");
+
 			pid->control(pid->P * error + pid->I * pid->error_sum + pid->D * (error - pid->last_error));
-		    Serial.print(pid->P * error + pid->I * pid->error_sum + pid->D * (error - pid->last_error));
 			Serial.println("");
 			pid->last_error = error;
 		}

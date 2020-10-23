@@ -42,10 +42,10 @@ void initialize_motor_control_pin()
 	pinMode(right_back_encoder_B, INPUT);
 
 	// External Interrupt
-	attachInterrupt(
-		2, [] { left_encoder_counter++; }, RISING);
-	attachInterrupt(
-		4, [] { right_encoder_counter++; }, RISING);
+	// attachInterrupt(
+	// 	2, [] { left_encoder_counter++; }, RISING);
+	// attachInterrupt(
+	// 	4, [] { right_encoder_counter++; }, RISING);
 }
 
 void setLeftPWM(const int &pwm)
@@ -68,24 +68,28 @@ void setLeftPWM(const int &pwm)
 	}
 }
 
-void setRightPWM(const int &pwm)
+void setRightPWM(int pwm)
 {
-	int pwm_tmp = std::min(pwm, 255);
-	pwm_tmp = std::max(pwm_tmp, -255);
-	if (pwm_tmp > 0)
+	Serial.print("setting pwm : ");
+	Serial.println(pwm);
+	// int pwm = std::min(pwm, 255);
+	// pwm = std::max(pwm, -255);
+
+	// Serial.println(pwm);
+	if (pwm > 0)
 	{
-		analogWrite(right_back_pin_A, pwm_tmp);
+		analogWrite(right_back_pin_A, pwm);
 		analogWrite(right_back_pin_B, 0);
 
-		analogWrite(right_front_pin_A, pwm_tmp);
+		analogWrite(right_front_pin_A, pwm);
 		analogWrite(right_front_pin_B, 0);
 	}
 	else
 	{
 		analogWrite(right_back_pin_A, 0);
-		analogWrite(right_back_pin_B, -pwm_tmp);
+		analogWrite(right_back_pin_B, -pwm);
 
 		analogWrite(right_front_pin_A, 0);
-		analogWrite(right_front_pin_B, -pwm_tmp);
+		analogWrite(right_front_pin_B, -pwm);
 	}
 }
