@@ -2,6 +2,7 @@
 #define STATEMACHINE_H
 
 #include "util.h"
+#include "information.h"
 
 class StateMachine // The statemachine of the car (Singleton)
 {

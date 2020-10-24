@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "statemachine.h"
+#include "information.h"
 #include <MsTimer2.h>
 #include <string.h>
 #include <Encoder.h>
@@ -41,9 +42,14 @@ TimerInterrupt timer2(50, [] {
 
 void setup()
 {
+
+	initialize_motor_control_pin();
+  Serial.begin(9600);
+  Serial1.begin(115200);
+  JY61_serial.begin(115200);
 	Motor::initialize();
 	Serial.begin(9600);
-	JY61_serial.begin(115200);
+	
 	// delay(2000);
 
 	//Timer Interrupt 10ms
@@ -51,14 +57,10 @@ void setup()
 
 	myPID.SetMode(AUTOMATIC);
 	myPID.SetSampleTime(10);
+
 }
 
 void loop()
 {
-	// put your main code here, to run repeatedly:
-	// setRightPWM(100);
 	Setpoint = 100;
-	// myPID.Compute();
-
-	// delay(200);
 }

@@ -5,9 +5,9 @@ enum MissionType {GO_TO_MAZE, RETURN};
 enum ActionType {MOVE, TURN};
 enum State {IN_MAZE, OUT_MAZE};
 
-struct Position
+struct MazePosition
 {
-    float x, y;
+    int x, y;
 };
 
 struct Action
