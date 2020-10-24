@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "statemachine.h"
+#include "information.h"
 #include <MsTimer2.h>
 #include <string.h>
 #include "TimerInterrupt.hpp"
@@ -14,26 +15,31 @@ PID pid = PID(
 void setup()
 {
 	initialize_motor_control_pin();
-	Serial.begin(9600);
-
+    Serial.begin(9600);
+    Serial1.begin(115200);
+    /*
 	//Timer Interrupt 10ms
 	MsTimer2::set(10, Interrupt_10ms);
 	MsTimer2::start();
 	add_100ms([] {
-		PID::run();
+		// PID::run();
 		// encoder
 		// Serial.println(right_encoder_counter);
 		//Serial.println(encoderB_counter);
 		// Serial.println();
-		right_encoder_counter = 0;
-		left_encoder_counter = 0;
+		// right_encoder_counter = 0;
+		// left_encoder_counter = 0;
 	});
+    */
 }
 
 void loop()
 {
-	// put your main code here, to run repeatedly:
+    Information &info = Information::getInstance();
+    info.updateInfo();
+	delay(100);
+    // put your main code here, to run repeatedly:
 	// setRightPWM(150);
-	pid.target = 110;
-	delay(200);
+	// pid.target = 110;
+	// delay(200);
 }
