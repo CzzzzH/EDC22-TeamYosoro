@@ -1,91 +1,85 @@
 #include <Arduino.h>
 
-const int left_back_pin_A = 6;
-const int left_back_pin_B = 7;
-
-const int left_front_pin_A = 8;
-const int left_front_pin_B = 9;
-
-const int right_back_pin_A = 10;
-const int right_back_pin_B = 11;
-
-const int right_front_pin_A = 12;
-const int right_front_pin_B = 13;
-
-const int left_back_encoder_A = 21;
-const int left_back_encoder_B = 20;
-
-const int right_back_encoder_A = 19;
-const int right_back_encoder_B = 18;
-
-double left_encoder_counter = 0;
-double right_encoder_counter = 0;
-
-void initialize_motor_control_pin()
+struct pin_2
 {
-	pinMode(left_back_pin_A, OUTPUT);
-	pinMode(left_back_pin_B, OUTPUT);
+	int A;
+	int B;
+};
 
-	pinMode(left_front_pin_A, OUTPUT);
-	pinMode(left_front_pin_B, OUTPUT);
-
-	pinMode(right_back_pin_A, OUTPUT);
-	pinMode(right_back_pin_B, OUTPUT);
-
-	pinMode(right_front_pin_A, OUTPUT);
-	pinMode(right_front_pin_B, OUTPUT);
-
-	// Encoder input
-	pinMode(left_back_encoder_A, INPUT);
-	pinMode(left_back_encoder_B, INPUT);
-	pinMode(right_back_encoder_A, INPUT);
-	pinMode(right_back_encoder_B, INPUT);
-
-	// External Interrupt
-	attachInterrupt(
-		2, [] { left_encoder_counter++; }, RISING);
-	attachInterrupt(
-		4, [] { right_encoder_counter++; }, RISING);
-}
-
-void setLeftPWM(const int &pwm)
+class encoder
 {
-	if (pwm > 0)
+public:
+	const static pin_2 left_pin;
+	const static pin_2 right_pin;
+
+	static struct
 	{
-		analogWrite(left_back_pin_A, pwm);
-		analogWrite(left_back_pin_B, 0);
+		double left;
+		double right;
+	} counter;
+};
 
-		analogWrite(left_front_pin_A, pwm);
-		analogWrite(left_front_pin_B, 0);
-	}
-	else
-	{
-		analogWrite(left_back_pin_A, 0);
-		analogWrite(left_back_pin_B, -pwm);
+const pin_2 encoder::left_pin = {21, 20};
+const pin_2 encoder::right_pin = {19, 18};
+decltype(encoder::counter) encoder::counter;
 
-		analogWrite(left_front_pin_A, 0);
-		analogWrite(left_front_pin_B, -pwm);
-	}
-}
-
-void setRightPWM(const int &pwm)
+class Motor
 {
-	int pwm_tmp = std::min(pwm, 255);
-	pwm_tmp = std::max(pwm_tmp, -255);
-	if (pwm_tmp > 0)
-	{
-		analogWrite(right_back_pin_A, pwm_tmp);
-		analogWrite(right_back_pin_B, 0);
+public:
+	const static pin_2 left_pin;
+	const static pin_2 right_pin;
 
-		analogWrite(right_front_pin_A, pwm_tmp);
-		analogWrite(right_front_pin_B, 0);
-	}
-	else
+	static void initialize()
 	{
-		analogWrite(right_back_pin_A, 0);
-		analogWrite(right_back_pin_B, -pwm_tmp);
+		pinMode(left_pin.A, OUTPUT);
+		pinMode(left_pin.B, OUTPUT);
 
-		analogWrite(right_front_pin_A, 0);
-		analogWrite(right_front_pin_B, -pwm_tmp);
+		pinMode(right_pin.A, OUTPUT);
+		pinMode(right_pin.B, OUTPUT);
+
+		// Encoder input
+		pinMode(encoder::left_pin.A, INPUT);
+		pinMode(encoder::left_pin.B, INPUT);
+		pinMode(encoder::right_pin.A, INPUT);
+		pinMode(encoder::right_pin.B, INPUT);
 	}
-}
+
+	static void setLeftPWM(int pwm)
+	{
+		Serial.print("setting left pwm : ");
+		pwm = std::min(pwm, 255);
+		pwm = std::max(pwm, -255);
+		Serial.println(pwm);
+		if (pwm > 0)
+		{
+			analogWrite(left_pin.A, pwm);
+			analogWrite(left_pin.B, 0);
+		}
+		else
+		{
+			analogWrite(left_pin.A, 0);
+			analogWrite(left_pin.B, -pwm);
+		}
+	}
+
+	static void setRightPWM(int pwm)
+	{
+		Serial.print("setting right pwm : ");
+		pwm = std::min(pwm, 255);
+		pwm = std::max(pwm, -255);
+		Serial.println(pwm);
+		if (pwm > 0)
+		{
+			analogWrite(right_pin.A, pwm);
+			analogWrite(right_pin.B, 0);
+		}
+		else
+		{
+			analogWrite(right_pin.A, 0);
+			analogWrite(right_pin.B, -pwm);
+		}
+	}
+};
+
+const pin_2 Motor::left_pin = {6, 7};
+const pin_2 Motor::right_pin = {12, 13};

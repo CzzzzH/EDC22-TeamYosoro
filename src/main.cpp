@@ -3,43 +3,64 @@
 #include "information.h"
 #include <MsTimer2.h>
 #include <string.h>
+#include <Encoder.h>
 #include "TimerInterrupt.hpp"
 #include "motor_control.hpp"
-#include "PID.hpp"
+#include <PID_v1.h>
+#include <SoftwareSerial.h>
+#include <JY61.hpp>
 
 StateMachine &sm = StateMachine::getInstance();
 
-PID pid = PID(
-	1.1, 0.01, 0.01, [](double d) { setRightPWM(d); }, &right_encoder_counter);
+double Output;
+double Setpoint;
+PID myPID(&encoder::counter.right, &Output, &Setpoint, 2, 0.05, 0.05, DIRECT);
+
+Encoder rightEnc(encoder::right_pin.A, encoder::right_pin.B);
+Encoder leftEnc(encoder::left_pin.A, encoder::left_pin.B);
+
+TimerInterrupt timer1(3, [] {
+	encoder::counter.right = rightEnc.read();
+	encoder::counter.left = leftEnc.read();
+
+	// Serial.print("right:  ");
+	// Serial.print(encoder::counter.right);
+	// Serial.print("\t\tleft:   ");
+	// Serial.println(encoder::counter.left);
+
+	// Motor::setRightPWM(250);
+	// Motor::setLeftPWM(250);
+
+	rightEnc.write(0);
+	leftEnc.write(0);
+});
+
+TimerInterrupt timer2(50, [] {
+	JY61_read();
+	// JY61_print();
+});
 
 void setup()
 {
+
 	initialize_motor_control_pin();
-    Serial.begin(9600);
-    Serial1.begin(115200);
-    /*
+  Serial.begin(9600);
+  Serial1.begin(115200);
+  JY61_serial.begin(115200);
+	Motor::initialize();
+	Serial.begin(9600);
+	
+	// delay(2000);
+
 	//Timer Interrupt 10ms
-	MsTimer2::set(10, Interrupt_10ms);
-	MsTimer2::start();
-	add_100ms([] {
-		// PID::run();
-		// encoder
-		// Serial.println(right_encoder_counter);
-		//Serial.println(encoderB_counter);
-		// Serial.println();
-		// right_encoder_counter = 0;
-		// left_encoder_counter = 0;
-	});
-    */
+	TimerInterrupt::initialize(10);
+
+	myPID.SetMode(AUTOMATIC);
+	myPID.SetSampleTime(10);
+
 }
 
 void loop()
 {
-    Information &info = Information::getInstance();
-    info.updateInfo();
-	delay(100);
-    // put your main code here, to run repeatedly:
-	// setRightPWM(150);
-	// pid.target = 110;
-	// delay(200);
+	Setpoint = 100;
 }
