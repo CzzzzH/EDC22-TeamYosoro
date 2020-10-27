@@ -1,3 +1,6 @@
+#ifndef TIMERINTERRUPT_HPP
+#define TIMERINTERRUPT_HPP
+
 #include <map>
 #include <list>
 #include <MsTimer2.h>
@@ -44,3 +47,7 @@ public:
 
 std::list<TimerInterrupt *>
 	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();
+
+const int interrupt_period = 10;
+
+#endif
