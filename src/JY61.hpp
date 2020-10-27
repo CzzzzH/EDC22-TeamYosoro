@@ -1,47 +1,71 @@
-#include <SoftwareSerial.h>
+#ifndef JY61_HPP
+#define JY61_HPP
+
 #include <JY901.h>
 #include <Wire.h>
 #include <Arduino.h>
 
-SoftwareSerial JY61_serial(10, 11); // 10 is TX , 11 is RX
-
-void JY61_print()
+class JY61
 {
-	Serial.print("Acc:");
-	Serial.print((float)JY901.stcAcc.a[0] / 32768 * 16);
-	Serial.print(" ");
-	Serial.print((float)JY901.stcAcc.a[1] / 32768 * 16);
-	Serial.print(" ");
-	Serial.println((float)JY901.stcAcc.a[2] / 32768 * 16);
+public:
+	static double Acc[3];
+	static double Gyro[3];
+	static double Angle[3];
 
-	Serial.print("Gyro:");
-	Serial.print((float)JY901.stcGyro.w[0] / 32768 * 2000);
-	Serial.print(" ");
-	Serial.print((float)JY901.stcGyro.w[1] / 32768 * 2000);
-	Serial.print(" ");
-	Serial.println((float)JY901.stcGyro.w[2] / 32768 * 2000);
+	static bool isDebug;
 
-	Serial.print("Angle:");
-	Serial.print((float)JY901.stcAngle.Angle[0] / 32768 * 180);
-	Serial.print(" ");
-	Serial.print((float)JY901.stcAngle.Angle[1] / 32768 * 180);
-	Serial.print(" ");
-	Serial.println((float)JY901.stcAngle.Angle[2] / 32768 * 180);
-
-	Serial.println("");
-}
-
-/*
-    SerialEvent occurs whenever a new data comes in the
-    hardware serial RX.  This routine is run between each
-    time loop() runs, so using delay inside loop can delay
-    response.  Multiple bytes of data may be available.
- */
-void JY61_read()
-{
-	while (JY61_serial.available())
+	static void print()
 	{
-		JY901.CopeSerialData(JY61_serial.read()); //Call JY901 data cope function
+		if (!isDebug)
+			return;
+		Serial.println("JY61 :");
+		Serial.print("\tAcc:  ");
+		for (int i = 0; i < 3; i++)
+		{
+			Serial.print(Acc[i]);
+			Serial.print(" ");
+		}
+		Serial.println("");
+
+		Serial.print("\tGyro:");
+		for (int i = 0; i < 3; i++)
+		{
+			Serial.print(Gyro[i]);
+			Serial.print(" ");
+		}
+		Serial.println("");
+
+		Serial.print("\tAngle:");
+		for (int i = 0; i < 3; i++)
+		{
+			Serial.print(Angle[i]);
+			Serial.print(" ");
+		}
+		Serial.println("");
+
+		Serial.println("");
 	}
-	JY61_print();
-}
+
+	static void read()
+	{
+		while (Serial2.available())
+		{
+			JY901.CopeSerialData(Serial2.read()); //Call JY901 data cope function
+		}
+		for (int i = 0; i < 3; i++)
+		{
+			Acc[i] = (double)JY901.stcAcc.a[i] / 32768 * 16;
+			Gyro[i] = (double)JY901.stcGyro.w[i] / 32768 * 2000;
+			Angle[i] = (double)JY901.stcAngle.Angle[i] / 32768 * 180;
+		}
+		print();
+	}
+};
+
+bool JY61::isDebug = false;
+
+double JY61::Acc[3];
+double JY61::Gyro[3];
+double JY61::Angle[3];
+
+#endif

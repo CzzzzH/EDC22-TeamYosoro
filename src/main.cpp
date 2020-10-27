@@ -3,64 +3,73 @@
 #include "information.h"
 #include <MsTimer2.h>
 #include <string.h>
-#include <Encoder.h>
 #include "TimerInterrupt.hpp"
 #include "motor_control.hpp"
-#include <PID_v1.h>
 #include <SoftwareSerial.h>
-#include <JY61.hpp>
+// #include <JY61.hpp>
+#include <servoCtl.h>
+#include <AngleControl.hpp>
 
 StateMachine &sm = StateMachine::getInstance();
 
-double Output;
-double Setpoint;
-PID myPID(&encoder::counter.right, &Output, &Setpoint, 2, 0.05, 0.05, DIRECT);
-
-Encoder rightEnc(encoder::right_pin.A, encoder::right_pin.B);
-Encoder leftEnc(encoder::left_pin.A, encoder::left_pin.B);
-
-TimerInterrupt timer1(3, [] {
-	encoder::counter.right = rightEnc.read();
-	encoder::counter.left = leftEnc.read();
+TimerInterrupt timer1(motor_time_interval / interrupt_period, [] {
+	EncoderRead();
 
 	// Serial.print("right:  ");
-	// Serial.print(encoder::counter.right);
+	// Serial.println(encoder::counter.right);
 	// Serial.print("\t\tleft:   ");
 	// Serial.println(encoder::counter.left);
 
-	// Motor::setRightPWM(250);
-	// Motor::setLeftPWM(250);
+	PID_compute();
 
-	rightEnc.write(0);
-	leftEnc.write(0);
-});
+	Motor::setRightPWM(basePWM + right_Output);
+	Motor::setLeftPWM(basePWM + left_Output);
 
-TimerInterrupt timer2(50, [] {
-	JY61_read();
-	// JY61_print();
+	EncoderReset();
 });
 
 void setup()
 {
-
-	initialize_motor_control_pin();
-  Serial.begin(9600);
-  Serial1.begin(115200);
-  JY61_serial.begin(115200);
-	Motor::initialize();
 	Serial.begin(9600);
-	
-	// delay(2000);
+	Serial1.begin(115200);
+	Serial2.begin(115200);
+	JY61::isDebug = true;
+
+	Motor::initialize();
+	Motor::isDebug = false;
 
 	//Timer Interrupt 10ms
-	TimerInterrupt::initialize(10);
+	TimerInterrupt::initialize(interrupt_period);
 
-	myPID.SetMode(AUTOMATIC);
-	myPID.SetSampleTime(10);
+	PID_initialize();
 
+	angleInitialize();
+
+	servoCtl::initialize(4);
+
+	JY61::read();
+	initAngle = JY61::Angle[2];
 }
 
 void loop()
 {
-	Setpoint = 100;
+	targetSpeed = 29;
+	targetAngle = initAngle;
+	// for (int i = 20; i <= 160; i += 2)
+	// {
+	// 	servoCtl::angleReach(i);
+	// 	// delay(200);
+	// }
+	// for (int i = 160; i >= 20; i -= 2)
+	// {
+	// 	servoCtl::angleReach(i);
+	// 	// delay(200);
+	// }
+
+	delay(1000);
+
+	// targetAngle = 90;
+	// while (true)
+	// {
+	// }
 }
