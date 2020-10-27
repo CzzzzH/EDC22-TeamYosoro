@@ -1,4 +1,5 @@
 #include "information.h"
+#include "statemachine.h"
 #include <string>
 
 Information &Information::getInstance()
@@ -15,12 +16,12 @@ void Information::updateInfo()
     while (true)
     {
         // Serial.print("Zigbee status: ");
-        // Serial.print(Serial1.available());
+        // Serial.println(Serial3.available());
         // Serial.print("\n");
-        if (Serial1.available())
+        if (Serial3.available())
         {
-            uint8_t zigbeeBuffer = Serial1.read();
-            // Serial.println(zigbeeBuffer);
+            uint8_t zigbeeBuffer = Serial3.read();
+            // Serial.print(zigbeeBuffer);
             message_index = receiveIndexAdd(message_index, 1); //一个简单的索引数增加函数
             zigbeeMessage[message_index] = zigbeeBuffer;
 
@@ -38,6 +39,7 @@ void Information::updateInfo()
                         zigbeeReceive[i] = zigbeeMessage[index];
                         index = receiveIndexAdd(index, 1);
                     }
+                    // Serial.println("OK!!!");
                     Decode();
                     // Serial.println("X: " + String(getCarposX()));
                     // Serial.println("Y: " + String(getCarposY()));
@@ -132,7 +134,7 @@ uint16_t Information::getCarposX()
     return (uint16_t)Car.pos.X;
 }
 
-uint16_t Information::getCarposY()
+uint16_t Information::getCarposY()  
 {
     return (uint16_t)Car.pos.Y;
 }
@@ -240,8 +242,6 @@ void Information::DecodeBasicInfo()
 
 void Information::DecodeCarInfo()
 {
-    Serial.println(zigbeeReceive[3]);
-    Serial.println(zigbeeReceive[4]);
     Car.pos.X = (zigbeeReceive[3]);
     Car.pos.Y = (zigbeeReceive[4]);
     Car.score = (zigbeeReceive[32] << 8) + zigbeeReceive[33];
