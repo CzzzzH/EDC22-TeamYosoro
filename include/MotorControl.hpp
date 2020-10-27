@@ -113,7 +113,7 @@ const pin_2 Motor::right_pin = {6, 7};
 bool Motor::isDebug = false;
 
 const int motor_time_interval = 50;
-const double basePWM = 140;
+double basePWM = 0;
 double right_Output = 0;
 double left_Output = 0;
 double targetSpeed = 0;

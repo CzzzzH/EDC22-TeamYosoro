@@ -3,7 +3,7 @@
 
 #include "util.h"
 #include "information.h"
-
+#include <vector>
 class StateMachine // The statemachine of the car (Singleton)
 {
 private:
@@ -12,16 +12,21 @@ private:
 public:
 
     // Attributes
-    Action nowAction;
-
+    State nowState;
+    Mission nowMission;
+    int nowTargetIndex = 0;
+    int counter = -100;
+    std::vector<Position> outsideTarget;
+    
     // Methods
     ~StateMachine() {}
     static StateMachine& getInstance();
     
+    void init();
     void process();
-    void updateInfo();
+    void updateInfo(Information &info);
     void updateMission();
-    void updateAction();
+    void updateAction(Information &info);
     void updateMotor();
 
 };

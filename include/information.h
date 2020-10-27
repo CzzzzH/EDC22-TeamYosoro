@@ -1,85 +1,27 @@
 /********************************
 information.h
-½ÓÊÜÉÏÎ»»úµÄÊý¾Ý
-½ÓÊÕËµÃ÷£¨ÒÔUSART2ÎªÀý£©
-	ÔÚ³ÌÐò¿ªÊ¼µÄÊ±ºòÊ¹ÓÃzigbee_Init(&huart2)½øÐÐ³õÊ¼»¯;
-	ÔÚ»Øµ÷º¯ÊýÖÐÊ¹ÓÃzigbeeMessageRecord(void)¼ÇÂ¼Êý¾Ý£¬²¢ÖØÐÂ¿ªÆôÖÐ¶Ï
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½USART2Îªï¿½ï¿½ï¿½ï¿½
+	ï¿½Ú³ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½Ê±ï¿½ï¿½Ê¹ï¿½ï¿½zigbee_Init(&huart2)ï¿½ï¿½ï¿½Ð³ï¿½Ê¼ï¿½ï¿½;
+	ï¿½Ú»Øµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½zigbeeMessageRecord(void)ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
 
-Êý¾ÝËµÃ÷
-    struct BasicInfo Game;´¢´æ±ÈÈü×´Ì¬¡¢Ê±¼ä¡¢Ð¹ºé¿ÚÐÅÏ¢
-    struct CarInfo CarInfo;//´¢´æ³µÁ¾ÐÅÏ¢
-    struct PassengerInfo Passenger;//´¢´æÈËÔ±µÄÐÅÏ¢¡¢Î»ÖÃºÍËÍ´ïÎ»ÖÃ
-    struct PackageInfo Package[6];//´¢´æÎï×ÊµÄÐÅÏ¢
-    struct StopInfo Stop[2];//´¢´æ¸ôÀëµãÎ»ÖÃÐÅÏ¢
-    struct ObstacleInfo Obstacle[8];//´¢´æÐéÄâÕÏ°­ÎïÐÅÏ¢
-    Í¨¹ý½Ó¿Ú»ñÈ¡Êý¾Ý
+ï¿½ï¿½ï¿½ï¿½Ëµï¿½ï¿½
+    struct BasicInfo Game;ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ê±ï¿½ä¡¢Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+    struct CarInfo CarInfo;//ï¿½ï¿½ï¿½æ³µï¿½ï¿½ï¿½ï¿½Ï¢
+    struct PassengerInfo Passenger;//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Î»ï¿½Ãºï¿½ï¿½Í´ï¿½Î»ï¿½ï¿½
+    struct PackageInfo Package[6];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½Ï¢
+    struct StopInfo Stop[2];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½Ï¢
+    struct ObstacleInfo Obstacle[8];//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+    Í¨ï¿½ï¿½ï¿½Ó¿Ú»ï¿½È¡ï¿½ï¿½ï¿½ï¿½
 **********************************/
 #ifndef INFORMATION_H
 #define INFORMATION_H
 
 #include <Arduino.h>
+#include "util.h"
 
 #define INVALID_ARG -1
 #define ZIGBEE_MESSAGE_LENTH 70
-
-struct Position
-{
-    unsigned int X;
-    unsigned int Y;
-};
-
-struct BasicInfo
-{
-    uint8_t GameState; //ÓÎÏ·×´Ì¬£º00Î´¿ªÊ¼£¬01½øÐÐÖÐ£¬10ÔÝÍ££¬11½áÊø
-    uint16_t Time;     //±ÈÈüÊ±¼ä£¬ÒÔ0.1sÎªµ¥Î»
-    uint8_t stop;      //Ð¹ºé¿Ú¿ªÆôÐÅÏ¢
-};
-
-struct CarInfo
-{
-    struct Position pos;     //Ð¡³µÎ»ÖÃ
-    uint16_t score;          //µÃ·Ö
-    uint8_t picknum;         //Ð¡³µ³É¹¦ÊÕ¼¯Îï×Ê¸öÊý
-    uint8_t task;            //Ð¡³µÈÎÎñ£¬0ÉÏ°ë³¡£¬1ÏÂ°ë³¡
-    uint8_t transport;       //Ð¡³µÉÏÊÇ·ñÓÐÈË
-    uint8_t transportnum;    //Ð¡³µÔËËÍÈËµÄ¸öÊý
-    uint8_t area;            //Ð¡³µËùÔÚµÄÇøÓò
-    uint8_t WhetherRightPos; //Ð¡³µÕâ´ÎÎ»ÖÃÐÅÏ¢ÊÇ·ñÊÇÕýÈ·µÄ£¬1ÊÇÕýÈ·µÄ£¬0ÊÇ²»ÕýÈ·µÄ.
-};
-
-struct PassengerInfo
-{
-    struct Position startpos; //ÈËÔ±³õÊ¼Î»ÖÃ
-    struct Position finalpos; //ÈËÔ±Òªµ½´ïµÄÎ»ÖÃ
-};
-
-struct PackageInfo
-{
-    uint8_t No; //Îï×Ê±àºÅ
-    struct Position pos;
-    uint8_t whetherpicked; //Îï×ÊÊÇ·ñÒÑ±»Ê°È¡
-};
-
-struct FloodInfo
-{
-    uint8_t FloodNo;
-    struct Position pos;
-};
-
-struct ObstacleInfo
-{
-    uint8_t ObstacleNo;
-    struct Position posA;
-    struct Position posB;
-};
-
-enum GameStateEnum
-{
-    GameNotStart, //Î´¿ªÊ¼
-    GameGoing,    //½øÐÐÖÐ
-    GamePause,    //ÔÝÍ£ÖÐ
-    GameOver      //ÒÑ½áÊø
-};
 
 class Information
 {
@@ -88,15 +30,15 @@ private:
     Information &operator=(const Information &) = delete;
 
 public:
-    BasicInfo Game;           //´¢´æ±ÈÈü×´Ì¬¡¢Ê±¼ä¡¢Ð¹ºé¿ÚÐÅÏ¢
-    CarInfo Car;              //´¢´æ³µÁ¾ÐÅÏ¢
-    PassengerInfo Passenger;  //´¢´æÈËÔ±µÄÐÅÏ¢¡¢Î»ÖÃºÍËÍ´ïÎ»ÖÃ
-    PackageInfo Package[6];   //´¢´æ·ÀÑ´Îï×ÊµÄÐÅÏ¢
-    FloodInfo Flood[5];       //´¢´æÐ¹ºé¿ÚÎ»ÖÃÐÅÏ¢
-    ObstacleInfo Obstacle[8]; //´¢´æÐéÄâÕÏ°­ÐÅÏ¢
+    BasicInfo Game;           //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×´Ì¬ï¿½ï¿½Ê±ï¿½ä¡¢Ð¹ï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+    CarInfo Car;              //ï¿½ï¿½ï¿½æ³µï¿½ï¿½ï¿½ï¿½Ï¢
+    PassengerInfo Passenger;  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½ï¿½ï¿½Ï¢ï¿½ï¿½Î»ï¿½Ãºï¿½ï¿½Í´ï¿½Î»ï¿½ï¿½
+    PackageInfo Package[6];   //ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½ï¿½ï¿½Êµï¿½ï¿½ï¿½Ï¢
+    FloodInfo Flood[5];       //ï¿½ï¿½ï¿½ï¿½Ð¹ï¿½ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½Ï¢
+    ObstacleInfo Obstacle[8]; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½ï¿½ï¿½Ï¢
 
-    uint8_t zigbeeReceive[ZIGBEE_MESSAGE_LENTH]; //ÊµÊ±¼ÇÂ¼ÊÕµ½µÄÐÅÏ¢
-    uint8_t zigbeeMessage[ZIGBEE_MESSAGE_LENTH]; //¾­¹ýÕûÀíË³ÐòºóµÃµ½µÄÐÅÏ¢
+    uint8_t zigbeeReceive[ZIGBEE_MESSAGE_LENTH]; //ÊµÊ±ï¿½ï¿½Â¼ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
+    uint8_t zigbeeMessage[ZIGBEE_MESSAGE_LENTH]; //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ë³ï¿½ï¿½ï¿½Ãµï¿½ï¿½ï¿½ï¿½ï¿½Ï¢
     int message_index = 0;
     int message_head = -1;
 
@@ -116,39 +58,38 @@ public:
     int receiveIndexMinus(int index_h, int num);
     int receiveIndexAdd(int index_h, int num);
 
-    enum GameStateEnum getGameState(void);			//±ÈÈü×´Ì¬
-    void updateInfo();                    //ÊµÊ±¼ÇÂ¼ÐÅÏ¢£¬ÔÚÃ¿´Î½ÓÊÕÍê³Éºó¸üÐÂÊý¾Ý£¬ÖØÐÂ¿ªÆôÖÐ¶Ï
-    uint16_t getGameTime(void);           //±ÈÈüÊ±¼ä£¬µ¥Î»Îª0.1s
-    uint16_t getPassengerstartposX(void); //ÈËÔ±³õÊ¼Î»ÖÃ
+    enum GameStateEnum getGameState(void);			//ï¿½ï¿½ï¿½ï¿½×´Ì¬
+    void updateInfo();                    //ÊµÊ±ï¿½ï¿½Â¼ï¿½ï¿½Ï¢ï¿½ï¿½ï¿½ï¿½Ã¿ï¿½Î½ï¿½ï¿½ï¿½ï¿½ï¿½Éºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½ï¿½Â¿ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
+    uint16_t getGameTime(void);           //ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ä£¬ï¿½ï¿½Î»Îª0.1s
+    uint16_t getPassengerstartposX(void); //ï¿½ï¿½Ô±ï¿½ï¿½Ê¼Î»ï¿½ï¿½
     uint16_t getPassengerstartposY(void);
     struct Position getPassengerstartpos(void);
-    uint16_t getPassengerfinalposX(void); //ÈËÔ±Ðèµ½´ïÎ»ÖÃ
+    uint16_t getPassengerfinalposX(void); //ï¿½ï¿½Ô±ï¿½èµ½ï¿½ï¿½Î»ï¿½ï¿½
     uint16_t getPassengerfinalposY(void);
     struct Position getPassengerfinalpos(void);
-    uint16_t getGameFlood(void);              //¸ôÀëµã¿ªÆôÐÅÏ¢
-    uint16_t getFloodposX(int FloodNo);       //¸ôÀëµãÎ»ÖÃX
-    uint16_t getFloodposY(int FloodNo);       //¸ôÀëµãÎ»ÖÃY
-    struct Position getFloodpos(int FloodNo); //¸ôÀëµãÎ»ÖÃ
-    uint16_t getCarposX();                    //Ð¡³µx×ø±ê
-    uint16_t getCarposY();                    //Ð¡³µy×ø±ê
-    struct Position getCarpos();              //Ð¡³µÎ»ÖÃ
-    //uint16_t getCarWhetherRightPos();//Ð¡³µÕâ´ÎÎ»ÖÃÐÅÏ¢ÊÇ·ñÊÇÕýÈ·µÄ
-    uint16_t getPackageposX(int PackNo);             //Îï×Êx×ø±ê
-    uint16_t getPackageposY(int PackNo);             //Îï×Êy×ø±ê
-    uint16_t getPackagewhetherpicked(int PackNo);    //Îï×ÊÊÇ·ñÒÑ±»ÊÕ¼¯
-    struct Position getPackagepos(int PackNo);       //Îï×ÊÎ»ÖÃ
-    uint16_t getCarpicknum();                        //Ð¡³µÊÕ¼¯Êý
-    uint16_t getCartransportnum();                   //Ð¡³µÔËËÍÈËÔ±Êý
-    uint16_t getCartransport();                      //Ð¡³µÊÇ·ñÕýÔÚÔËËÍÈËÔ±
-    uint16_t getCarscore();                          //Ð¡³µµÃ·Ö
-    uint16_t getCartask();                           //Ð¡³µÈÎÎñ
-    uint16_t getCararea();                           //Ð¡³µÇøÓò
-    uint16_t getObstacleAposX(int ObstacleNo);       //ÐéÄâÕÏ°­Ax×ø±ê
-    uint16_t getObstacleAposY(int ObstacleNo);       //ÐéÄâÕÏ°­Ay×ø±ê
-    uint16_t getObstacleBposX(int ObstacleNo);       //ÐéÄâÕÏ°­Bx×ø±ê
-    uint16_t getObstacleBposY(int ObstacleNo);       //ÐéÄâÕÏ°­By×ø±ê
-    struct Position getObstacleApos(int ObstacleNo); //ÐéÄâÕÏ°­AÎ»ÖÃ
-    struct Position getObstacleBpos(int ObstacleNo); //ÐéÄâÕÏ°­BÎ»ÖÃ
+    uint16_t getGameFlood(void);              //ï¿½ï¿½ï¿½ï¿½ã¿ªï¿½ï¿½ï¿½ï¿½Ï¢
+    uint16_t getFloodposX(int FloodNo);       //ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½X
+    uint16_t getFloodposY(int FloodNo);       //ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½Y
+    struct Position getFloodpos(int FloodNo); //ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+    uint16_t getCarposX();                    //Ð¡ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½
+    uint16_t getCarposY();                    //Ð¡ï¿½ï¿½yï¿½ï¿½ï¿½ï¿½
+    struct Position getCarpos();              //Ð¡ï¿½ï¿½Î»ï¿½ï¿½
+    uint16_t getPackageposX(int PackNo);             //ï¿½ï¿½ï¿½ï¿½xï¿½ï¿½ï¿½ï¿½
+    uint16_t getPackageposY(int PackNo);             //ï¿½ï¿½ï¿½ï¿½yï¿½ï¿½ï¿½ï¿½
+    uint16_t getPackagewhetherpicked(int PackNo);    //ï¿½ï¿½ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ñ±ï¿½ï¿½Õ¼ï¿½
+    struct Position getPackagepos(int PackNo);       //ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+    uint16_t getCarpicknum();                        //Ð¡ï¿½ï¿½ï¿½Õ¼ï¿½ï¿½ï¿½
+    uint16_t getCartransportnum();                   //Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±ï¿½ï¿½
+    uint16_t getCartransport();                      //Ð¡ï¿½ï¿½ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô±
+    uint16_t getCarscore();                          //Ð¡ï¿½ï¿½ï¿½Ã·ï¿½
+    uint16_t getCartask();                           //Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    uint16_t getCararea();                           //Ð¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    uint16_t getObstacleAposX(int ObstacleNo);       //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½Axï¿½ï¿½ï¿½ï¿½
+    uint16_t getObstacleAposY(int ObstacleNo);       //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½Ayï¿½ï¿½ï¿½ï¿½
+    uint16_t getObstacleBposX(int ObstacleNo);       //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½Bxï¿½ï¿½ï¿½ï¿½
+    uint16_t getObstacleBposY(int ObstacleNo);       //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½Byï¿½ï¿½ï¿½ï¿½
+    struct Position getObstacleApos(int ObstacleNo); //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½AÎ»ï¿½ï¿½
+    struct Position getObstacleBpos(int ObstacleNo); //ï¿½ï¿½ï¿½ï¿½ï¿½Ï°ï¿½BÎ»ï¿½ï¿½
 
     ~Information() {}
     static Information &getInstance();
