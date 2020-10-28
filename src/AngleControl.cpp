@@ -3,6 +3,7 @@
 #include <TimerInterrupt.h>
 #include <math.h>
 #include "AngleControl.h"
+#include <Arduino.h>
 
 void AngleControl::initialize()
 {
@@ -11,24 +12,20 @@ void AngleControl::initialize()
 	pid.SetOutputLimits(-100, 100);
 
 	JY61::read();
+	delay(100);
+	JY61::read();
 	initAngle = JY61::Angle[2];
 	target = initAngle;
 }
-void AngleControl::setTarget(double targetAngle)
-{
-	AngleControl::target = targetAngle;
-	AngleControl::target = fmod(AngleControl::target, 360) - 180;
-}
-double AngleControl::getTarget() { return target; }
 double AngleControl::getOutput() { return output; }
 bool AngleControl::Compute()
 {
-	int k = floor((target + 180.0 - JY61::Angle[2]) / 360.0);
-	JY61::Angle[2] += k * 360;
+	Serial.println("JY61::Angle[2]   :   " + String(JY61::Angle[2]));
+	JY61::Angle[2] += floor((target + 180 - JY61::Angle[2]) / 360.0) * 360;
 	return pid.Compute();
 }
 
 double AngleControl::output;
 double AngleControl::target;
 double AngleControl::initAngle;
-PID AngleControl::pid = PID(&JY61::Angle[2], &output, &target, 1.5, 0.000000001, 0.0000001, DIRECT);
+PID AngleControl::pid = PID(&JY61::Angle[2], &output, &target, 1, 0.00000000001, 0.000000001, DIRECT);

@@ -9,18 +9,19 @@
 std::list<TimerInterrupt *>
 	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();
 
-TimerInterrupt angleTimer(AngleControl::timePeriod / interrupt_period, [] {
+TimerInterrupt angleTimer(AngleControl::timePeriod, [] {
 	JY61::read();
 	if (AngleControl::Compute())
 	{
-		// Serial.println("read angle : " + String(JY61::Angle[2]));
+		Serial.println("read angle : " + String(JY61::Angle[2]));
 		// Serial.println("target angle : " + String(AngleControl::getTarget()));
 		// Serial.println("angle output :　" + String(AngleControl::getOutput()));
 		servoCtl::myServo.write(AngleControl::middle - AngleControl::getOutput());
+		Motor::updatePWM();
 	}
 });
 
-TimerInterrupt motorTimer(Motor::timePeriod / interrupt_period, [] {
+TimerInterrupt motorTimer(Motor::timePeriod, [] {
 	StateMachine::getInstance().process();
 });
 

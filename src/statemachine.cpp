@@ -45,14 +45,15 @@ void StateMachine::process()
     // Begin
 
     // Serial.println("TargetSpeed: " + String(Motor::targetSpeed));
-    // Serial.println("TargetAngle: " + String(AngleControl::getTarget()));
+    Serial.println("TargetAngle: " + String(AngleControl::target));
 
     Information &info = Information::getInstance();
     // updateInfo(info);
-    Serial.println("Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
+    // Serial.println("Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
     updateAction(info);
     updateMission();
-    Motor::updateSpeed();
+    Motor::PID_compute();
+    Motor::updatePWM();
     Motor::targetSpeed = 30;
     // counter++;
     // End
@@ -85,10 +86,10 @@ void StateMachine::updateAction(Information &info)
             switch (nowTargetIndex)
             {
             case 0:
-                AngleControl::setTarget(AngleControl::getTarget() - 90);
+                AngleControl::target -= 90;
                 break;
             case 1:
-                AngleControl::setTarget(AngleControl::getTarget() - 90);
+                AngleControl::target -= 90;
                 break;
             default:
                 break;
@@ -98,7 +99,7 @@ void StateMachine::updateAction(Information &info)
         if (counter == 30)
         {
             counter = 0;
-            AngleControl::setTarget(AngleControl::getTarget() + 90);
+            AngleControl::target += 90;
         }
     }
 }

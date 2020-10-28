@@ -52,13 +52,9 @@ public:
 
 	static void PID_initialize();
 	static void initialize();
-
 	static void setPWM(int pwm, bool isRight);
-
 	static void PID_compute();
-
-	static void updateSpeed();
-
+	static void updatePWM();
 	static double estimatePWM(double targeteSpeed);
 };
 

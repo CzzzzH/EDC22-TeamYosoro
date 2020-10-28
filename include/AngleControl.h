@@ -7,16 +7,14 @@ class AngleControl
 {
 private:
 	static double output;
-	static double target;
 	static double initAngle;
 	static PID pid;
 
 public:
-	const static int timePeriod = 20;
+	const static int timePeriod = 10;
 	const static int middle = 85;
+	static double target;
 	static void initialize();
-	static void setTarget(double targetAngle);
-	static double getTarget();
 	static double getOutput();
 	static bool Compute();
 };

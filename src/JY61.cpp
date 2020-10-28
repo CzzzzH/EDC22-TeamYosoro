@@ -3,6 +3,7 @@
 #include <Arduino.h>
 #include <string.h>
 #include "JY61.h"
+#include "math.h"
 
 void JY61::print()
 {
@@ -30,6 +31,7 @@ void JY61::print()
 
 void JY61::read()
 {
+	static double last_Angle_2;
 	while (Serial2.available())
 	{
 		JY901.CopeSerialData(Serial2.read()); //Call JY901 data cope function
@@ -40,6 +42,14 @@ void JY61::read()
 		Gyro[i] = (double)JY901.stcGyro.w[i] / 32768 * 2000;
 		Angle[i] = (double)JY901.stcAngle.Angle[i] / 32768 * 180;
 	}
+	if (fabs(Angle[2] - last_Angle_2) > 30)
+	{
+		Serial.println("angle jump !!!");
+		Serial.println("last angle : " + String(last_Angle_2));
+		Serial.println("this angle : " + String(Angle[2]));
+		Angle[2] = last_Angle_2;
+	}
+	last_Angle_2 = Angle[2];
 	print();
 }
 

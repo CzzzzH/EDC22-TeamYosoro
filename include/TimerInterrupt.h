@@ -19,7 +19,7 @@ private:
 
 public:
 	static void initialize(unsigned long interval);
-	TimerInterrupt(unsigned int times, Func func);
+	TimerInterrupt(unsigned int, Func);
 
 	void execute();
 };

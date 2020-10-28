@@ -4,6 +4,7 @@
 #include <string.h>
 #include <string>
 #include "MotorControl.h"
+#include "AngleControl.h"
 
 void encoder::initialize()
 {
@@ -77,17 +78,16 @@ void Motor::setPWM(int pwm, bool isRight)
 
 void Motor::PID_compute()
 {
+	encoder::Read();
 	leftPID.Compute();
 	rightPID.Compute();
+	encoder::Reset();
 }
 
-void Motor::updateSpeed()
+void Motor::updatePWM()
 {
-	encoder::Read();
-	PID_compute();
-	setPWM(estimatePWM(targetSpeed) + rightOutput, true);
-	setPWM(estimatePWM(targetSpeed) + leftOutput, false);
-	encoder::Reset();
+	setPWM(estimatePWM(targetSpeed) + rightOutput + 5 * AngleControl::getOutput(), true);
+	setPWM(estimatePWM(targetSpeed) + leftOutput - 5 * AngleControl::getOutput(), false);
 }
 
 double Motor::estimatePWM(double targeteSpeed)

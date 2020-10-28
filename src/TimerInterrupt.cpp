@@ -15,7 +15,7 @@ void TimerInterrupt::initialize(unsigned long interval)
 	MsTimer2::start();
 }
 
-TimerInterrupt::TimerInterrupt(unsigned int times, Func func) : times(times), func(func)
+TimerInterrupt::TimerInterrupt(unsigned int period, Func func) : times((double)period / (double)interrupt_period), func(func)
 {
 	timer_list.push_back(this);
 }

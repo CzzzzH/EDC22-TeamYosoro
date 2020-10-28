@@ -15,7 +15,7 @@ public:
     State nowState;
     Mission nowMission;
     int nowTargetIndex = 0;
-    int counter = -100;
+    int counter = -30;
     std::vector<Position> outsideTarget;
 
     // Methods
