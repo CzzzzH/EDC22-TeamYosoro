@@ -3,45 +3,35 @@
 #include <SoftwareSerial.h>
 #include <servoCtl.h>
 #include "statemachine.h"
-#include "AngleControl.hpp"
-#include "MotorControl.hpp"
+#include "AngleControl.h"
+#include "MotorControl.h"
+#include "TimerInterrupt.h"
+#include "JY61.h"
 
-TimerInterrupt timer1(motor_time_interval / interrupt_period, [] 
-{
-    StateMachine::getInstance().process();
-});
-
-StateMachine& StateMachine::getInstance()
+StateMachine &StateMachine::getInstance()
 {
     static StateMachine instance;
     return instance;
 }
 
 void StateMachine::init()
-{   
+{
     Serial.begin(9600);
-	Serial2.begin(115200);
+    Serial2.begin(115200);
     Serial3.begin(115200);
-	JY61::isDebug = false;
+    JY61::isDebug = false;
     Motor::isDebug = false;
 
-	Motor::initialize();
-	
+    Motor::initialize();
+
     //Timer Interrupt 10ms
-	TimerInterrupt::initialize(interrupt_period);
+    TimerInterrupt::initialize(interrupt_period);
 
-	PID_initialize();
+    AngleControl::initialize();
 
-	angleInitialize();
+    servoCtl::initialize(4);
 
-	servoCtl::initialize(4);
-
-	JY61::read();
-	initAngle = JY61::Angle[2];
-    initSpeed = 0;
-
-    targetSpeed = initSpeed;
-	targetAngle = initAngle;
+    Motor::targetSpeed = 0;
 
     outsideTarget.push_back({23, 236});
     outsideTarget.push_back({83, 232});
@@ -54,16 +44,18 @@ void StateMachine::process()
 {
     // Begin
 
-    Serial.println("TargetSpeed: " + String(targetSpeed));
-    Serial.println("TargetAngle: " + String(targetAngle));
+    // Serial.println("TargetSpeed: " + String(Motor::targetSpeed));
+    Serial.println("TargetAngle: " + String(AngleControl::target));
 
     Information &info = Information::getInstance();
     // updateInfo(info);
-    Serial.println("Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
+    // Serial.println("Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
     updateAction(info);
     updateMission();
-    updateMotor();
-    counter++;
+    Motor::PID_compute();
+    Motor::updatePWM();
+    Motor::targetSpeed = 30;
+    // counter++;
     // End
 }
 
@@ -86,39 +78,33 @@ void StateMachine::updateMission()
 void StateMachine::updateAction(Information &info)
 {
     // TODO: update the current action (use infrared info and zigbee info)
-    if (nowMission == GO_TO_MAZE);
+    if (nowMission == GO_TO_MAZE)
+        ;
     {
         if (info.getCarpos().getDist(outsideTarget[nowTargetIndex]) < 5)
         {
             switch (nowTargetIndex)
             {
-                case 0:
-                    targetAngle -= 90;
-                    break;
-                case 1:
-                    targetAngle -= 90;
-                    break;
-                default:
-                    break;
+            case 0:
+                AngleControl::target -= 90;
+                break;
+            case 1:
+                AngleControl::target -= 90;
+                break;
+            default:
+                break;
             }
-            nowTargetIndex ++;
+            nowTargetIndex++;
         }
-        if (counter >= 0) targetSpeed = 40; 
         if (counter == 30)
         {
             counter = 0;
-            targetAngle += 90;
-            if (targetAngle > 180) targetAngle -= 360;
+            AngleControl::target += 90;
         }
     }
 }
 
-void StateMachine::updateMotor()
-{
-    // TODO: update the motor paramters (use PID)
-    EncoderRead();
-    PID_compute();
-	Motor::setRightPWM(targetSpeed * 4.2 + right_Output);
-	Motor::setLeftPWM(targetSpeed * 4.2 + left_Output);
-    EncoderReset();
-}
+// void StateMachine::updateMotor()
+// {
+//     // TODO: update the motor paramters (use PID)
+// }
