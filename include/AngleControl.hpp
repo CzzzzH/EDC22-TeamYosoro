@@ -13,16 +13,6 @@ double baseAngle = 85;
 const int angle_time_period = 20;
 PID anglePID(&JY61::Angle[2], &angleOutput, &targetAngle, 1.5, 0, 0.0000001, DIRECT);
 
-TimerInterrupt angleTimer(angle_time_period / interrupt_period, [] {
-	if (anglePID.Compute())
-	{
-		JY61::read();
-		// Serial.print("angleOutput:　");
-		// Serial.println(angleOutput);
-		servoCtl::myServo.write(baseAngle - angleOutput);
-	}
-});
-
 void angleInitialize()
 {
 	anglePID.SetMode(AUTOMATIC);

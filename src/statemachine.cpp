@@ -6,7 +6,17 @@
 #include "AngleControl.hpp"
 #include "MotorControl.hpp"
 
-TimerInterrupt timer1(motor_time_interval / interrupt_period, [] 
+TimerInterrupt angleTimer(angle_time_period / interrupt_period, [] {
+	if (anglePID.Compute())
+	{
+		JY61::read();
+        if (fabs(targetAngle - JY61::Angle[2]) > 360) 
+            JY61::Angle[2] += double(int(targetAngle - JY61::Angle[2]) / 360) * 360;
+		servoCtl::myServo.write(baseAngle - angleOutput);
+	}
+});
+
+TimerInterrupt motorTimer(motor_time_interval / interrupt_period, [] 
 {
     StateMachine::getInstance().process();
 });
@@ -103,12 +113,10 @@ void StateMachine::updateAction(Information &info)
             }
             nowTargetIndex ++;
         }
-        if (counter >= 0) targetSpeed = 40; 
         if (counter == 30)
         {
             counter = 0;
             targetAngle += 90;
-            if (targetAngle > 180) targetAngle -= 360;
         }
     }
 }
