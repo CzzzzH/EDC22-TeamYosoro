@@ -78,10 +78,13 @@ void Motor::setPWM(int pwm, bool isRight)
 
 void Motor::PID_compute()
 {
-	encoder::Read();
-	leftPID.Compute();
-	rightPID.Compute();
-	encoder::Reset();
+	int i = 0;
+	i = i + 1;
+	Serial.println(i);
+	// encoder::Read();
+	// leftPID.Compute();
+	// rightPID.Compute();
+	// encoder::Reset();
 }
 
 void Motor::updatePWM()
@@ -92,7 +95,7 @@ void Motor::updatePWM()
 
 double Motor::estimatePWM(double targeteSpeed)
 {
-	return 4.5 * targeteSpeed;
+	return 5 * targeteSpeed;
 }
 
 const pin_2 Motor::left_pin = {12, 13};

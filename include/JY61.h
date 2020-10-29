@@ -1,11 +1,6 @@
 #ifndef JY61_HPP
 #define JY61_HPP
 
-// #include <JY901.h>
-// #include <Wire.h>
-// #include <Arduino.h>
-// #include <string.h>
-
 class JY61
 {
 public:

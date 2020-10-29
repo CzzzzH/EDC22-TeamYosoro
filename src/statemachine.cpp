@@ -20,7 +20,7 @@ void StateMachine::init()
     Serial2.begin(115200);
     Serial3.begin(115200);
     JY61::isDebug = false;
-    Motor::isDebug = false;
+    Motor::isDebug = true;
 
     Motor::initialize();
 
@@ -45,7 +45,7 @@ void StateMachine::process()
     // Begin
 
     // Serial.println("TargetSpeed: " + String(Motor::targetSpeed));
-    Serial.println("TargetAngle: " + String(AngleControl::target));
+    // Serial.println("TargetAngle: " + String(AngleControl::target));
 
     Information &info = Information::getInstance();
     // updateInfo(info);
@@ -55,7 +55,9 @@ void StateMachine::process()
     Motor::PID_compute();
     Motor::updatePWM();
     Motor::targetSpeed = 30;
-    // counter++;
+    counter += 1;
+    // Serial.println("counter : " + String(counter));
+    Serial.println("milli seconds : " + String(millis()));
     // End
 }
 
