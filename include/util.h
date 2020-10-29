@@ -1,9 +1,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-enum Mission {GO_TO_MAZE, RETURN};
-enum State {IN_MAZE, OUT_MAZE};
-
+enum Mission {WAIT_FOR_START, GO_TO_MAZE, SEARCH_MAZE, RETURN};
 struct MazePosition
 {
     int x, y;

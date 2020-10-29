@@ -20,7 +20,7 @@ void AngleControl::initialize()
 double AngleControl::getOutput() { return output; }
 bool AngleControl::Compute()
 {
-	Serial.println("JY61::Angle[2]   :   " + String(JY61::Angle[2]));
+	// Serial.println("JY61::Angle[2]   :   " + String(JY61::Angle[2]));
 	JY61::Angle[2] += floor((target + 180 - JY61::Angle[2]) / 360.0) * 360;
 	return pid.Compute();
 }
