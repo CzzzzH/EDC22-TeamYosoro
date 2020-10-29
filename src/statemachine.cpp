@@ -34,7 +34,7 @@ void StateMachine::init()
     IRReceiver::initialize();
     
     // Other Initialization 
-    Motor::targetSpeed = 0;
+    Motor::targetSpeed = 30;
     outsideTarget.push_back({23, 236});
     outsideTarget.push_back({83, 232});
     nowMission = WAIT_FOR_START;
@@ -45,14 +45,18 @@ void StateMachine::process()
 {
     // Serial.println("TargetSpeed: " + String(Motor::targetSpeed));
     // Serial.println("TargetAngle: " + String(AngleControl::target));
-    Serial.println("NowIRStatus: " + String(IRReceiver::leftOuterValue));
+
     Information &info = Information::getInstance();
     updateInfo(info);
     // Serial.println("Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
     updateAction(info);
+
+    
     updateMission(info);
     updateMotor(info);
-    // counter++;
+    counter++;
+    Serial.println("counter : " + String(counter));
+    Serial.println("milli seconds : " + String(millis()));
 }
 
 void StateMachine::updateInfo(Information &info)

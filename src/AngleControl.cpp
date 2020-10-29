@@ -14,6 +14,7 @@ void AngleControl::initialize()
 	JY61::read();
 	delay(100);
 	JY61::read();
+
 	initAngle = JY61::Angle[2];
 	target = initAngle;
 }
