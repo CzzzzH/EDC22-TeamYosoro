@@ -7,6 +7,7 @@
 #include "MotorControl.h"
 #include "TimerInterrupt.h"
 #include "JY61.h"
+#include "IRReceiver.h"
 
 StateMachine &StateMachine::getInstance()
 {
@@ -16,72 +17,58 @@ StateMachine &StateMachine::getInstance()
 
 void StateMachine::init()
 {
+    // Debug Mode
+    JY61::isDebug = false;
+    Motor::isDebug = false;
+
+    // Initialize Serial
     Serial.begin(9600);
     Serial2.begin(115200);
     Serial3.begin(115200);
-    JY61::isDebug = false;
-    Motor::isDebug = true;
 
+    // Initialize components
     Motor::initialize();
-
-    //Timer Interrupt 10ms
     TimerInterrupt::initialize(interrupt_period);
-
     AngleControl::initialize();
-
     servoCtl::initialize(4);
-
-    Motor::targetSpeed = 0;
-
+    IRReceiver::initialize();
+    
+    // Other Initialization 
+    Motor::targetSpeed = 30;
     outsideTarget.push_back({23, 236});
     outsideTarget.push_back({83, 232});
-    nowState = OUT_MAZE;
-    nowMission = GO_TO_MAZE;
+    nowMission = WAIT_FOR_START;
 }
 
 // Execute every clock interruption
 void StateMachine::process()
 {
-    // Begin
-
     // Serial.println("TargetSpeed: " + String(Motor::targetSpeed));
     // Serial.println("TargetAngle: " + String(AngleControl::target));
 
     Information &info = Information::getInstance();
-    // updateInfo(info);
+    updateInfo(info);
     // Serial.println("Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
     updateAction(info);
-    updateMission();
-    Motor::PID_compute();
-    Motor::updatePWM();
-    Motor::targetSpeed = 30;
-    counter += 1;
-    // Serial.println("counter : " + String(counter));
+
+    
+    updateMission(info);
+    updateMotor(info);
+    counter++;
+    Serial.println("counter : " + String(counter));
     Serial.println("milli seconds : " + String(millis()));
-    // End
 }
 
 void StateMachine::updateInfo(Information &info)
 {
     // TODO: update constant info (from gyroscope, encoders, zigbee)
-    info.updateInfo();
-}
-
-void StateMachine::updateMission()
-{
-    // TODO: update the current mission  (use updated info)
-    if (nowTargetIndex == 2 && nowMission == GO_TO_MAZE)
-    {
-        nowTargetIndex = 0;
-        nowMission = RETURN;
-    }
+    IRReceiver::updateValue();
 }
 
 void StateMachine::updateAction(Information &info)
 {
     // TODO: update the current action (use infrared info and zigbee info)
     if (nowMission == GO_TO_MAZE)
-        ;
     {
         if (info.getCarpos().getDist(outsideTarget[nowTargetIndex]) < 5)
         {
@@ -98,15 +85,31 @@ void StateMachine::updateAction(Information &info)
             }
             nowTargetIndex++;
         }
-        if (counter == 30)
-        {
-            counter = 0;
-            AngleControl::target += 90;
-        }
+    }
+    else if (nowMission == SEARCH_MAZE)
+    {
+        if (IRReceiver::atCrossroad() && AngleControl::getAngleDist() < 5)
+            AngleControl::target -= 90;
     }
 }
 
-// void StateMachine::updateMotor()
-// {
-//     // TODO: update the motor paramters (use PID)
-// }
+void StateMachine::updateMission(Information &info)
+{
+    // TODO: update the current mission  (use updated info)
+    if (info.getGameState() == GameGoing && nowMission == WAIT_FOR_START)
+        nowMission = SEARCH_MAZE;
+    if (nowTargetIndex == 2 && nowMission == GO_TO_MAZE)
+    {
+        nowTargetIndex = 0;
+        nowMission = RETURN;
+    }
+}
+
+void StateMachine::updateMotor(Information &info)
+{
+    // TODO: update the motor paramters (use PID)
+    Motor::PID_compute();
+    Motor::updatePWM();
+    if (nowMission == WAIT_FOR_START) Motor::targetSpeed = 0;
+    else Motor::targetSpeed = 30;
+} 

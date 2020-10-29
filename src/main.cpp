@@ -15,9 +15,6 @@ TimerInterrupt angleTimer(AngleControl::timePeriod, [] {
 	JY61::read();
 	if (AngleControl::Compute())
 	{
-		// Serial.println("read angle : " + String(JY61::Angle[2]));
-		// Serial.println("target angle : " + String(AngleControl::target));
-		Serial.println("angle output :　" + String(AngleControl::getOutput()));
 		servoCtl::myServo.write(AngleControl::middle - AngleControl::getOutput());
 		Motor::updatePWM();
 	}
@@ -54,17 +51,5 @@ void setup()
 
 void loop()
 {
-	// sm.updateInfo(Information::getInstance());
-
-	// delay(500);
-	// mpu.update();
-	// mpu.printRawData();
-	// Serial.println("");
-
-	// Serial.print("roll  (x-forward (north)) : ");
-	// Serial.println(mpu.getRoll());
-	// Serial.print("pitch (y-right (east))    : ");
-	// Serial.println(mpu.getPitch());
-	// Serial.print("yaw   (z-down (down))     : ");
-	// Serial.println(mpu.getYaw());
+    sm.updateInfo(Information::getInstance());
 }

@@ -17,6 +17,7 @@ public:
 	static void initialize();
 	static double getOutput();
 	static bool Compute();
+    
 };
 
 #endif
