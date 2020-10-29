@@ -13,7 +13,7 @@ TimerInterrupt angleTimer(AngleControl::timePeriod, [] {
 	JY61::read();
 	if (AngleControl::Compute())
 	{
-		Serial.println("read angle : " + String(JY61::Angle[2]));
+		// Serial.println("read angle : " + String(JY61::Angle[2]));
 		// Serial.println("target angle : " + String(AngleControl::getTarget()));
 		// Serial.println("angle output :　" + String(AngleControl::getOutput()));
 		servoCtl::myServo.write(AngleControl::middle - AngleControl::getOutput());
@@ -35,5 +35,5 @@ void setup()
 
 void loop()
 {
-	// sm.updateInfo(Information::getInstance());
+    sm.updateInfo(Information::getInstance());
 }

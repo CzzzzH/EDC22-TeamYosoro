@@ -12,7 +12,6 @@ private:
 
 public:
     // Attributes
-    State nowState;
     Mission nowMission;
     int nowTargetIndex = 0;
     int counter = -30;
@@ -25,9 +24,9 @@ public:
     void init();
     void process();
     void updateInfo(Information &info);
-    void updateMission();
+    void updateMission(Information &info);
     void updateAction(Information &info);
-    // void updateMotor();
+    void updateMotor(Information &info);
 };
 
 #endif
