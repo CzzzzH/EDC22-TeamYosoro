@@ -44,6 +44,7 @@ void JY61::read()
 		Angle[i] = (double)JY901.stcAngle.Angle[i] / 32768 * 180;
 	}
 
+    
 	if (count < 5)
 	{
 		count++;
@@ -57,7 +58,7 @@ void JY61::read()
 		delta = delta - ((delta > 180) ? 360 : 0);
 		// Serial.println("delta3 : " + String(delta));
 		delta = fabs(delta);
-		double lambda = (delta < 20) ? 1 : exp(0.2 * (20 - delta));
+		double lambda = (delta < 15) ? 1 : exp(0.2 * (15 - delta));
 		// Serial.println("delta : " + String(delta));
 		// Serial.println("lambda : " + String(lambda));
 		// Serial.println("Angle[2] before : " + String(Angle[2]));
@@ -65,6 +66,7 @@ void JY61::read()
 
 		Angle[2] = lambda * Angle[2] + (1 - lambda) * last_Angle;
 	}
+    
 
 	last_Angle = Angle[2];
 	print();

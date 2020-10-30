@@ -34,10 +34,10 @@ void StateMachine::init()
     IRReceiver::initialize();
     
     // Other Initialization 
-    Motor::targetSpeed = 30;
+    // Motor::targetSpeed = 30;
     outsideTarget.push_back({23, 236});
     outsideTarget.push_back({83, 232});
-    nowMission = WAIT_FOR_START;
+    nowMission = RETURN;
 }
 
 // Execute every clock interruption
@@ -54,7 +54,7 @@ void StateMachine::process()
     
     updateMission(info);
     updateMotor(info);
-    counter++;
+    // counter++;
     Serial.println("counter : " + String(counter));
     Serial.println("milli seconds : " + String(millis()));
 }
@@ -86,11 +86,13 @@ void StateMachine::updateAction(Information &info)
             nowTargetIndex++;
         }
     }
+    /*
     else if (nowMission == SEARCH_MAZE)
     {
         if (IRReceiver::atCrossroad() && AngleControl::getAngleDist() < 5)
             AngleControl::target -= 90;
     }
+    */
 }
 
 void StateMachine::updateMission(Information &info)

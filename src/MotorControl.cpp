@@ -78,13 +78,13 @@ void Motor::setPWM(int pwm, bool isRight)
 
 void Motor::PID_compute()
 {
-	int i = 0;
-	i = i + 1;
-	Serial.println(i);
-	// encoder::Read();
-	// leftPID.Compute();
-	// rightPID.Compute();
-	// encoder::Reset();
+	// int i = 0;
+	// i = i + 1;
+	// Serial.println(i);
+	encoder::Read();
+	leftPID.Compute();
+	rightPID.Compute();
+	encoder::Reset();
 }
 
 void Motor::updatePWM()
