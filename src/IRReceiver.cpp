@@ -2,26 +2,32 @@
 
 void IRReceiver::initialize()
 {
-    pinMode(SENSOR_LEFT_OUTNER, INPUT);
-    pinMode(SENSOR_LEFT_INNER, INPUT);
-    pinMode(SENSOR_RIGHT_INNER, INPUT);
-    pinMode(SENSOR_RIGHT_OUTNER, INPUT);
+    memset(leftValue, 0, sizeof(leftValue));
+    memset(rightValue, 0, sizeof(rightValue));
+    filterSum = 0;
+    for (int count = 0;count < SENSOR_COUNT;count++)
+        pinMode(A0 + count, INPUT);
+    for (int count = 0;count < SENSOR_COUNT;count++)
+    {
+        filter[count] = abs(3.5 - count);
+        filterSum += filter[count];
+    }
 }
 
 void IRReceiver::updateValue()
 {
-    leftOuterValue = digitalRead(SENSOR_LEFT_OUTNER);
-    leftInnerValue = digitalRead(SENSOR_LEFT_INNER);
-    rightInnerValue = digitalRead(SENSOR_RIGHT_INNER);
-    rightOuterValue = digitalRead(SENSOR_RIGHT_OUTNER);
+    for (int count = 0;count < SENSOR_COUNT / 2;count++)
+    {
+        leftValue[count] = digitalRead(A0 + count);
+        rightValue[count] = digitalRead(A0 + count + 4);
+    }
 }
 
 bool IRReceiver::atCrossroad()
 {
-    return leftOuterValue & leftInnerValue & rightInnerValue & rightOuterValue;
+    double sum = 0;
+    for (int count = 0;count < SENSOR_COUNT / 2;count ++)
+        sum += leftValue[count] * filter[count] + rightValue[count] * filter[count + 4];
+    sum /= filterSum;
+    return (sum * sum) > 0.5;
 }
-
-int IRReceiver::leftOuterValue = 0;
-int IRReceiver::leftInnerValue = 0;
-int IRReceiver::rightInnerValue = 0;
-int IRReceiver::rightOuterValue = 0;
