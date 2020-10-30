@@ -14,7 +14,8 @@ public:
     // Attributes
     Mission nowMission;
     int nowTargetIndex = 0;
-    int counter = -30;
+    int counter = 0;
+    
     std::vector<Position> outsideTarget;
 
     // Methods
