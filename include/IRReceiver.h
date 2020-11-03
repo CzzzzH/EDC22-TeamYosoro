@@ -1,14 +1,13 @@
 #include <Arduino.h>
 
 // From left to right
-#define A0 22
-#define SENSOR_COUNT 8
+#define IR_PIN_BEGIN 22
+#define SENSOR_COUNT 4
 
 class IRReceiver
 {
 public:
-
-/*  *** A single IR sensor array. ***
+    /*  *** A single IR sensor array. ***
     __       __ __       __
     ||-------||-||-------||
 
@@ -17,10 +16,10 @@ public:
     __       __ __       __  __       __ __       __
     ||-------||-||-------||--||-------||-||-------||  
 */
-    static int leftValue[SENSOR_COUNT/2];
-    static int rightValue[SENSOR_COUNT/2];
+    static int leftValue[SENSOR_COUNT / 2];
+    static int rightValue[SENSOR_COUNT / 2];
     static double filter[SENSOR_COUNT];
-    static int filterSum;
+    static double filterSum;
     static void initialize();
     static void updateValue();
     static bool atCrossroad();

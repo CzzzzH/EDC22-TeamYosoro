@@ -28,4 +28,4 @@ void servoCtl::initialize(int Pin)
 
 int16_t servoCtl::angNow = 90;
 int16_t servoCtl::angMemory = 90;
-Servo servoCtl::myServo = Servo();
+Servo servoCtl::myServo = Servo();  

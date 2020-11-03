@@ -89,8 +89,19 @@ void Motor::PID_compute()
 
 void Motor::updatePWM()
 {
-	setPWM(estimatePWM(targetSpeed) + rightOutput + 5 * AngleControl::getOutput(), true);
-	setPWM(estimatePWM(targetSpeed) + leftOutput - 5 * AngleControl::getOutput(), false);
+    if (AngleControl::getOutput() > 0)
+    {
+        // Serial.println("Getoutput Turn Left: " + String(AngleControl::getOutput()));
+        setPWM(estimatePWM(targetSpeed) + rightOutput + 0.1 * AngleControl::getOutput() * AngleControl::getOutput(), true);
+	    setPWM(estimatePWM(targetSpeed) + leftOutput - 0.1 * AngleControl::getOutput() * AngleControl::getOutput(), false);
+    }
+    else
+    {
+        // Serial.println("Getoutput Turn Right: " + String(AngleControl::getOutput()));
+        setPWM(estimatePWM(targetSpeed) + rightOutput - 0.1 * AngleControl::getOutput() * AngleControl::getOutput(), true);
+	    setPWM(estimatePWM(targetSpeed) + leftOutput + 0.1 * AngleControl::getOutput() * AngleControl::getOutput(), false);
+    }
+    
 }
 
 double Motor::estimatePWM(double targeteSpeed)

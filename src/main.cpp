@@ -9,6 +9,7 @@
 std::list<TimerInterrupt *>
 	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();
 
+/*
 TimerInterrupt angleTimer(AngleControl::timePeriod, [] {
 	JY61::read();
 	if (AngleControl::Compute())
@@ -20,10 +21,13 @@ TimerInterrupt angleTimer(AngleControl::timePeriod, [] {
 		Motor::updatePWM();
 	}
 });
+*/
 
-TimerInterrupt motorTimer(Motor::timePeriod, [] {
+
+TimerInterrupt motorTimer(50, [] {
 	StateMachine::getInstance().process();
 });
+
 
 StateMachine &sm = StateMachine::getInstance();
 
