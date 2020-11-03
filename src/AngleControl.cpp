@@ -1,29 +1,39 @@
+#include "AngleControl.h"
+#include <Arduino.h>
 #include <JY61.h>
 #include <PID_v1.h>
 #include <TimerInterrupt.h>
 #include <math.h>
-#include "AngleControl.h"
-#include <Arduino.h>
 
 void AngleControl::initialize()
 {
-	pid.SetMode(AUTOMATIC);
-	pid.SetSampleTime(timePeriod);
-	pid.SetOutputLimits(-100, 100);
+    pid.SetMode(AUTOMATIC);
+    pid.SetSampleTime(timePeriod);
+    pid.SetOutputLimits(-100, 100);
 
-	JY61::read();
-	delay(100);
-	JY61::read();
+    JY61::read();
+    delay(100);
+    JY61::read();
 
-	initAngle = JY61::Angle[2];
-	target = initAngle;
+    initAngle = JY61::Angle[2];
+    target = initAngle;
 }
-double AngleControl::getOutput() { return output; }
+
+double AngleControl::getOutput()
+{
+    return output;
+}
+
+double AngleControl::getAngleDist()
+{
+    return fabs(JY61::Angle[2] - target);
+}
+
 bool AngleControl::Compute()
 {
-	// Serial.println("JY61::Angle[2]   :   " + String(JY61::Angle[2]));
-	JY61::Angle[2] += floor((target + 180 - JY61::Angle[2]) / 360.0) * 360;
-	return pid.Compute();
+    // Serial.println("JY61::Angle[2]   :   " + String(JY61::Angle[2]));
+    JY61::Angle[2] += floor((target + 180 - JY61::Angle[2]) / 360.0) * 360;
+    return pid.Compute();
 }
 
 double AngleControl::output;

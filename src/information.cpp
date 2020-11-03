@@ -12,7 +12,7 @@ void Information::updateInfo()
 {
     std::string zigbeeMessage;
     zigbeeMessage.resize(75);
-    // Serial.print("Start Update:      ");
+    // Serial.print("Start Update!!!");
     while (true)
     {
         // Serial.print("Zigbee status: ");
