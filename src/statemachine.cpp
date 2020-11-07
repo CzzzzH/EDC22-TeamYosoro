@@ -10,7 +10,7 @@
 
 // Define to debug components
 // #define DEBUG_MOTOR
-// #define DEBUG_ANGLECONTROLER
+#define DEBUG_ANGLECONTROLER
 // #define DEBUG_IRRECEIVER
 // #define DEBUG_ZIGBEE
 // #define DEBUG_TIMER
@@ -49,7 +49,7 @@ void StateMachine::init()
     // insideTarget.push_back({-1, 1});
     // insideTarget.push_back({-1, 0});
     // insideTarget.push_back({0, 0});
-    nowMission = SEARCH_MAZE;
+    nowMission = RETURN;
     nowDirection = Y_POSITIVE;
     nowMazePosition = {0, 0};
 }
@@ -147,6 +147,11 @@ void StateMachine::updateAction(Information &info)
             // turnInMaze(1);
         }
         // else AngleControl::target += IRReceiver::angleOffset();
+    }
+    if (counter == 120)
+    {
+        AngleControl::target += 90;
+        counter = 0;
     }
 }
 
