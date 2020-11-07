@@ -16,27 +16,29 @@ void IRReceiver::initialize()
 
 void IRReceiver::updateValue()
 {   
+    int midCount = 0;
     for (int i = 0; i < SIDE_IR_COUNT; ++i)
     {
         leftValue[i] = digitalRead(LEFT_BEGIN + i); 
         rightValue[i] = digitalRead(RIGHT_BEGIN + i); 
     }
     for (int i = 0; i <  MID_IR_COUNT; ++i)
-        midValue[i] = digitalRead(MID_BEGIN + i); 
-
-    if (leftPointer < SIDE_IR_COUNT && leftValue[leftPointer] == SIDE_DETECT) leftPointer++;
-    if (rightPointer < SIDE_IR_COUNT && rightValue[rightPointer] == SIDE_DETECT) rightPointer++;
+    {
+        midValue[i] = digitalRead(MID_BEGIN + i);
+        midCount += (midValue[i] == MID_DETECT);
+    }
+    if (midCount >= 3 && atCross == false)
+        atCross = true;
 }
 
 bool IRReceiver::atCrossroad()
 {
-    if (leftPointer == SIDE_IR_COUNT && rightPointer == SIDE_IR_COUNT)
+    if (atCross && (leftValue[1] == SIDE_DETECT || rightValue[1] == SIDE_DETECT))
     {
-        leftPointer = 0;
-        rightPointer = 0;
+        atCross = false;
         return true;
     }
-    return false;
+    else return false;
 }
 
 double IRReceiver::angleOffset()
@@ -63,3 +65,4 @@ int IRReceiver::rightValue[SIDE_IR_COUNT];
 int IRReceiver::midValue[MID_IR_COUNT];
 int IRReceiver::rightPointer = 0;
 int IRReceiver::leftPointer = 0;
+bool IRReceiver::atCross = false;
