@@ -5,7 +5,7 @@
 #include "JY61.h"
 #include "MotorControl.h"
 
-#define INTERRUPT_INTERVAL 50
+#define INTERRUPT_INTERVAL 40
 
 std::list<TimerInterrupt *>
 	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();

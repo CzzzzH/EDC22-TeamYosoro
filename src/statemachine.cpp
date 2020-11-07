@@ -41,14 +41,14 @@ void StateMachine::init()
     // Other Initialization 
     outsideTarget.push_back({16, 240});
     outsideTarget.push_back({72, 240});
-    insideTarget.push_back({0, 1});
-    insideTarget.push_back({-1, 1});
-    insideTarget.push_back({-1, 0});
-    insideTarget.push_back({0, 0});
-    insideTarget.push_back({0, 1});
-    insideTarget.push_back({-1, 1});
-    insideTarget.push_back({-1, 0});
-    insideTarget.push_back({0, 0});
+    // insideTarget.push_back({0, 1});
+    // insideTarget.push_back({-1, 1});
+    // insideTarget.push_back({-1, 0});
+    // insideTarget.push_back({0, 0});
+    // insideTarget.push_back({0, 1});
+    // insideTarget.push_back({-1, 1});
+    // insideTarget.push_back({-1, 0});
+    // insideTarget.push_back({0, 0});
     nowMission = SEARCH_MAZE;
     nowDirection = Y_POSITIVE;
     nowMazePosition = {0, 0};
@@ -143,7 +143,8 @@ void StateMachine::updateAction(Information &info)
             default:
                 break;
             }
-            turnInMaze(1);
+            nowTargetIndex++;
+            // turnInMaze(1);
         }
         // else AngleControl::target += IRReceiver::angleOffset();
     }
@@ -175,7 +176,7 @@ void StateMachine::updateMotor(Information &info)
     else Motor::targetSpeed = 30;
 } 
 
-void StateMachine::turnInMaze(int dir)
+void StateMachine::turnInMaze(bool dir)
 {
     nowDirection = Direction(int(nowDirection) + int(dir > 0));
     if (nowDirection > 3) nowDirection = Y_POSITIVE;

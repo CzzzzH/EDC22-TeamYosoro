@@ -19,7 +19,7 @@ public:
     int counter = 0;
     
     std::vector<Position> outsideTarget;
-    std::vector<MazePosition> insideTarget;
+    std::vector<std::pair<MazePosition, bool>> insideTarget;
 
     // Methods
     ~StateMachine() {}
@@ -31,7 +31,7 @@ public:
     void updateMission(Information &info);
     void updateAction(Information &info);
     void updateMotor(Information &info);
-    void turnInMaze(int dir);
+    void turnInMaze(bool isLeft);
 };
 
 #endif
