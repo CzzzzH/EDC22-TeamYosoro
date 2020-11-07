@@ -2,6 +2,7 @@
 #define UTIL_H
 
 enum Mission {WAIT_FOR_START, GO_TO_MAZE, SEARCH_MAZE, RETURN};
+enum Direction {Y_POSITIVE, X_NEGTIVE, Y_NEGTIVE, X_POSITIVE};
 struct MazePosition
 {
     int x, y;

@@ -41,7 +41,17 @@ void StateMachine::init()
     // Other Initialization 
     outsideTarget.push_back({16, 240});
     outsideTarget.push_back({72, 240});
+    insideTarget.push_back({0, 1});
+    insideTarget.push_back({-1, 1});
+    insideTarget.push_back({-1, 0});
+    insideTarget.push_back({0, 0});
+    insideTarget.push_back({0, 1});
+    insideTarget.push_back({-1, 1});
+    insideTarget.push_back({-1, 0});
+    insideTarget.push_back({0, 0});
     nowMission = SEARCH_MAZE;
+    nowDirection = Y_POSITIVE;
+    nowMazePosition = {0, 0};
 }
 
 // Execute every clock interruption
@@ -113,11 +123,28 @@ void StateMachine::updateAction(Information &info)
     }
     else if (nowMission == SEARCH_MAZE)
     {
-        // if (IRReceiver::atCrossroad())
-        // {
-        //     AngleControl::target += 90;
-        //     nowTargetIndex++;
-        // }
+        if (IRReceiver::atCrossroad())
+        {
+            AngleControl::target += 90;
+            switch (nowDirection)
+            {
+            case Y_POSITIVE:
+                nowMazePosition.y++;
+                break;
+            case Y_NEGTIVE:
+                nowMazePosition.y--;
+                break;
+            case X_POSITIVE:
+                nowMazePosition.x++;
+                break;
+            case X_NEGTIVE:
+                nowMazePosition.x--;
+                break;
+            default:
+                break;
+            }
+            turnInMaze(1);
+        }
         // else AngleControl::target += IRReceiver::angleOffset();
     }
 }
@@ -147,3 +174,10 @@ void StateMachine::updateMotor(Information &info)
     if (nowMission == WAIT_FOR_START) Motor::targetSpeed = 0;
     else Motor::targetSpeed = 30;
 } 
+
+void StateMachine::turnInMaze(int dir)
+{
+    nowDirection = Direction(int(nowDirection) + int(dir > 0));
+    if (nowDirection > 3) nowDirection = Y_POSITIVE;
+    if (nowDirection < 0) nowDirection = X_POSITIVE;
+}

@@ -13,10 +13,13 @@ private:
 public:
     // Attributes
     Mission nowMission;
+    Direction nowDirection;
+    MazePosition nowMazePosition;
     int nowTargetIndex = 0;
     int counter = 0;
     
     std::vector<Position> outsideTarget;
+    std::vector<MazePosition> insideTarget;
 
     // Methods
     ~StateMachine() {}
@@ -28,6 +31,7 @@ public:
     void updateMission(Information &info);
     void updateAction(Information &info);
     void updateMotor(Information &info);
+    void turnInMaze(int dir);
 };
 
 #endif
