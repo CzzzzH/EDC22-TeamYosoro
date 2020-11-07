@@ -1,12 +1,13 @@
 #include <Arduino.h>
 
 // From left to right
-#define LEFT_BEGIN 22
-#define MID_BEGIN 25
-#define RIGHT_BEGIN 29
+#define LEFT_BEGIN 25
+#define MID_BEGIN 28
+#define RIGHT_BEGIN 22
 #define SIDE_IR_COUNT 3
 #define MID_IR_COUNT 4
-#define BLACK 1
+#define MID_DETECT 0
+#define SIDE_DETECT 1
 #define NON_SENSITIVITY 0
 
 class IRReceiver

@@ -18,14 +18,14 @@ void IRReceiver::updateValue()
 {   
     for (int i = 0; i < SIDE_IR_COUNT; ++i)
     {
-        leftValue[i] = 1 - digitalRead(LEFT_BEGIN + i); 
-        rightValue[i] = 1 - digitalRead(RIGHT_BEGIN + i); 
+        leftValue[i] = digitalRead(LEFT_BEGIN + i); 
+        rightValue[i] = digitalRead(RIGHT_BEGIN + i); 
     }
     for (int i = 0; i <  MID_IR_COUNT; ++i)
-        midValue[i] = 1 - digitalRead(MID_BEGIN + i); 
+        midValue[i] = digitalRead(MID_BEGIN + i); 
 
-    if (leftPointer < SIDE_IR_COUNT && leftValue[leftPointer] == BLACK) leftPointer++;
-    if (rightPointer < SIDE_IR_COUNT && rightValue[rightPointer] == BLACK) rightPointer++;
+    if (leftPointer < SIDE_IR_COUNT && leftValue[leftPointer] == SIDE_DETECT) leftPointer++;
+    if (rightPointer < SIDE_IR_COUNT && rightValue[rightPointer] == SIDE_DETECT) rightPointer++;
 }
 
 bool IRReceiver::atCrossroad()
@@ -51,8 +51,8 @@ double IRReceiver::angleOffset()
     }
     for (int i = 0; i < MID_IR_COUNT; ++i)
     {
-        if (i < MID_IR_COUNT / 2) leftCount += midValue[i];
-        else rightCount += midValue[i];
+        if (i < MID_IR_COUNT / 2) rightCount += midValue[i];
+        else leftCount += midValue[i];
     }
     res += max(0, leftCount - rightCount - NON_SENSITIVITY);
     return res;
