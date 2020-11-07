@@ -18,7 +18,7 @@ void TimerInterrupt::initialize(unsigned long interval)
 
 TimerInterrupt::TimerInterrupt(unsigned int period, Func func) : times((double)period / (double)interrupt_period), func(func)
 {
-	Serial.println("times : " + String(times));
+	// Serial.println("times : " + String(times));
 	timer_list.push_back(this);
 }
 

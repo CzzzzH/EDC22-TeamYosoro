@@ -82,6 +82,8 @@ void Motor::PID_compute()
 	// i = i + 1;
 	// Serial.println(i);
 	encoder::Read();
+    // Serial.println("Left encoder : " + String(encoder::counter.left));
+    // Serial.println("right encoder : " + String(encoder::counter.right));
 	leftPID.Compute();
 	rightPID.Compute();
 	encoder::Reset();
@@ -89,6 +91,7 @@ void Motor::PID_compute()
 
 void Motor::updatePWM()
 {
+    Serial.println("Getoutput: " + String(AngleControl::getOutput()));
     if (AngleControl::getOutput() > 0)
     {
         // Serial.println("Getoutput Turn Left: " + String(AngleControl::getOutput()));
