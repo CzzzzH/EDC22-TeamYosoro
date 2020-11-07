@@ -4,7 +4,7 @@
 #include "util.h"
 #include "information.h"
 #include <vector>
-class StateMachine // The statemachine of the car (Singleton)
+class StateMachine // The statemachine of th2e car (Singleton)
 {
 private:
     StateMachine() {}

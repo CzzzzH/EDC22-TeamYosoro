@@ -57,6 +57,8 @@ void StateMachine::process()
     // Fill debug codes below
     #ifdef DEBUG_MOTOR
         Serial.println("Target Speed: " + String(Motor::targetSpeed));
+        Serial.println("Left Motor Counter: " + String(encoder::counter.left));
+        Serial.println("Right Motor Counter: " + String(encoder::counter.right));
     #endif
 
     #ifdef DEBUG_ANGLECONTROLER
@@ -111,12 +113,12 @@ void StateMachine::updateAction(Information &info)
     }
     else if (nowMission == SEARCH_MAZE)
     {
-        if (IRReceiver::atCrossroad())
-        {
-            AngleControl::target += 90;
-            nowTargetIndex++;
-        }
-        else AngleControl::target += IRReceiver::angleOffset();
+        // if (IRReceiver::atCrossroad())
+        // {
+        //     AngleControl::target += 90;
+        //     nowTargetIndex++;
+        // }
+        // else AngleControl::target += IRReceiver::angleOffset();
     }
 }
 
@@ -141,6 +143,7 @@ void StateMachine::updateMotor(Information &info)
     JY61::read();
 	AngleControl::Compute();
     Motor::updatePWM();
+    // Motor::setPWM(100,false);
     if (nowMission == WAIT_FOR_START) Motor::targetSpeed = 0;
     else Motor::targetSpeed = 30;
 } 
