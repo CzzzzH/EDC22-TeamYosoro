@@ -3,37 +3,63 @@
 void IRReceiver::initialize()
 {
     memset(leftValue, 0, sizeof(leftValue));
+    memset(midValue, 0, sizeof(midValue));
     memset(rightValue, 0, sizeof(rightValue));
-    filterSum = 0;
-    for (int count = 0; count < SENSOR_COUNT; count++)
-        pinMode(IR_PIN_BEGIN + count, INPUT);
-    for (int count = 0; count < SENSOR_COUNT; count++)
+    for (int i = 0; i < SIDE_IR_COUNT; i++)
     {
-        filter[count] = abs(SENSOR_COUNT / 2 - 0.5 - count);
-        filterSum += filter[count];
+        pinMode(LEFT_BEGIN + i, INPUT);
+        pinMode(RIGHT_BEGIN + i, INPUT);
     }
+    for (int i = 0; i < MID_IR_COUNT; i++)
+        pinMode(MID_BEGIN + i, INPUT);
 }
 
 void IRReceiver::updateValue()
-{
-    for (int count = 0; count < SENSOR_COUNT / 2; count++)
+{   
+    for (int i = 0; i < SIDE_IR_COUNT; ++i)
     {
-        rightValue[count] = 1 - digitalRead(IR_PIN_BEGIN + count);
-        leftValue[count] = 1 - digitalRead(IR_PIN_BEGIN + count + SENSOR_COUNT / 2);
+        leftValue[i] = 1 - digitalRead(LEFT_BEGIN + i); 
+        rightValue[i] = 1 - digitalRead(RIGHT_BEGIN + i); 
     }
-    // Serial.println(String(leftValue[0]) + " " + String(leftValue[1]) + " " + String(rightValue[0]) + " " + String(rightValue[1]));
+    for (int i = 0; i <  MID_IR_COUNT; ++i)
+        midValue[i] = 1 - digitalRead(MID_BEGIN + i); 
+
+    if (leftPointer < SIDE_IR_COUNT && leftValue[leftPointer] == BLACK) leftPointer++;
+    if (rightPointer < SIDE_IR_COUNT && rightValue[rightPointer] == BLACK) rightPointer++;
 }
 
 bool IRReceiver::atCrossroad()
 {
-    double sum = 0;
-    for (int count = 0; count < SENSOR_COUNT / 2; count++)
-        sum += leftValue[count] * filter[count] + rightValue[count] * filter[count + SENSOR_COUNT / 2];
-    sum /= filterSum;
-    return (sum * sum) > 0.5;
+    if (leftPointer == SIDE_IR_COUNT && rightPointer == SIDE_IR_COUNT)
+    {
+        leftPointer = 0;
+        rightPointer = 0;
+        return true;
+    }
+    return false;
 }
 
-int IRReceiver::leftValue[SENSOR_COUNT / 2];
-int IRReceiver::rightValue[SENSOR_COUNT / 2];
-double IRReceiver::filter[SENSOR_COUNT];
-double IRReceiver::filterSum;
+double IRReceiver::angleOffset()
+{
+    int res = 0;
+    int leftCount = 0;
+    int rightCount = 0;
+    for (int i = 0; i < SIDE_IR_COUNT; ++i)
+    {
+        leftCount += leftValue[i];
+        rightCount += rightValue[i];
+    }
+    for (int i = 0; i < MID_IR_COUNT; ++i)
+    {
+        if (i < MID_IR_COUNT / 2) leftCount += midValue[i];
+        else rightCount += midValue[i];
+    }
+    res += max(0, leftCount - rightCount - NON_SENSITIVITY);
+    return res;
+}
+
+int IRReceiver::leftValue[SIDE_IR_COUNT];
+int IRReceiver::rightValue[SIDE_IR_COUNT];
+int IRReceiver::midValue[MID_IR_COUNT];
+int IRReceiver::rightPointer = 0;
+int IRReceiver::leftPointer = 0;

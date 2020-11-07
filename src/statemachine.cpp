@@ -1,13 +1,19 @@
 #include <Arduino.h>
 #include <string.h>
 #include <SoftwareSerial.h>
-#include <servoCtl.h>
 #include "statemachine.h"
 #include "AngleControl.h"
 #include "MotorControl.h"
 #include "TimerInterrupt.h"
 #include "JY61.h"
 #include "IRReceiver.h"
+
+// Define to debug components
+// #define DEBUG_MOTOR
+// #define DEBUG_ANGLECONTROLER
+// #define DEBUG_IRRECEIVER
+// #define DEBUG_ZIGBEE
+// #define DEBUG_TIMER
 
 StateMachine &StateMachine::getInstance()
 {
@@ -30,36 +36,55 @@ void StateMachine::init()
     Motor::initialize();
     TimerInterrupt::initialize(interrupt_period);
     AngleControl::initialize();
-    servoCtl::initialize(4);
     IRReceiver::initialize();
     
     // Other Initialization 
     outsideTarget.push_back({16, 240});
     outsideTarget.push_back({72, 240});
-    nowMission = WAIT_FOR_START;
+    nowMission = SEARCH_MAZE;
 }
 
 // Execute every clock interruption
 void StateMachine::process()
 {
-    // Serial.println("TargetSpeed: " + String(Motor::targetSpeed));
-    // Serial.println("TargetAngle: " + String(AngleControl::target));
-
     Information &info = Information::getInstance();
-    // updateInfo(info);
-    // Serial.println("Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
+
     updateAction(info);
     updateMission(info);
     updateMotor(info);
     counter++;
-    // Serial.println("counter : " + String(counter));
-    // Serial.println("milli seconds : " + String(millis()));
+
+    // Fill debug codes below
+    #ifdef DEBUG_MOTOR
+        Serial.println("Target Speed: " + String(Motor::targetSpeed));
+    #endif
+
+    #ifdef DEBUG_ANGLECONTROLER
+        Serial.println("Now Angle: " + String(JY61::Angle[2]));
+        Serial.println("Target Angle: " + String(AngleControl::target));
+    #endif
+
+    #ifdef DEBUG_IRRECEIVER
+        Serial.println("LeftIR: " + String(IRReceiver::leftValue[0]) + " " + String(IRReceiver::leftValue[1]) + " " + String(IRReceiver::leftValue[2]));
+        Serial.println("RightIR: " + String(IRReceiver::rightValue[0]) + " " + String(IRReceiver::rightValue[1]) + " " + String(IRReceiver::rightValue[2]));
+        Serial.println("MidIR: " + String(IRReceiver::midValue[0]) + " " + String(IRReceiver::midValue[1]) + " " + String(IRReceiver::midValue[2]) + " " + String(IRReceiver::midValue[3]));
+    #endif
+
+    #ifdef DEBUG_ZIGBEE
+        Serial.println("Car Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
+    #endif
+
+    #ifdef DEBUG_TIMER
+        Serial.println("Counter: " + String(counter));
+        Serial.println("Milli Seconds: " + String(millis()));
+    #endif
+    
 }
 
 void StateMachine::updateInfo(Information &info)
 {
     // TODO: update constant info (from gyroscope, encoders, zigbee)
-    info.updateInfo();
+    // info.updateInfo();
     IRReceiver::updateValue();
 }
 
@@ -86,13 +111,12 @@ void StateMachine::updateAction(Information &info)
     }
     else if (nowMission == SEARCH_MAZE)
     {
-        if (IRReceiver::atCrossroad() && counter >= 0)
+        if (IRReceiver::atCrossroad())
         {
-            if (nowTargetIndex == 3) AngleControl::target += 90;
-            if (nowTargetIndex == 6) AngleControl::target -= 90;
-            counter = -10;
+            AngleControl::target += 90;
             nowTargetIndex++;
         }
+        else AngleControl::target += IRReceiver::angleOffset();
     }
 }
 
@@ -115,14 +139,7 @@ void StateMachine::updateMotor(Information &info)
     Motor::PID_compute();
 
     JY61::read();
-	if (AngleControl::Compute())
-	{
-		// Serial.println("read angle : " + String(JY61::Angle[2]));
-		// Serial.println("target angle : " + String(AngleControl::target));
-		// Serial.println("angle output :　" + String(AngleControl::getOutput()));
-		servoCtl::myServo.write(AngleControl::middle - AngleControl::getOutput());
-		// Motor::updatePWM();
-	}
+	AngleControl::Compute();
     Motor::updatePWM();
     if (nowMission == WAIT_FOR_START) Motor::targetSpeed = 0;
     else Motor::targetSpeed = 30;
