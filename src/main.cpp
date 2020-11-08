@@ -5,16 +5,21 @@
 #include "JY61.h"
 #include "MotorControl.h"
 
-#define INTERRUPT_INTERVAL 40
+#define INTERRUPT_INTERVAL 50
 
 std::list<TimerInterrupt *>
 	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();
-
 
 TimerInterrupt motorTimer(INTERRUPT_INTERVAL, [] {
 	StateMachine::getInstance().process();
 });
 
+TimerInterrupt angleTimer(10, [] {
+	// Serial.println("mills : " + String(millis()));
+	JY61::read();
+	AngleControl::Compute();
+	Motor::updatePWM();
+});
 
 StateMachine &sm = StateMachine::getInstance();
 
@@ -25,5 +30,5 @@ void setup()
 
 void loop()
 {
-    sm.updateInfo(Information::getInstance());
+	sm.updateInfo(Information::getInstance());
 }

@@ -95,7 +95,7 @@ void Motor::PID_compute()
 
 double diffVelocity(double angle)
 {
-    return 3 * angle;
+    return 2.5 * angle + pow(angle / 14, 3);
 }
 
 void Motor::updatePWM()
