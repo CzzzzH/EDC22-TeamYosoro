@@ -125,23 +125,7 @@ void StateMachine::updateAction(Information &info)
         if (IRReceiver::atCrossroad())
         {
             AngleControl::target += 90;
-            switch (nowDirection)
-            {
-            case Y_POSITIVE:
-                nowMazePosition.y++;
-                break;
-            case Y_NEGTIVE:
-                nowMazePosition.y--;
-                break;
-            case X_POSITIVE:
-                nowMazePosition.x++;
-                break;
-            case X_NEGTIVE:
-                nowMazePosition.x--;
-                break;
-            default:
-                break;
-            }
+            
             nowTargetIndex++;
             // turnInMaze(1);
         }
