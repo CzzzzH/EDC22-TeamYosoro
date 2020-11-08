@@ -37,8 +37,8 @@ void StateMachine::init()
     TimerInterrupt::initialize(interrupt_period);
     AngleControl::initialize();
     IRReceiver::initialize();
-    
-    // Other Initialization 
+
+    // Other Initialization
     outsideTarget.push_back({16, 240});
     outsideTarget.push_back({72, 240});
     // insideTarget.push_back({0, 1});
@@ -49,7 +49,7 @@ void StateMachine::init()
     // insideTarget.push_back({-1, 1});
     // insideTarget.push_back({-1, 0});
     // insideTarget.push_back({0, 0});
-    nowMission = RETURN;
+    nowMission = SEARCH_MAZE;
     nowDirection = Y_POSITIVE;
     nowMazePosition = {0, 0};
 }
@@ -64,33 +64,32 @@ void StateMachine::process()
     updateMotor(info);
     counter++;
 
-    // Fill debug codes below
-    #ifdef DEBUG_MOTOR
-        Serial.println("Target Speed: " + String(Motor::targetSpeed));
-        Serial.println("Left Motor Counter: " + String(encoder::counter.left));
-        Serial.println("Right Motor Counter: " + String(encoder::counter.right));
-    #endif
+// Fill debug codes below
+#ifdef DEBUG_MOTOR
+    Serial.println("Target Speed: " + String(Motor::targetSpeed));
+    Serial.println("Left Motor Counter: " + String(encoder::counter.left));
+    Serial.println("Right Motor Counter: " + String(encoder::counter.right));
+#endif
 
-    #ifdef DEBUG_ANGLECONTROLER
-        Serial.println("Now Angle: " + String(JY61::Angle[2]));
-        Serial.println("Target Angle: " + String(AngleControl::target));
-    #endif
+#ifdef DEBUG_ANGLECONTROLER
+    Serial.println("Now Angle: " + String(JY61::Angle[2]));
+    Serial.println("Target Angle: " + String(AngleControl::target));
+#endif
 
-    #ifdef DEBUG_IRRECEIVER
-        Serial.println("LeftIR: " + String(IRReceiver::leftValue[0]) + " " + String(IRReceiver::leftValue[1]) + " " + String(IRReceiver::leftValue[2]));
-        Serial.println("RightIR: " + String(IRReceiver::rightValue[0]) + " " + String(IRReceiver::rightValue[1]) + " " + String(IRReceiver::rightValue[2]));
-        Serial.println("MidIR: " + String(IRReceiver::midValue[0]) + " " + String(IRReceiver::midValue[1]) + " " + String(IRReceiver::midValue[2]) + " " + String(IRReceiver::midValue[3]));
-    #endif
+#ifdef DEBUG_IRRECEIVER
+    Serial.println("LeftIR: " + String(IRReceiver::leftValue[0]) + " " + String(IRReceiver::leftValue[1]) + " " + String(IRReceiver::leftValue[2]));
+    Serial.println("RightIR: " + String(IRReceiver::rightValue[0]) + " " + String(IRReceiver::rightValue[1]) + " " + String(IRReceiver::rightValue[2]));
+    Serial.println("MidIR: " + String(IRReceiver::midValue[0]) + " " + String(IRReceiver::midValue[1]) + " " + String(IRReceiver::midValue[2]) + " " + String(IRReceiver::midValue[3]));
+#endif
 
-    #ifdef DEBUG_ZIGBEE
-        Serial.println("Car Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
-    #endif
+#ifdef DEBUG_ZIGBEE
+    Serial.println("Car Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
+#endif
 
-    #ifdef DEBUG_TIMER
-        Serial.println("Counter: " + String(counter));
-        Serial.println("Milli Seconds: " + String(millis()));
-    #endif
-    
+#ifdef DEBUG_TIMER
+    Serial.println("Counter: " + String(counter));
+    Serial.println("Milli Seconds: " + String(millis()));
+#endif
 }
 
 void StateMachine::updateInfo(Information &info)
@@ -146,13 +145,14 @@ void StateMachine::updateAction(Information &info)
             nowTargetIndex++;
             // turnInMaze(1);
         }
-        // else AngleControl::target += IRReceiver::angleOffset();
+        // else
+        //     AngleControl::target += IRReceiver::angleOffset();
     }
-    if (counter == 120)
-    {
-        AngleControl::target += 90;
-        counter = 0;
-    }
+    // if (counter == 120)
+    // {
+    //     AngleControl::target += 90;
+    //     counter = 0;
+    // }
 }
 
 void StateMachine::updateMission(Information &info)
@@ -173,17 +173,18 @@ void StateMachine::updateMotor(Information &info)
     // TODO: update the motor paramters (use PID)
     Motor::PID_compute();
 
-    JY61::read();
-	AngleControl::Compute();
-    Motor::updatePWM();
     // Motor::setPWM(100,false);
-    if (nowMission == WAIT_FOR_START) Motor::targetSpeed = 0;
-    else Motor::targetSpeed = 30;
-} 
+    if (nowMission == WAIT_FOR_START)
+        Motor::targetSpeed = 0;
+    else
+        Motor::targetSpeed = 30;
+}
 
 void StateMachine::turnInMaze(bool dir)
 {
     nowDirection = Direction(int(nowDirection) + int(dir > 0));
-    if (nowDirection > 3) nowDirection = Y_POSITIVE;
-    if (nowDirection < 0) nowDirection = X_POSITIVE;
+    if (nowDirection > 3)
+        nowDirection = Y_POSITIVE;
+    if (nowDirection < 0)
+        nowDirection = X_POSITIVE;
 }
