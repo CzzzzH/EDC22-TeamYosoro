@@ -33,15 +33,21 @@ struct bfsInfo
     int dist;
 };
 
+struct CrossroadAction
+{
+    int rotateAngle; // 0 90 -90 180
+    int nextPosition; //-1~36
+};
+
 class Maze {
 private:
     static std::map <int, std::list<int>> adjList;
-
+    static bfsInfo getWay(int now, int target);
 public:
     static void initialize(Information &info);
     static void addEdge(int u, int v, bool dir);
-    static bfsInfo getDistance(int now, int target);
-    static int getDirection(int last, int now, int target);
+    static int getDistance(int now, int target);
+    static CrossroadAction getDirection(int last, int now, int target);
 };
 
 #endif //maze_H

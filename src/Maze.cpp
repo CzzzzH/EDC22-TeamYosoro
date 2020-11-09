@@ -23,7 +23,7 @@ void Maze::initialize(Information &info)
     }
 }
 
-bfsInfo Maze::getDistance(int now, int target)
+bfsInfo Maze::getWay(int now, int target)
 {
     int Stack[MAZE_SIZE * MAZE_SIZE];
     memset(Stack, 0, sizeof(Stack));
@@ -69,9 +69,14 @@ bfsInfo Maze::getDistance(int now, int target)
     return {index1, int(history.size())};
 }
 
-int Maze::getDirection(int last, int now, int target)
+int Maze::getDistance(int now, int target)
 {
-    int index1 = getDistance(now, target).nextNode;
+    return getWay(now, target).dist;
+}
+
+CrossroadAction Maze::getDirection(int last, int now, int target)
+{
+    int index1 = getWay(now, target).nextNode;
     int rotate = 0;
     int diff1 = now - last;
     int diff2 = index1 - now;
@@ -90,7 +95,7 @@ int Maze::getDirection(int last, int now, int target)
         else if(diff2 == -MAZE_SIZE)
             rotate = (diff1 == -1) ? -1 : 1;
     }
-    return rotate * 90;
+    return {rotate * 90, index1};
 }
 
 std::map <int, std::list<int>>Maze::adjList;
