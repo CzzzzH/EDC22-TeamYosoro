@@ -8,48 +8,37 @@ void Maze::addEdge(int u, int v, bool dir = 1)
         adjList[v].push_back(u);
 }
 
-void Maze::genRoute()
+void Maze::initialize(Information &info)
 {
-    for(int i = 0;i < history.size() - 1;i++)
+    //adding the edges in the Maze
+    for (int i = 0;i <= MAZE_SIZE;i++)
     {
-        history[i] = history[i + 1] - history[i];
-    }
-    history.pop_back();
-    for(int i = 0;i < history.size() - 1;i++)
-    {
-        int rotate = 0;
-        if(history[i + 1] - history[i] == 0)
-            rotate = 0;
-        else
+        for(int j = 1;j <= MAZE_SIZE;j++)
         {
-            if(history[i + 1] == -1)
-                rotate = (history[i] == -MAZE_SIZE) ? 1 : -1;
-            else if(history[i + 1] == 1)
-                rotate = (history[i] == MAZE_SIZE) ? 1 : -1;
-            else if(history[i + 1] == MAZE_SIZE)
-                rotate = (history[i] == 1) ? 1 : -1;
-            else if(history[i + 1] == -MAZE_SIZE)
-                rotate = (history[i] == -1) ? 1 : -1;
+            if(j + 1 <= MAZE_SIZE)
+                Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + 1);
+            if(i < MAZE_SIZE - 1)
+                Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + MAZE_SIZE);
         }
-        Rotate.push_back(rotate);
     }
 }
 
-void Maze::bfs(int src, int dest)
+bfsInfo Maze::getDistance(int now, int target)
 {
+    int Stack[MAZE_SIZE * MAZE_SIZE];
+    memset(Stack, 0, sizeof(Stack));
     bool Break = false;
     std::queue<int> q;
-
+    std::vector<int> history;
     std::map<int, bool> visited;
 
-    q.push(src);
-    visited[src] = true;
+    q.push(now);
+    visited[now] = true;
 
     while (!q.empty())
     {
         int node = q.front();
         q.pop();
-
         for (auto neighbours : adjList[node])
         {
             if (!visited[neighbours])
@@ -57,7 +46,7 @@ void Maze::bfs(int src, int dest)
                 q.push(neighbours);
                 visited[neighbours] = true;
                 Stack[neighbours] = node;
-                if(neighbours == dest)
+                if(neighbours == target)
                 {
                     Break = true;
                     break;
@@ -67,25 +56,41 @@ void Maze::bfs(int src, int dest)
         if(Break)
             break;
     }
-    //trace back
-    int t = Stack[dest];
-    history.push_back(dest);
-    while(Stack[t] != -1)
+    //回溯
+    int t = Stack[target];
+    history.push_back(target);
+    while(t != 0)
     {
         history.push_back(t);
-        int val = Stack[t];
-        Stack[t] = -1;
-        t = val;
+        t = Stack[t];
     }
-    std::reverse(history.begin(),history.end());
+    history.pop_back();
+    int index1 = history.back();
+    return {index1, int(history.size())};
 }
 
-void Maze::initialize()
+int Maze::getDirection(int last, int now, int target)
 {
-    memset(Stack, 0, sizeof(Stack));;
+    int index1 = getDistance(now, target).nextNode;
+    int rotate = 0;
+    int diff1 = now - last;
+    int diff2 = index1 - now;
+    if(diff1 == diff2)
+        rotate = 0;
+    else if(diff1 + diff2 == 0)
+        rotate = 2;
+    else
+    {
+        if(diff2 == -1)
+            rotate = (diff1 == MAZE_SIZE) ? -1 : 1;
+        else if(diff2 == 1)
+            rotate = (diff1 == -MAZE_SIZE) ? -1 : 1;
+        else if(diff2 == MAZE_SIZE)
+            rotate = (diff1 == 1) ? -1 : 1;
+        else if(diff2 == -MAZE_SIZE)
+            rotate = (diff1 == -1) ? -1 : 1;
+    }
+    return rotate * 90;
 }
 
 std::map <int, std::list<int>>Maze::adjList;
-int Maze::Stack[MAZE_SIZE * MAZE_SIZE];
-std::vector<int> Maze::history;
-std::vector<int> Maze::Rotate;
