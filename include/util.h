@@ -2,11 +2,16 @@
 #define UTIL_H
 
 enum Mission {WAIT_FOR_START, GO_TO_MAZE, SEARCH_MAZE, RETURN};
-enum Direction {Y_POSITIVE, X_NEGTIVE, Y_NEGTIVE, X_POSITIVE}; 
-
-struct MazePosition
+struct bfsInfo
 {
-    int x, y;
+    int nextNode;
+    int dist;
+};
+
+struct CrossroadAction
+{
+    int rotateAngle; // 0 90 -90 180
+    int nextPosition; //-1~36
 };
 
 struct Position

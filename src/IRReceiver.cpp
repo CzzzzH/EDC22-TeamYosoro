@@ -13,63 +13,58 @@ void IRReceiver::initialize()
     }
     for (int i = 0; i < MID_IR_COUNT; i++)
         pinMode(MID_BEGIN + i, INPUT);
+    midWeight[0] = 1; // * 0
+    midWeight[1] = 1; // * 1
+    midWeight[2] = -1; // * 1
+    midWeight[3] = -1; // * 0
 }
 
 void IRReceiver::updateValue()
 {   
-    int midCount = 0;
-    int leftCount = 0;
-    int rightCount = 0;
     for (int i = 0; i < SIDE_IR_COUNT; ++i)
     {
         leftValue[i] = digitalRead(LEFT_BEGIN + i); 
         rightValue[i] = digitalRead(RIGHT_BEGIN + i);
-        leftCount += (leftValue[i] == SIDE_DETECT);
-        rightCount += (rightValue[i] == SIDE_DETECT);
     }
     for (int i = 0; i < MID_IR_COUNT; ++i)
-    {
         midValue[i] = digitalRead(MID_BEGIN + i);
-        midCount += (midValue[i] == MID_DETECT);
-    }
-    if (midCount >= 3 && (leftCount + rightCount) < 6 && atCross == false)
-    {
-        atCross = true;
-        Motor::targetSpeed -= 10;
-    }
 }
 
-bool IRReceiver::atCrossroad()
-{
+bool IRReceiver::atCrossroad(int angle)
+{   
     if (atCross && (leftValue[1] == SIDE_DETECT || rightValue[1] == SIDE_DETECT))
     {
         atCross = false;
-        Motor::targetSpeed += 10;
         return true;
     }
-    else return false;
+    else if (!atCross)
+    {
+        int midCount = 0;
+        int leftCount = 0;
+        int rightCount = 0;
+        for (int i = 0; i < SIDE_IR_COUNT; ++i)
+        {
+            leftCount += (leftValue[i] == SIDE_DETECT);
+            rightCount += (rightValue[i] == SIDE_DETECT);
+        }
+        for (int i = 0; i < MID_IR_COUNT; ++i)
+            midCount += (midValue[i] == MID_DETECT);
+        if (midCount >= 3 && (leftCount + rightCount) < 6)
+            atCross = true;
+    }
+    return false;
 }
 
-double IRReceiver::angleOffset()
+int IRReceiver::angleOffset()
 {
-    int res = 0;
-    int leftCount = 0;
-    int rightCount = 0;
-    for (int i = 0; i < SIDE_IR_COUNT; ++i)
-    {
-        leftCount += leftValue[i];
-        rightCount += rightValue[i];
-    }
+    int offset = 0;
     for (int i = 0; i < MID_IR_COUNT; ++i)
-    {
-        if (i < MID_IR_COUNT / 2) rightCount += midValue[i];
-        else leftCount += midValue[i];
-    }
-    res += std::max(0, leftCount - rightCount - NON_SENSITIVITY);
-    return res;
+        offset += midWeight[i] * (midValue[i] == MID_DETECT);
+    return offset;
 }
 
 int IRReceiver::leftValue[SIDE_IR_COUNT];
 int IRReceiver::rightValue[SIDE_IR_COUNT];
 int IRReceiver::midValue[MID_IR_COUNT];
+int IRReceiver::midWeight[MID_IR_COUNT];
 bool IRReceiver::atCross = false;

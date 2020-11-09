@@ -27,18 +27,6 @@
 //    | |
 //    End
 
-struct bfsInfo
-{
-    int nextNode;
-    int dist;
-};
-
-struct CrossroadAction
-{
-    int rotateAngle; // 0 90 -90 180
-    int nextPosition; //-1~36
-};
-
 class Maze {
 private:
     static std::map <int, std::list<int>> adjList;

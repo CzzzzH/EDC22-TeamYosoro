@@ -3,7 +3,7 @@
 
 #include "util.h"
 #include "information.h"
-#include <vector>
+#include <queue>
 class StateMachine // The statemachine of th2e car (Singleton)
 {
 private:
@@ -13,13 +13,12 @@ private:
 public:
     // Attributes
     Mission nowMission;
-    Direction nowDirection;
-    MazePosition nowMazePosition;
-    int nowTargetIndex = 0;
+    int lastMazeIndex, nowMazeIndex;
     int counter = 0;
+    int offset = 0;
     
-    std::vector<Position> outsideTarget;
-    std::vector<std::pair<MazePosition, bool>> insideTarget;
+    std::queue<Position> outsideTarget;
+    std::queue<int> insideTarget;
 
     // Methods
     ~StateMachine() {}
@@ -27,11 +26,10 @@ public:
 
     void init();
     void process();
-    void updateInfo(Information &info);
+    void updateInfo();
     void updateMission(Information &info);
     void updateAction(Information &info);
     void updateMotor(Information &info);
-    void turnInMaze(bool isLeft);
 };
 
 #endif

@@ -7,10 +7,11 @@
 #include "TimerInterrupt.h"
 #include "JY61.h"
 #include "IRReceiver.h"
+#include "Maze.h"
 
 // Define to debug components
 // #define DEBUG_MOTOR
-#define DEBUG_ANGLECONTROLER
+// #define DEBUG_ANGLECONTROLER
 // #define DEBUG_IRRECEIVER
 // #define DEBUG_ZIGBEE
 // #define DEBUG_TIMER
@@ -32,26 +33,32 @@ void StateMachine::init()
     Serial2.begin(115200);
     Serial3.begin(115200);
 
+    // Other Initialization
+    outsideTarget.push({16, 240});
+    outsideTarget.push({72, 240});
+    insideTarget.push(20);
+    insideTarget.push(19);
+    insideTarget.push(13);
+    insideTarget.push(14);
+    insideTarget.push(15);
+    insideTarget.push(9);
+    insideTarget.push(8);
+    insideTarget.push(9);
+    //
+    insideTarget.push(14);
+    insideTarget.push(28);
+    insideTarget.push(32);
+    nowMission = SEARCH_MAZE;
+    nowMazeIndex = 26;
+    lastMazeIndex = 32;
+
     // Initialize components
     Motor::initialize();
-    TimerInterrupt::initialize(interrupt_period);
+    Motor::targetSpeed = 30;
     AngleControl::initialize();
     IRReceiver::initialize();
-
-    // Other Initialization
-    outsideTarget.push_back({16, 240});
-    outsideTarget.push_back({72, 240});
-    // insideTarget.push_back({0, 1});
-    // insideTarget.push_back({-1, 1});
-    // insideTarget.push_back({-1, 0});
-    // insideTarget.push_back({0, 0});
-    // insideTarget.push_back({0, 1});
-    // insideTarget.push_back({-1, 1});
-    // insideTarget.push_back({-1, 0});
-    // insideTarget.push_back({0, 0});
-    nowMission = SEARCH_MAZE;
-    nowDirection = Y_POSITIVE;
-    nowMazePosition = {0, 0};
+    Maze::initialize(Information::getInstance());
+    TimerInterrupt::initialize(interrupt_period);
 }
 
 // Execute every clock interruption
@@ -59,6 +66,7 @@ void StateMachine::process()
 {
     Information &info = Information::getInstance();
 
+    updateInfo();
     updateAction(info);
     updateMission(info);
     updateMotor(info);
@@ -92,10 +100,9 @@ void StateMachine::process()
 #endif
 }
 
-void StateMachine::updateInfo(Information &info)
+void StateMachine::updateInfo()
 {
-    // TODO: update constant info (from gyroscope, encoders, zigbee)
-    // info.updateInfo();
+    // TODO: update IR info
     IRReceiver::updateValue();
 }
 
@@ -104,39 +111,45 @@ void StateMachine::updateAction(Information &info)
     // TODO: update the current action (use infrared info and zigbee info)
     if (nowMission == GO_TO_MAZE)
     {
-        if (info.getCarpos().getDist(outsideTarget[nowTargetIndex]) < 15)
+        if (info.getCarpos().getDist(outsideTarget.front()) < 15)
         {
-            switch (nowTargetIndex)
+            outsideTarget.pop();
+            switch (outsideTarget.size())
             {
-            case 0:
+            case 1:
                 AngleControl::target += 90;
                 break;
-            case 1:
+            case 0:
                 AngleControl::target += 90;
                 break;
             default:
                 break;
-            }
-            nowTargetIndex++;
+            }   
         }
     }
     else if (nowMission == SEARCH_MAZE)
-    {
-        if (IRReceiver::atCrossroad())
+    {   
+        CrossroadAction action = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
+        if (IRReceiver::atCrossroad(action.rotateAngle) && !insideTarget.empty())
         {
-            AngleControl::target += 90;
-            
-            nowTargetIndex++;
-            // turnInMaze(1);
+            AngleControl::target += action.rotateAngle;
+            if (action.rotateAngle != 0)
+            {
+                AngleControl::target -= offset;
+                Motor::targetSpeed = 0;
+                offset = 0;
+            }
+            lastMazeIndex = nowMazeIndex;
+            nowMazeIndex = action.nextPosition;
+            if (nowMazeIndex == insideTarget.front()) insideTarget.pop();
         }
-        // else
-        //     AngleControl::target += IRReceiver::angleOffset();
+        else if (AngleControl::getAngleDist() < 15)
+        {
+            Motor::targetSpeed = 30;
+            offset += IRReceiver::angleOffset();
+            AngleControl::target += IRReceiver::angleOffset();
+        }
     }
-    // if (counter == 120)
-    // {
-    //     AngleControl::target += 90;
-    //     counter = 0;
-    // }
 }
 
 void StateMachine::updateMission(Information &info)
@@ -144,12 +157,12 @@ void StateMachine::updateMission(Information &info)
     // TODO: update the current mission  (use updated info)
     // Serial.println("GameState" + String(info.getGameState()));
     if (info.getGameState() == GameGoing && nowMission == WAIT_FOR_START)
-        nowMission = GO_TO_MAZE;
-    if (nowTargetIndex == 2 && nowMission == GO_TO_MAZE)
     {
-        nowTargetIndex = 0;
-        nowMission = SEARCH_MAZE;
+        nowMission = GO_TO_MAZE;
+        Motor::targetSpeed = 30;
     }
+    if (nowMission == WAIT_FOR_START && outsideTarget.empty())
+        nowMission = SEARCH_MAZE;
 }
 
 void StateMachine::updateMotor(Information &info)
@@ -157,18 +170,6 @@ void StateMachine::updateMotor(Information &info)
     // TODO: update the motor paramters (use PID)
     Motor::PID_compute();
 
-    // Motor::setPWM(100,false);
     if (nowMission == WAIT_FOR_START)
         Motor::targetSpeed = 0;
-    else
-        Motor::targetSpeed = 30;
-}
-
-void StateMachine::turnInMaze(bool dir)
-{
-    nowDirection = Direction(int(nowDirection) + int(dir > 0));
-    if (nowDirection > 3)
-        nowDirection = Y_POSITIVE;
-    if (nowDirection < 0)
-        nowDirection = X_POSITIVE;
 }
