@@ -5,6 +5,7 @@
 #include <PID_v1.h>
 #include <string.h>
 #include <string>
+#include "IRReceiver.h"
 
 void encoder::initialize()
 {
@@ -93,16 +94,19 @@ void Motor::PID_compute()
     encoder::Reset();
 }
 
-double diffVelocity(double angle)
+double diffVelocity(const double angle)
 {
-    return 2.5 * angle + pow(angle / 14, 3);
+    double result_angle = 2.5 * angle + pow(angle / 14, 3);
+    if (result_angle > 100)
+        result_angle = 100;
+    return result_angle;
 }
 
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(AngleControl::getOutput()), true);
-    setPWM(estimatePWM(targetSpeed) + leftOutput - diffVelocity(AngleControl::getOutput()), false);
+    setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(AngleControl::getOutput() + (AngleControl::getOutput() < 10 ? 30 : 0) * IRReceiver::angleOffset()), true);
+    setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(-AngleControl::getOutput() - (AngleControl::getOutput() < 10 ? 30 : 0) * IRReceiver::angleOffset()), false);
 }
 
 double Motor::estimatePWM(double targeteSpeed)
@@ -120,5 +124,5 @@ double Motor::rightOutput = 0;
 double Motor::leftOutput = 0;
 double Motor::targetSpeed = 0;
 
-PID Motor::rightPID = PID(&encoder::counter.right, &rightOutput, &targetSpeed, 1, 0.00001, 0.00001, DIRECT);
-PID Motor::leftPID = PID(&encoder::counter.left, &leftOutput, &targetSpeed, 1, 0.00001, 0.00001, DIRECT);
+PID Motor::rightPID = PID(&encoder::counter.right, &rightOutput, &targetSpeed, 1, 0.001, 0.01, DIRECT);
+PID Motor::leftPID = PID(&encoder::counter.left, &leftOutput, &targetSpeed, 1, 0.001, 0.01, DIRECT);

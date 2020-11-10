@@ -43,7 +43,7 @@ void JY61::read()
 		Gyro[i] = (double)JY901.stcGyro.w[i] / 32768 * 2000;
 		Angle[i] = (double)JY901.stcAngle.Angle[i] / 32768 * 180;
 	}
-
+	// Serial.println("JY62 : " + String(Angle[2]));
 	if (count < 5)
 	{
 		count++;

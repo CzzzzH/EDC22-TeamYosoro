@@ -65,7 +65,7 @@ void StateMachine::init()
 
     // Initialize components
     Motor::initialize();
-    Motor::targetSpeed = 30;
+    Motor::targetSpeed = 45;
     AngleControl::initialize();
     IRReceiver::initialize();
     Maze::initialize(Information::getInstance());
@@ -114,7 +114,7 @@ void StateMachine::process()
 void StateMachine::updateInfo()
 {
     // TODO: update IR info
-    IRReceiver::updateValue();
+    // IRReceiver::updateValue();
 }
 
 void StateMachine::updateAction(Information &info)
@@ -135,11 +135,11 @@ void StateMachine::updateAction(Information &info)
                 break;
             default:
                 break;
-            }   
+            }
         }
     }
     else if (nowMission == SEARCH_MAZE)
-    {   
+    {
         CrossroadAction crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
         nowAction = GO_AHEAD;
         if (IRReceiver::atCrossroad(crossroadAction.rotateAngle) && !insideTarget.empty())
@@ -147,19 +147,15 @@ void StateMachine::updateAction(Information &info)
             AngleControl::target += crossroadAction.rotateAngle;
             if (crossroadAction.rotateAngle != 0)
             {
-                if (crossroadAction.rotateAngle == 180) nowAction = BIG_TURN;
-                else nowAction = SMALL_TURN;
-                AngleControl::target -= offset;
-                offset = 0;
+                if (crossroadAction.rotateAngle == 180)
+                    nowAction = BIG_TURN;
+                else
+                    nowAction = SMALL_TURN;
             }
             lastMazeIndex = nowMazeIndex;
             nowMazeIndex = crossroadAction.nextPosition;
-            if (nowMazeIndex == insideTarget.front()) insideTarget.pop();
-        }
-        else if (AngleControl::getAngleDist() < 15)
-        {
-            offset += IRReceiver::angleOffset();
-            AngleControl::target += IRReceiver::angleOffset();
+            if (nowMazeIndex == insideTarget.front())
+                insideTarget.pop();
         }
     }
 }
