@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "Maze.h"
+#include "util.h"
 
 void Maze::addEdge(int u, int v, bool dir = 1)
 {
@@ -10,15 +11,53 @@ void Maze::addEdge(int u, int v, bool dir = 1)
 
 void Maze::initialize(Information &info)
 {
+    std::vector<barrierEdge> barrier;
+
+    for(int i = 0;i < OBSTACLE;i++)
+    {
+        int xoffsetA = (info.getObstacleApos(i).X + 12)/30;
+        int xoffsetB = (info.getObstacleBpos(i).X + 12)/30;
+        int yoffsetA = (info.getObstacleApos(i).Y - 22)/30 - 1;
+        int yoffsetB = (info.getObstacleBpos(i).Y - 22)/30 - 1;
+        if(xoffsetA == xoffsetB)
+        {
+            xoffsetA -= 1;
+            yoffsetA += 1;
+            yoffsetB += 1;
+            int start = min(yoffsetA, yoffsetB);
+            int end = max(yoffsetA, yoffsetB);
+            for(int i = start;i < end;i++)
+                barrier.push_back({xoffsetA + i * MAZE_SIZE, xoffsetA + i * MAZE_SIZE + 1});
+        }
+        else if(yoffsetA == yoffsetB)
+        {
+            int start = min(xoffsetA, xoffsetB);
+            int end = max(xoffsetA, xoffsetB);
+            for(int i = start;i < end;i++)
+                barrier.push_back({yoffsetA * MAZE_SIZE + i, (yoffsetA + 1) * MAZE_SIZE + i});
+        }
+    }
+    
+    std::sort(barrier.begin(), barrier.end());
     //adding the edges in the Maze
-    for (int i = 0;i <= MAZE_SIZE;i++)
+    for (int i = 0;i < MAZE_SIZE;i++)
     {
         for(int j = 1;j <= MAZE_SIZE;j++)
         {
             if(j + 1 <= MAZE_SIZE)
-                Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + 1);
+            {
+                if(barrier.back().A == i * MAZE_SIZE + j && barrier.back().B - barrier.back().A == 1)
+                    barrier.pop_back();
+                else
+                    Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + 1);
+            }
             if(i < MAZE_SIZE - 1)
-                Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + MAZE_SIZE);
+            {
+                if(barrier.back().A == i * MAZE_SIZE + j && barrier.back().B - barrier.back().A == MAZE_SIZE)
+                    barrier.pop_back();
+                else
+                    Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + MAZE_SIZE);
+            }
         }
     }
 }

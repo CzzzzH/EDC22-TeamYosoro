@@ -1,6 +1,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#define min(a,b) ((a)<(b)?(a):(b))
+#define max(a,b) ((a)>(b)?(a):(b))
+
 enum Mission {WAIT_FOR_START, GO_TO_MAZE, SEARCH_MAZE, RETURN};
 enum Action {GO_AHEAD, SMALL_TURN, BIG_TURN};
 
@@ -16,6 +19,15 @@ struct CrossroadAction
     int nextPosition; //-1~36
 };
 
+struct barrierEdge
+{
+    int A;
+    int B;
+    friend bool operator < (barrierEdge u,barrierEdge v)
+    {
+        return u.A > v.A;   //Delibrately sort from big to small
+    }
+};
 struct Position
 {
     unsigned int X;
@@ -28,34 +40,34 @@ struct Position
 
 struct BasicInfo
 {
-    uint8_t GameState; //��Ϸ״̬��00δ��ʼ��01�����У�10��ͣ��11����
-    uint16_t Time;     //����ʱ�䣬��0.1sΪ��λ
-    uint8_t stop;      //й��ڿ�����Ϣ
+    uint8_t GameState; //
+    uint16_t Time;     //
+    uint8_t stop;      //
 };
 
 struct CarInfo
 {
-    struct Position pos;     //С��λ��
-    uint16_t score;          //�÷�
-    uint8_t picknum;         //С���ɹ��ռ����ʸ���
-    uint8_t task;            //С������0�ϰ볡��1�°볡
-    uint8_t transport;       //С�����Ƿ�����
-    uint8_t transportnum;    //С�������˵ĸ���
-    uint8_t area;            //С�����ڵ�����
-    uint8_t WhetherRightPos; //С�����λ����Ϣ�Ƿ�����ȷ�ģ�1����ȷ�ģ�0�ǲ���ȷ��.
+    struct Position pos;     //
+    uint16_t score;          //
+    uint8_t picknum;         //
+    uint8_t task;            //
+    uint8_t transport;       //
+    uint8_t transportnum;    //
+    uint8_t area;            //
+    uint8_t WhetherRightPos; //
 };
 
 struct PassengerInfo
 {
-    struct Position startpos; //��Ա��ʼλ��
-    struct Position finalpos; //��ԱҪ�����λ��
+    struct Position startpos; //
+    struct Position finalpos; //
 };
 
 struct PackageInfo
 {
-    uint8_t No; //���ʱ��
+    uint8_t No; //
     struct Position pos;
-    uint8_t whetherpicked; //�����Ƿ��ѱ�ʰȡ
+    uint8_t whetherpicked; //
 };
 
 struct FloodInfo
@@ -73,10 +85,10 @@ struct ObstacleInfo
 
 enum GameStateEnum
 {
-    GameNotStart, //δ��ʼ
-    GameGoing,    //������
-    GamePause,    //��ͣ��
-    GameOver      //�ѽ���
+    GameNotStart, //
+    GameGoing,    //
+    GamePause,    //
+    GameOver      //
 };
 
 #endif
