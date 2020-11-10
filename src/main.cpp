@@ -4,6 +4,7 @@
 #include "AngleControl.h"
 #include "JY61.h"
 #include "MotorControl.h"
+#include "IRReceiver.h"
 
 #define INTERRUPT_INTERVAL 50
 
@@ -16,6 +17,7 @@ TimerInterrupt motorTimer(INTERRUPT_INTERVAL, [] {
 
 TimerInterrupt angleTimer(10, [] {
 	// Serial.println("mills : " + String(millis()));
+	IRReceiver::updateValue();
 	JY61::read();
 	AngleControl::Compute();
 	Motor::updatePWM();
@@ -31,4 +33,3 @@ void setup()
 void loop()
 {
 }
-
