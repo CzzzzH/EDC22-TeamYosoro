@@ -36,6 +36,8 @@ void StateMachine::init()
     // Other Initialization
     outsideTarget.push({16, 240});
     outsideTarget.push({72, 240});
+
+    // A Simple Path
     insideTarget.push(20);
     insideTarget.push(19);
     insideTarget.push(13);
@@ -44,10 +46,19 @@ void StateMachine::init()
     insideTarget.push(9);
     insideTarget.push(8);
     insideTarget.push(9);
-    //
     insideTarget.push(14);
     insideTarget.push(28);
     insideTarget.push(32);
+
+    // Test big turn only
+    // insideTarget.push(26);
+    // insideTarget.push(27);
+    // insideTarget.push(26);
+    // insideTarget.push(27);
+    // insideTarget.push(26);
+    // insideTarget.push(27);
+    // insideTarget.push(26);
+
     nowMission = SEARCH_MAZE;
     nowMazeIndex = 26;
     lastMazeIndex = 32;
@@ -129,23 +140,24 @@ void StateMachine::updateAction(Information &info)
     }
     else if (nowMission == SEARCH_MAZE)
     {   
-        CrossroadAction action = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
-        if (IRReceiver::atCrossroad(action.rotateAngle) && !insideTarget.empty())
+        CrossroadAction crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
+        nowAction = GO_AHEAD;
+        if (IRReceiver::atCrossroad(crossroadAction.rotateAngle) && !insideTarget.empty())
         {
-            AngleControl::target += action.rotateAngle;
-            if (action.rotateAngle != 0)
+            AngleControl::target += crossroadAction.rotateAngle;
+            if (crossroadAction.rotateAngle != 0)
             {
+                if (crossroadAction.rotateAngle == 180) nowAction = BIG_TURN;
+                else nowAction = SMALL_TURN;
                 AngleControl::target -= offset;
-                Motor::targetSpeed = 0;
                 offset = 0;
             }
             lastMazeIndex = nowMazeIndex;
-            nowMazeIndex = action.nextPosition;
+            nowMazeIndex = crossroadAction.nextPosition;
             if (nowMazeIndex == insideTarget.front()) insideTarget.pop();
         }
         else if (AngleControl::getAngleDist() < 15)
         {
-            Motor::targetSpeed = 30;
             offset += IRReceiver::angleOffset();
             AngleControl::target += IRReceiver::angleOffset();
         }

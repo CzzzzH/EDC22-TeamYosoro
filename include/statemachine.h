@@ -13,6 +13,7 @@ private:
 public:
     // Attributes
     Mission nowMission;
+    Action nowAction;
     int lastMazeIndex, nowMazeIndex;
     int counter = 0;
     int offset = 0;
