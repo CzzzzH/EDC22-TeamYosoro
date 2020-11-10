@@ -7,8 +7,6 @@
 #include <stack>
 #include <algorithm>
 #include "information.h"
-#define MAZE_SIZE 6
-#define OBSATCLE 8
 
 // image axis
 //            Start

@@ -22,10 +22,10 @@ void Information::updateInfo()
         {
             uint8_t zigbeeBuffer = Serial3.read();
             // Serial.print(zigbeeBuffer);
-            message_index = receiveIndexAdd(message_index, 1); //一个简单的索引数增加函数
+            message_index = receiveIndexAdd(message_index, 1); 
             zigbeeMessage[message_index] = zigbeeBuffer;
 
-            if (zigbeeMessage[receiveIndexMinus(message_index, 2)] == 0x0D && zigbeeMessage[receiveIndexMinus(message_index, 1)] == 0x0A) //一串信息的结尾
+            if (zigbeeMessage[receiveIndexMinus(message_index, 2)] == 0x0D && zigbeeMessage[receiveIndexMinus(message_index, 1)] == 0x0A) //一锟斤拷锟斤拷息锟侥斤拷尾
             {
                 // Serial.println("Message Complete!");
                 // Serial.println("*** message_head: " + String(message_head));
@@ -365,4 +365,11 @@ int Information::receiveIndexAdd(int index_h, int num)
     {
         return index_h + num - ZIGBEE_MESSAGE_LENTH;
     }
+}
+
+int Information::positonTransform(Position &pos)
+{
+    int xOffset = (pos.X - 37)/30 + 1;
+    int yOffset = (pos.Y - 37)/30;
+    return (xOffset + yOffset * MAZE_SIZE);
 }
