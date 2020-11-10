@@ -30,5 +30,5 @@ void setup()
 
 void loop()
 {
-	sm.updateInfo(Information::getInstance());
 }
+

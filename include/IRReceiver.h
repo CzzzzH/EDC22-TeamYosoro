@@ -17,10 +17,11 @@ public:
     static int leftValue[SIDE_IR_COUNT];
     static int midValue[MID_IR_COUNT];
     static int rightValue[SIDE_IR_COUNT];
+    static int midWeight[MID_IR_COUNT];
     static int leftPointer, rightPointer;
     static bool atCross;
     static void initialize();
     static void updateValue();
-    static bool atCrossroad();
-    static double angleOffset();
+    static bool atCrossroad(int angle);
+    static int angleOffset();
 };

@@ -26,17 +26,19 @@ double AngleControl::getOutput()
 
 double AngleControl::getAngleDist()
 {
-    return fabs(JY61::Angle[2] - target);
+    return angleDist;
 }
 
 bool AngleControl::Compute()
 {
     // Serial.println("JY61::Angle[2]   :   " + String(JY61::Angle[2]));
     JY61::Angle[2] += floor((target + 180 - JY61::Angle[2]) / 360.0) * 360;
+    angleDist = fabs(JY61::Angle[2] - target);
     return pid.Compute();
 }
 
 double AngleControl::output;
 double AngleControl::target;
 double AngleControl::initAngle;
+double AngleControl::angleDist;
 PID AngleControl::pid = PID(&JY61::Angle[2], &output, &target, 1, 0.00000000001, 0.000000001, DIRECT);

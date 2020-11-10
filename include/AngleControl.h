@@ -8,6 +8,7 @@ class AngleControl
 private:
 	static double output;
 	static double initAngle;
+    static double angleDist;
 	static PID pid;
 
 public:
