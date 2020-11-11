@@ -1,5 +1,6 @@
 #include "IRReceiver.h"
 #include "MotorControl.h"
+#include "statemachine.h"
 
 void IRReceiver::initialize()
 {
@@ -49,8 +50,23 @@ bool IRReceiver::atCrossroad(int angle)
         }
         for (int i = 0; i < MID_IR_COUNT; ++i)
             midCount += (midValue[i] == MID_DETECT);
-        if (midCount >= 3 && (leftCount + rightCount) < 6)
-            atCross = true;
+        if (StateMachine::getInstance().motorDirection == 1)
+        {
+            if (midCount >= 3 && (leftCount + rightCount) < 5)
+            {
+                atCross = true;
+                Motor::targetSpeed = 30;
+            }
+        }
+        else if (StateMachine::getInstance().motorDirection == -1)
+        {
+            if ((leftValue[2] == SIDE_DETECT || rightValue[2] == SIDE_DETECT) 
+                && (leftCount + rightCount) < 5)
+            {
+                atCross = true;
+                Motor::targetSpeed = 30;
+            }
+        }
     }
     return false;
 }

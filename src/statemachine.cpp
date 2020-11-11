@@ -23,10 +23,13 @@ StateMachine &StateMachine::getInstance()
 }
 
 void StateMachine::init()
-{
+{   
     // Debug Mode
     JY61::isDebug = false;
     Motor::isDebug = false;
+
+    // Set Half
+    nowHalf = SECOND_HALF;
 
     // Initialize Serial
     Serial.begin(9600);
@@ -38,17 +41,17 @@ void StateMachine::init()
     outsideTarget.push({72, 240});
 
     // A Simple Path
-    insideTarget.push(20);
-    insideTarget.push(19);
-    insideTarget.push(13);
-    insideTarget.push(14);
-    insideTarget.push(15);
-    insideTarget.push(9);
-    insideTarget.push(8);
-    insideTarget.push(9);
-    insideTarget.push(14);
-    insideTarget.push(28);
-    insideTarget.push(32);
+    insideTarget.push_back(20);
+    insideTarget.push_back(19);
+    insideTarget.push_back(13);
+    insideTarget.push_back(14);
+    insideTarget.push_back(15);
+    insideTarget.push_back(9);
+    insideTarget.push_back(8);
+    insideTarget.push_back(9);
+    insideTarget.push_back(14);
+    insideTarget.push_back(28);
+    insideTarget.push_back(32);
 
     // Test big turn only
     // insideTarget.push(26);
@@ -139,23 +142,28 @@ void StateMachine::updateAction(Information &info)
         }
     }
     else if (nowMission == SEARCH_MAZE)
-    {
-        CrossroadAction crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
+    {   
+        CrossroadAction crossroadAction;
+        if (motorDirection == 1)
+            crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
+        else
+            crossroadAction = Maze::getDirection(2 * nowMazeIndex - lastMazeIndex, nowMazeIndex, insideTarget.front());
         nowAction = GO_AHEAD;
         if (IRReceiver::atCrossroad(crossroadAction.rotateAngle) && !insideTarget.empty())
         {
-            AngleControl::target += crossroadAction.rotateAngle;
-            if (crossroadAction.rotateAngle != 0)
+            if (crossroadAction.rotateAngle == 180)
             {
-                if (crossroadAction.rotateAngle == 180)
-                    nowAction = BIG_TURN;
-                else
-                    nowAction = SMALL_TURN;
+                if (motorDirection == 1) motorDirection = -1;
+            }
+            else
+            {
+                motorDirection = 1;
+                AngleControl::target += crossroadAction.rotateAngle;
             }
             lastMazeIndex = nowMazeIndex;
             nowMazeIndex = crossroadAction.nextPosition;
             if (nowMazeIndex == insideTarget.front())
-                insideTarget.pop();
+                insideTarget.erase(0);
         }
     }
 }
@@ -163,7 +171,7 @@ void StateMachine::updateAction(Information &info)
 void StateMachine::updateMission(Information &info)
 {
     // TODO: update the current mission  (use updated info)
-    // Serial.println("GameState" + String(info.getGameState()));
+
     if (info.getGameState() == GameGoing && nowMission == WAIT_FOR_START)
     {
         nowMission = GO_TO_MAZE;
@@ -171,13 +179,16 @@ void StateMachine::updateMission(Information &info)
     }
     if (nowMission == WAIT_FOR_START && outsideTarget.empty())
         nowMission = SEARCH_MAZE;
+    if (nowMission == SEARCH_MAZE && insideTarget.empty())
+        nowMission = END_GAME;
 }
 
 void StateMachine::updateMotor(Information &info)
 {
     // TODO: update the motor paramters (use PID)
-    Motor::PID_compute();
-
-    if (nowMission == WAIT_FOR_START)
+    if (nowMission == WAIT_FOR_START || nowMission == END_GAME)
         Motor::targetSpeed = 0;
+    else Motor::targetSpeed = fabs(Motor::targetSpeed) * motorDirection;
+
+    Motor::PID_compute();
 }

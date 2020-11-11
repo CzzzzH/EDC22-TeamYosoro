@@ -4,8 +4,9 @@
 #define min(a,b) ((a)<(b)?(a):(b))
 #define max(a,b) ((a)>(b)?(a):(b))
 
-enum Mission {WAIT_FOR_START, GO_TO_MAZE, SEARCH_MAZE, RETURN};
-enum Action {GO_AHEAD, SMALL_TURN, BIG_TURN};
+enum Match {FIRST_HALF, SECOND_HALF};
+enum Mission {WAIT_FOR_START, GO_TO_MAZE, SEARCH_MAZE, RETURN, END_GAME};
+enum Action {GO_AHEAD, SMALL_TURN, BIG_TURN}; 
 
 struct bfsInfo
 {

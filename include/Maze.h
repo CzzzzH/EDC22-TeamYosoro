@@ -9,7 +9,7 @@
 #include "information.h"
 
 // image axis
-//            Start
+//             END
 //             | |
 // -1--2--3--4--5--6-
 //  |  |  |  |  |  |  
@@ -23,7 +23,7 @@
 //  |  |  |  |  |  |  
 // -31-32-33-34-35-36
 //    | |
-//    End
+//   START
 
 class Maze {
 private:
