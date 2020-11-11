@@ -3,8 +3,8 @@
 
 #include "util.h"
 #include "information.h"
-#include <queue>
-#include <vector>
+#include <deque>
+
 class StateMachine // The statemachine of th2e car (Singleton)
 {
 private:
@@ -21,8 +21,8 @@ public:
     int offset = 0;
     int motorDirection = 1;
     
-    std::queue<Position> outsideTarget;
-    std::vector<int> insideTarget;
+    std::deque<Position> outsideTarget;
+    std::deque<int> insideTarget;
 
     // Methods
     ~StateMachine() {}

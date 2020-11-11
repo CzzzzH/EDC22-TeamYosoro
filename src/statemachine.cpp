@@ -8,6 +8,7 @@
 #include "JY61.h"
 #include "IRReceiver.h"
 #include "Maze.h"
+#include "information.h"
 
 // Define to debug components
 // #define DEBUG_MOTOR
@@ -24,6 +25,8 @@ StateMachine &StateMachine::getInstance()
 
 void StateMachine::init()
 {   
+    // Get info
+    Information &info = Information::getInstance();
     // Debug Mode
     JY61::isDebug = false;
     Motor::isDebug = false;
@@ -37,21 +40,16 @@ void StateMachine::init()
     Serial3.begin(115200);
 
     // Other Initialization
-    outsideTarget.push({16, 240});
-    outsideTarget.push({72, 240});
+    outsideTarget.push_back({16, 240});
+    outsideTarget.push_back({72, 240});
 
     // A Simple Path
     insideTarget.push_back(20);
-    insideTarget.push_back(19);
     insideTarget.push_back(13);
-    insideTarget.push_back(14);
+    insideTarget.push_back(9);
     insideTarget.push_back(15);
-    insideTarget.push_back(9);
-    insideTarget.push_back(8);
-    insideTarget.push_back(9);
-    insideTarget.push_back(14);
-    insideTarget.push_back(28);
-    insideTarget.push_back(32);
+    insideTarget.push_back(7);
+    insideTarget.push_back(22);
 
     // Test big turn only
     // insideTarget.push(26);
@@ -62,9 +60,50 @@ void StateMachine::init()
     // insideTarget.push(27);
     // insideTarget.push(26);
 
+    info.Obstacle[0].posA.X = 32;
+    info.Obstacle[0].posA.Y = 56;
+    info.Obstacle[0].posB.X = 83;
+    info.Obstacle[0].posB.Y = 70;
+    
+    info.Obstacle[1].posA.X = 127;
+    info.Obstacle[1].posA.Y = 67;
+    info.Obstacle[1].posB.X = 127;
+    info.Obstacle[1].posB.Y = 97;
+    
+    info.Obstacle[2].posA.X = 127;
+    info.Obstacle[2].posA.Y = 187;
+    info.Obstacle[2].posB.X = 157;
+    info.Obstacle[2].posB.Y = 187;
+    
+    info.Obstacle[3].posA.X = 180;
+    info.Obstacle[3].posA.Y = 126;
+    info.Obstacle[3].posB.X = 180;
+    info.Obstacle[3].posB.Y = 220;
+    
+    info.Obstacle[4].posA.X = 157;
+    info.Obstacle[4].posA.Y = 65;
+    info.Obstacle[4].posB.X = 187;
+    info.Obstacle[4].posB.Y = 67;
+    
+    info.Obstacle[5].posA.X = 52;
+    info.Obstacle[5].posA.Y = 97;
+    info.Obstacle[5].posB.X = 82;
+    info.Obstacle[5].posB.Y = 97;
+    
+    info.Obstacle[6].posA.X = 67;
+    info.Obstacle[6].posA.Y = 127;
+    info.Obstacle[6].posB.X = 67;
+    info.Obstacle[6].posB.Y = 157;
+    
+    info.Obstacle[7].posA.X = 156;
+    info.Obstacle[7].posA.Y = 97;
+    info.Obstacle[7].posB.X = 180;
+    info.Obstacle[7].posB.Y = 97;
+
     nowMission = SEARCH_MAZE;
-    nowMazeIndex = 26;
-    lastMazeIndex = 32;
+    nowMazeIndex = 32;
+    lastMazeIndex = 38;
+    motorDirection = 1;
 
     // Initialize components
     Motor::initialize();
@@ -116,8 +155,7 @@ void StateMachine::process()
 
 void StateMachine::updateInfo()
 {
-    // TODO: update IR info
-    // IRReceiver::updateValue();
+
 }
 
 void StateMachine::updateAction(Information &info)
@@ -127,7 +165,7 @@ void StateMachine::updateAction(Information &info)
     {
         if (info.getCarpos().getDist(outsideTarget.front()) < 15)
         {
-            outsideTarget.pop();
+            outsideTarget.pop_front();
             switch (outsideTarget.size())
             {
             case 1:
@@ -148,20 +186,21 @@ void StateMachine::updateAction(Information &info)
             crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
         else
             crossroadAction = Maze::getDirection(2 * nowMazeIndex - lastMazeIndex, nowMazeIndex, insideTarget.front());
-        nowAction = GO_AHEAD;
+        // Serial.println("Rotate Angle: " + String(crossroadAction.rotateAngle));
+        // Serial.println("Now Index: " + String(nowMazeIndex));
+        // Serial.println("Next Target: " + String(crossroadAction.nextPosition));
         if (IRReceiver::atCrossroad(crossroadAction.rotateAngle) && !insideTarget.empty())
         {
             if (crossroadAction.rotateAngle == 180)
-                motorDirection ^= 1;
+                motorDirection *= -1;
             else
             {
-                motorDirection = 1;
                 AngleControl::target += crossroadAction.rotateAngle;
+                motorDirection = 1;
             }
             lastMazeIndex = nowMazeIndex;
             nowMazeIndex = crossroadAction.nextPosition;
-            if (nowMazeIndex == insideTarget.front())
-                insideTarget.erase(0);
+            if (nowMazeIndex == insideTarget.front()) insideTarget.pop_front();
         }
     }
 }
