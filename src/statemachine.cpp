@@ -152,9 +152,7 @@ void StateMachine::updateAction(Information &info)
         if (IRReceiver::atCrossroad(crossroadAction.rotateAngle) && !insideTarget.empty())
         {
             if (crossroadAction.rotateAngle == 180)
-            {
-                if (motorDirection == 1) motorDirection = -1;
-            }
+                motorDirection ^= 1;
             else
             {
                 motorDirection = 1;
