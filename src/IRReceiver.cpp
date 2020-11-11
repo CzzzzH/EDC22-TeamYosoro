@@ -14,17 +14,17 @@ void IRReceiver::initialize()
     }
     for (int i = 0; i < MID_IR_COUNT; i++)
         pinMode(MID_BEGIN + i, INPUT);
-    midWeight[0] = 1; // * 0
-    midWeight[1] = 1; // * 1
+    midWeight[0] = 1;  // * 0
+    midWeight[1] = 1;  // * 1
     midWeight[2] = -1; // * 1
     midWeight[3] = -1; // * 0
 }
 
 void IRReceiver::updateValue()
-{   
+{
     for (int i = 0; i < SIDE_IR_COUNT; ++i)
     {
-        leftValue[i] = digitalRead(LEFT_BEGIN + i); 
+        leftValue[i] = digitalRead(LEFT_BEGIN + i);
         rightValue[i] = digitalRead(RIGHT_BEGIN + i);
     }
     for (int i = 0; i < MID_IR_COUNT; ++i)
@@ -32,10 +32,11 @@ void IRReceiver::updateValue()
 }
 
 bool IRReceiver::atCrossroad(int angle)
-{   
+{
     if (atCross && (leftValue[1] == SIDE_DETECT || rightValue[1] == SIDE_DETECT))
     {
         atCross = false;
+        Motor::targetSpeed = 30;
         return true;
     }
     else if (!atCross)
@@ -53,24 +54,36 @@ bool IRReceiver::atCrossroad(int angle)
 
         if (StateMachine::getInstance().motorDirection == 1)
         {
+            leftBack = false;
+            rightBack = false;
             if (midCount >= 3 && (leftCount + rightCount) < 6)
             {
                 atCross = true;
-                if (angle == 90 || angle == -90) Motor::targetSpeed = 30;
-                else Motor::targetSpeed = 30;
+                if (angle == 90 || angle == -90)
+                    Motor::targetSpeed = 30;
+                else
+                    Motor::targetSpeed = 30;
             }
         }
         else if (StateMachine::getInstance().motorDirection == -1)
         {
-            if (leftValue[2] == SIDE_DETECT) leftBack = true;
-            if (rightValue[2] == SIDE_DETECT) rightBack = true;
-            if (leftBack && rightBack && (leftCount + rightCount) < 6) 
+            if (leftValue[2] == SIDE_DETECT)
+                leftBack = true;
+            if (rightValue[2] == SIDE_DETECT)
+                rightBack = true;
+            if (midCount >= 3 && leftBack && rightBack && (leftCount + rightCount) < 6)
             {
                 atCross = true;
                 leftBack = false;
                 rightBack = false;
-                if (angle == 90 || angle == -90) Motor::targetSpeed = 30;
-                else Motor::targetSpeed = 30;
+                if (angle == 90 || angle == -90)
+                {
+                    Motor::targetSpeed = 30;
+                    StateMachine::getInstance().motorDirection = 1;
+                    StateMachine::getInstance().lastMazeIndex = 2 * StateMachine::getInstance().nowMazeIndex - StateMachine::getInstance().lastMazeIndex;
+                }
+                else
+                    Motor::targetSpeed = 30;
             }
         }
     }
