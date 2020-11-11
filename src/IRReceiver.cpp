@@ -57,15 +57,20 @@ bool IRReceiver::atCrossroad(int angle)
             {
                 atCross = true;
                 if (angle == 90 || angle == -90) Motor::targetSpeed = 30;
+                else Motor::targetSpeed = 30;
             }
         }
         else if (StateMachine::getInstance().motorDirection == -1)
         {
-            if ((leftValue[2] == SIDE_DETECT || rightValue[2] == SIDE_DETECT) 
-                && (leftCount + rightCount) < 6)
+            if (leftValue[2] == SIDE_DETECT) leftBack = true;
+            if (rightValue[2] == SIDE_DETECT) rightBack = true;
+            if (leftBack && rightBack && (leftCount + rightCount) < 6) 
             {
                 atCross = true;
+                leftBack = false;
+                rightBack = false;
                 if (angle == 90 || angle == -90) Motor::targetSpeed = 30;
+                else Motor::targetSpeed = 30;
             }
         }
     }
@@ -85,3 +90,5 @@ int IRReceiver::rightValue[SIDE_IR_COUNT];
 int IRReceiver::midValue[MID_IR_COUNT];
 int IRReceiver::midWeight[MID_IR_COUNT];
 bool IRReceiver::atCross = false;
+bool IRReceiver::leftBack = false;
+bool IRReceiver::rightBack = false;

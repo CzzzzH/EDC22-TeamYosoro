@@ -50,6 +50,7 @@ void StateMachine::init()
     insideTarget.push_back(15);
     insideTarget.push_back(7);
     insideTarget.push_back(22);
+    insideTarget.push_back(32);
 
     // Test big turn only
     // insideTarget.push(26);
@@ -181,11 +182,7 @@ void StateMachine::updateAction(Information &info)
     }
     else if (nowMission == SEARCH_MAZE)
     {   
-        CrossroadAction crossroadAction;
-        if (motorDirection == 1)
-            crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
-        else
-            crossroadAction = Maze::getDirection(2 * nowMazeIndex - lastMazeIndex, nowMazeIndex, insideTarget.front());
+        CrossroadAction crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
         // Serial.println("Rotate Angle: " + String(crossroadAction.rotateAngle));
         // Serial.println("Now Index: " + String(nowMazeIndex));
         // Serial.println("Next Target: " + String(crossroadAction.nextPosition));
@@ -195,8 +192,9 @@ void StateMachine::updateAction(Information &info)
                 motorDirection *= -1;
             else
             {
-                AngleControl::target += crossroadAction.rotateAngle;
-                motorDirection = 1;
+                AngleControl::target += motorDirection * crossroadAction.rotateAngle;
+                if (crossroadAction.rotateAngle != 0)
+                    motorDirection = 1;
             }
             lastMazeIndex = nowMazeIndex;
             nowMazeIndex = crossroadAction.nextPosition;
