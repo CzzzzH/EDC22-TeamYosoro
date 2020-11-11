@@ -24,7 +24,7 @@ StateMachine &StateMachine::getInstance()
 }
 
 void StateMachine::init()
-{   
+{
     // Get info
     Information &info = Information::getInstance();
     // Debug Mode
@@ -44,58 +44,58 @@ void StateMachine::init()
     outsideTarget.push_back({72, 240});
 
     // A Simple Path
-    insideTarget.push_back(20);
-    insideTarget.push_back(13);
-    insideTarget.push_back(9);
-    insideTarget.push_back(15);
-    insideTarget.push_back(7);
-    insideTarget.push_back(22);
-    insideTarget.push_back(32);
+    // insideTarget.push_back(20);
+    // insideTarget.push_back(13);
+    // insideTarget.push_back(9);
+    // insideTarget.push_back(15);
+    // insideTarget.push_back(7);
+    // insideTarget.push_back(22);
+    // insideTarget.push_back(32);
 
     // Test big turn only
-    // insideTarget.push(26);
-    // insideTarget.push(27);
-    // insideTarget.push(26);
-    // insideTarget.push(27);
-    // insideTarget.push(26);
-    // insideTarget.push(27);
-    // insideTarget.push(26);
+    insideTarget.push_back(26);
+    insideTarget.push_back(27);
+    insideTarget.push_back(26);
+    insideTarget.push_back(27);
+    insideTarget.push_back(26);
+    insideTarget.push_back(27);
+    insideTarget.push_back(26);
 
     info.Obstacle[0].posA.X = 32;
     info.Obstacle[0].posA.Y = 56;
     info.Obstacle[0].posB.X = 83;
     info.Obstacle[0].posB.Y = 70;
-    
+
     info.Obstacle[1].posA.X = 127;
     info.Obstacle[1].posA.Y = 67;
     info.Obstacle[1].posB.X = 127;
     info.Obstacle[1].posB.Y = 97;
-    
+
     info.Obstacle[2].posA.X = 127;
     info.Obstacle[2].posA.Y = 187;
     info.Obstacle[2].posB.X = 157;
     info.Obstacle[2].posB.Y = 187;
-    
+
     info.Obstacle[3].posA.X = 180;
     info.Obstacle[3].posA.Y = 126;
     info.Obstacle[3].posB.X = 180;
     info.Obstacle[3].posB.Y = 220;
-    
+
     info.Obstacle[4].posA.X = 157;
     info.Obstacle[4].posA.Y = 65;
     info.Obstacle[4].posB.X = 187;
     info.Obstacle[4].posB.Y = 67;
-    
+
     info.Obstacle[5].posA.X = 52;
     info.Obstacle[5].posA.Y = 97;
     info.Obstacle[5].posB.X = 82;
     info.Obstacle[5].posB.Y = 97;
-    
+
     info.Obstacle[6].posA.X = 67;
     info.Obstacle[6].posA.Y = 127;
     info.Obstacle[6].posB.X = 67;
     info.Obstacle[6].posB.Y = 157;
-    
+
     info.Obstacle[7].posA.X = 156;
     info.Obstacle[7].posA.Y = 97;
     info.Obstacle[7].posB.X = 180;
@@ -156,7 +156,6 @@ void StateMachine::process()
 
 void StateMachine::updateInfo()
 {
-
 }
 
 void StateMachine::updateAction(Information &info)
@@ -181,7 +180,8 @@ void StateMachine::updateAction(Information &info)
         }
     }
     else if (nowMission == SEARCH_MAZE)
-    {   
+    {
+        
         CrossroadAction crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
         // Serial.println("Rotate Angle: " + String(crossroadAction.rotateAngle));
         // Serial.println("Now Index: " + String(nowMazeIndex));
@@ -192,13 +192,14 @@ void StateMachine::updateAction(Information &info)
                 motorDirection *= -1;
             else
             {
-                AngleControl::target += motorDirection * crossroadAction.rotateAngle;
-                if (crossroadAction.rotateAngle != 0)
-                    motorDirection = 1;
+                AngleControl::target += crossroadAction.rotateAngle;
+                // if (crossroadAction.rotateAngle != 0)
+                //     motorDirection = 1;
             }
             lastMazeIndex = nowMazeIndex;
             nowMazeIndex = crossroadAction.nextPosition;
-            if (nowMazeIndex == insideTarget.front()) insideTarget.pop_front();
+            if (nowMazeIndex == insideTarget.front())
+                insideTarget.pop_front();
         }
     }
 }
@@ -210,7 +211,7 @@ void StateMachine::updateMission(Information &info)
     if (info.getGameState() == GameGoing && nowMission == WAIT_FOR_START)
     {
         nowMission = GO_TO_MAZE;
-        Motor::targetSpeed = 30;
+        Motor::targetSpeed = 45;
     }
     if (nowMission == WAIT_FOR_START && outsideTarget.empty())
         nowMission = SEARCH_MAZE;
@@ -223,7 +224,8 @@ void StateMachine::updateMotor(Information &info)
     // TODO: update the motor paramters (use PID)
     if (nowMission == WAIT_FOR_START || nowMission == END_GAME)
         Motor::targetSpeed = 0;
-    else Motor::targetSpeed = fabs(Motor::targetSpeed) * motorDirection;
+    else
+        Motor::targetSpeed = fabs(Motor::targetSpeed) * motorDirection;
 
     Motor::PID_compute();
 }
