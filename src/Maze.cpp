@@ -9,6 +9,21 @@ void Maze::addEdge(int u, int v, bool dir = 1)
         adjList[v].push_back(u);
 }
 
+// void Maze::initialize(Information &info)
+// {
+//     //adding the edges in the Maze
+//     for (int i = 0;i <= MAZE_SIZE;i++)
+//     {
+//         for(int j = 1;j <= MAZE_SIZE;j++)
+//         {
+//             if(j + 1 <= MAZE_SIZE)
+//                 Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + 1);
+//             if(i < MAZE_SIZE - 1)
+//                 Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + MAZE_SIZE);
+//         }
+//     }
+// }
+
 void Maze::initialize(Information &info)
 {
     std::vector<barrierEdge> barrier;
