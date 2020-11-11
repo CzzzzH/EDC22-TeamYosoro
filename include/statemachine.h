@@ -4,6 +4,7 @@
 #include "util.h"
 #include "information.h"
 #include <queue>
+#include <vector>
 class StateMachine // The statemachine of th2e car (Singleton)
 {
 private:
@@ -12,14 +13,16 @@ private:
 
 public:
     // Attributes
+    Match nowHalf;
     Mission nowMission;
     Action nowAction;
     int lastMazeIndex, nowMazeIndex;
     int counter = 0;
     int offset = 0;
+    int motorDirection = 1;
     
     std::queue<Position> outsideTarget;
-    std::queue<int> insideTarget;
+    std::vector<int> insideTarget;
 
     // Methods
     ~StateMachine() {}
