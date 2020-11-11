@@ -14,6 +14,7 @@ class IRReceiver
 {
 public:
 
+    static bool leftBack, rightBack;
     static int leftValue[SIDE_IR_COUNT];
     static int midValue[MID_IR_COUNT];
     static int rightValue[SIDE_IR_COUNT];
