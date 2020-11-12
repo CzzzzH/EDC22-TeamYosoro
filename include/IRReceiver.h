@@ -21,6 +21,7 @@ public:
     static int midWeight[MID_IR_COUNT];
     static int leftPointer, rightPointer;
     static bool atCross;
+    static bool backFlag;
     static void initialize();
     static void updateValue();
     static bool atCrossroad(int angle);
