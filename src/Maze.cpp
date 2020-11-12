@@ -77,7 +77,7 @@ void Maze::initialize(Information &info)
     }
 }
 
-bfsInfo Maze::getWay(int now, int target)
+int Maze::getWay(int now, std::deque<int> &target)
 {
     int Stack[MAZE_SIZE * MAZE_SIZE];
     memset(Stack, 0, sizeof(Stack));
@@ -88,47 +88,7 @@ bfsInfo Maze::getWay(int now, int target)
 
     q.push(now);
     visited[now] = true;
-
-    while (!q.empty())
-    {
-        int node = q.front();
-        q.pop();
-        for (auto neighbours : adjList[node])
-        {
-            if (!visited[neighbours])
-            {
-                q.push(neighbours);
-                visited[neighbours] = true;
-                Stack[neighbours] = node;
-                if(neighbours == target)
-                {
-                    Break = true;
-                    break;
-                }
-            }
-        }
-        if(Break)
-            break;
-    }
-    //回溯
-    int t = Stack[target];
-    history.push_back(target);
-    while(t != 0)
-    {
-        history.push_back(t);
-        t = Stack[t];
-    }
-    history.pop_back();
-    int index1 = history.back();
-    return {index1, int(history.size())};
-}
-
-void Maze::getDistance(int now, std::deque<int> &target)
-{
-    bool Break = false;
     int layer = 0;
-    std::queue<int> q;
-    std::map<int, bool> visited;
     
     std::deque<int>::iterator it = std::find(target.begin(), target.end(), now);
     if(it != target.end())
@@ -151,6 +111,7 @@ void Maze::getDistance(int now, std::deque<int> &target)
             {
                 q.push(neighbours);
                 visited[neighbours] = true;
+                Stack[neighbours] = node;
                 std::deque<int>::iterator it = std::find(target.begin(), target.end(), neighbours);
                 if(it != target.end())
                 {
@@ -162,11 +123,22 @@ void Maze::getDistance(int now, std::deque<int> &target)
         if(Break)
             break;
     }
+    //回溯
+    int t = Stack[target.front()];
+    history.push_back(target.front());
+    while(t != 0)
+    {
+        history.push_back(t);
+        t = Stack[t];
+    }
+    history.pop_back();
+    int index1 = history.back();
+    return index1;
 }
 
-CrossroadAction Maze::getDirection(int last, int now, int target)
+CrossroadAction Maze::getDirection(int last, int now, std::deque<int> &target)
 {
-    int index1 = getWay(now, target).nextNode;
+    int index1 = getWay(now, target);
     int rotate = 0;
     int diff1 = now - last;
     int diff2 = index1 - now;

@@ -28,12 +28,11 @@
 class Maze {
 private:
     static std::map <int, std::list<int>> adjList;
-    static bfsInfo getWay(int now, int target);
+    static int getWay(int now, std::deque<int> &target);
 public:
     static void initialize(Information &info);
     static void addEdge(int u, int v, bool dir);
-    static void getDistance(int now, std::deque<int> &target);
-    static CrossroadAction getDirection(int last, int now, int target);
+    static CrossroadAction getDirection(int last, int now, std::deque<int> &target);
 };
 
 #endif //maze_H
