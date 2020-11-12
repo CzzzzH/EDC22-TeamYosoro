@@ -32,7 +32,7 @@ private:
 public:
     static void initialize(Information &info);
     static void addEdge(int u, int v, bool dir);
-    static int getDistance(int now, int target);
+    static void getDistance(int now, std::deque<int> &target);
     static CrossroadAction getDirection(int last, int now, int target);
 };
 
