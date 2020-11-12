@@ -123,9 +123,45 @@ bfsInfo Maze::getWay(int now, int target)
     return {index1, int(history.size())};
 }
 
-int Maze::getDistance(int now, int target)
+void Maze::getDistance(int now, std::deque<int> &target)
 {
-    return getWay(now, target).dist;
+    bool Break = false;
+    int layer = 0;
+    std::queue<int> q;
+    std::map<int, bool> visited;
+    
+    std::deque<int>::iterator it = std::find(target.begin(), target.end(), now);
+    if(it != target.end())
+    {
+        std::swap(target[std::distance(target.begin(), it)], target.back());
+        target.pop_back();
+    }
+
+    q.push(now);
+    visited[now] = true;
+
+    while (!q.empty())
+    {
+        int node = q.front();
+        q.pop();
+        layer++;
+        for (auto neighbours : adjList[node])
+        {
+            if (!visited[neighbours])
+            {
+                q.push(neighbours);
+                visited[neighbours] = true;
+                std::deque<int>::iterator it = std::find(target.begin(), target.end(), neighbours);
+                if(it != target.end())
+                {
+                    std::swap(target[std::distance(target.begin(), it)], target.front());
+                    Break = true;
+                }
+            }
+        }
+        if(Break)
+            break;
+    }
 }
 
 CrossroadAction Maze::getDirection(int last, int now, int target)
