@@ -44,13 +44,12 @@ void StateMachine::init()
     outsideTarget.push_back({72, 240});
 
     // A Simple Path
-    insideTarget.push_back(20);
-    insideTarget.push_back(13);
-    insideTarget.push_back(9);
+    insideTarget.push_back(26);
+    insideTarget.push_back(27);
+    insideTarget.push_back(21);
     insideTarget.push_back(15);
     insideTarget.push_back(7);
-    insideTarget.push_back(21);
-    insideTarget.push_back(32);
+    insideTarget.push_back(13);
 
     // Test big turn only
     // for (int i = 0; i < 10; ++i)
@@ -181,8 +180,7 @@ void StateMachine::updateAction(Information &info)
     }
     else if (nowMission == SEARCH_MAZE)
     {
-        
-        CrossroadAction crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget.front());
+        CrossroadAction crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
         // Serial.println("Rotate Angle: " + String(crossroadAction.rotateAngle));
         // Serial.println("Now Index: " + String(nowMazeIndex));
         // Serial.println("Next Target: " + String(crossroadAction.nextPosition));

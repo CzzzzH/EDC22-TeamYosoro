@@ -14,10 +14,13 @@ void IRReceiver::initialize()
     }
     for (int i = 0; i < MID_IR_COUNT; i++)
         pinMode(MID_BEGIN + i, INPUT);
-    midWeight[0] = 1;  // * 0
-    midWeight[1] = 1;  // * 1
-    midWeight[2] = -1; // * 1
-    midWeight[3] = -1; // * 0
+
+    midWeight[0] = 1.5;  // * 0
+    midWeight[1] = 0.7;  // * 0 
+    midWeight[2] = 0.3; // * 1
+    midWeight[3] = -0.3; // * 1
+    midWeight[4] = -0.7; // * 0
+    midWeight[5] = -1.5; // * 0
 }
 
 void IRReceiver::updateValue()
@@ -49,7 +52,7 @@ bool IRReceiver::atCrossroad(int angle)
 
         if (StateMachine::getInstance().motorDirection == 1)
         {
-            if (midCount >= 3)
+            if (midCount >= 4)
             {
                 atCross = true;
                 if (angle == 90 || angle == -90)
@@ -60,7 +63,7 @@ bool IRReceiver::atCrossroad(int angle)
         }
         else if (StateMachine::getInstance().motorDirection == -1)
         {   
-            if (midCount >= 3)
+            if (midCount >= 4)
             {
                 atCross = true;
                 if (backFlag)
@@ -76,19 +79,17 @@ bool IRReceiver::atCrossroad(int angle)
     return false;
 }
 
-int IRReceiver::angleOffset()
+double IRReceiver::angleOffset()
 {
     int offset = 0;
     for (int i = 0; i < MID_IR_COUNT; ++i)
         offset += midWeight[i] * (midValue[i] == MID_DETECT);
-    // if (StateMachine::getInstance().motorDirection == -1)
-    //     offset = 0;
     return offset;
 }
 
 int IRReceiver::leftValue[SIDE_IR_COUNT];
 int IRReceiver::rightValue[SIDE_IR_COUNT];
 int IRReceiver::midValue[MID_IR_COUNT];
-int IRReceiver::midWeight[MID_IR_COUNT];
+double IRReceiver::midWeight[MID_IR_COUNT];
 bool IRReceiver::atCross = false;
 bool IRReceiver::backFlag = true;
