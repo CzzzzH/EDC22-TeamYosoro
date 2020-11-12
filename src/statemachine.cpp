@@ -44,22 +44,22 @@ void StateMachine::init()
     outsideTarget.push_back({72, 240});
 
     // A Simple Path
-    // insideTarget.push_back(20);
-    // insideTarget.push_back(13);
-    // insideTarget.push_back(9);
-    // insideTarget.push_back(15);
-    // insideTarget.push_back(7);
-    // insideTarget.push_back(22);
-    // insideTarget.push_back(32);
+    insideTarget.push_back(20);
+    insideTarget.push_back(13);
+    insideTarget.push_back(9);
+    insideTarget.push_back(15);
+    insideTarget.push_back(7);
+    insideTarget.push_back(21);
+    insideTarget.push_back(32);
 
     // Test big turn only
-    insideTarget.push_back(26);
-    insideTarget.push_back(27);
-    insideTarget.push_back(26);
-    insideTarget.push_back(27);
-    insideTarget.push_back(26);
-    insideTarget.push_back(27);
-    insideTarget.push_back(26);
+    // for (int i = 0; i < 10; ++i)
+    // {
+    //     insideTarget.push_back(8);
+    //     insideTarget.push_back(9);
+    //     insideTarget.push_back(15);
+    //     insideTarget.push_back(14);
+    // }
 
     info.Obstacle[0].posA.X = 32;
     info.Obstacle[0].posA.Y = 56;
@@ -189,13 +189,11 @@ void StateMachine::updateAction(Information &info)
         if (IRReceiver::atCrossroad(crossroadAction.rotateAngle) && !insideTarget.empty())
         {
             if (crossroadAction.rotateAngle == 180)
-                motorDirection *= -1;
-            else
             {
-                AngleControl::target += crossroadAction.rotateAngle;
-                // if (crossroadAction.rotateAngle != 0)
-                //     motorDirection = 1;
+                motorDirection = -motorDirection;
+                if (motorDirection == -1) IRReceiver::backFlag = false;
             }
+            else AngleControl::target += crossroadAction.rotateAngle;
             lastMazeIndex = nowMazeIndex;
             nowMazeIndex = crossroadAction.nextPosition;
             if (nowMazeIndex == insideTarget.front())

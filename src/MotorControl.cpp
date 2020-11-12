@@ -6,6 +6,7 @@
 #include <string.h>
 #include <string>
 #include "IRReceiver.h"
+#include "statemachine.h"
 
 void encoder::initialize()
 {
@@ -57,8 +58,8 @@ void Motor::initialize()
 
 void Motor::setPWM(int pwm, bool isRight)
 {
-    pwm = std::min(pwm, 255);
-    pwm = std::max(pwm, -255);
+    pwm = min(pwm, 255);
+    pwm = max(pwm, -255);
     if (isDebug)
     {
         Serial.print(String("setting ") + (isRight ? "right" : "left") + String(" pwm : "));
@@ -96,7 +97,7 @@ void Motor::PID_compute()
 
 double diffVelocity(const double angle)
 {
-    double result_angle = 3 * angle + pow(angle / 14, 3);
+    double result_angle = 4.5 * angle + pow(angle / 14, 3);
     return result_angle;
 }
 
@@ -104,8 +105,8 @@ void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
     double diff_velocity_in = AngleControl::getOutput() + (fabs(AngleControl::getOutput()) < 10 ? 20 : 0) * IRReceiver::angleOffset();
-    if (targetSpeed < 0)
-        diff_velocity_in = -diff_velocity_in;
+    // if (StateMachine::getInstance().motorDirection == -1)
+    //     diff_velocity_in = -diff_velocity_in;
     setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(diff_velocity_in), true);
     setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(-diff_velocity_in), false);
 }

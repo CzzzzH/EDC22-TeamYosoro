@@ -29,6 +29,8 @@ void IRReceiver::updateValue()
     }
     for (int i = 0; i < MID_IR_COUNT; ++i)
         midValue[i] = digitalRead(MID_BEGIN + i);
+    // if (leftValue[2] == SIDE_DETECT) leftBack = true;
+    // if (rightValue[2] == SIDE_DETECT) rightBack = true;    
 }
 
 bool IRReceiver::atCrossroad(int angle)
@@ -37,26 +39,17 @@ bool IRReceiver::atCrossroad(int angle)
     {
         atCross = false;
         Motor::targetSpeed = 30;
-        return true;
+        return StateMachine::getInstance().motorDirection == 1;
     }
     else if (!atCross)
     {
         int midCount = 0;
-        int leftCount = 0;
-        int rightCount = 0;
-        for (int i = 0; i < SIDE_IR_COUNT; ++i)
-        {
-            leftCount += (leftValue[i] == SIDE_DETECT);
-            rightCount += (rightValue[i] == SIDE_DETECT);
-        }
         for (int i = 0; i < MID_IR_COUNT; ++i)
             midCount += (midValue[i] == MID_DETECT);
 
         if (StateMachine::getInstance().motorDirection == 1)
         {
-            leftBack = false;
-            rightBack = false;
-            if (midCount >= 3 && (leftCount + rightCount) < 6)
+            if (midCount >= 3)
             {
                 atCross = true;
                 if (angle == 90 || angle == -90)
@@ -66,24 +59,17 @@ bool IRReceiver::atCrossroad(int angle)
             }
         }
         else if (StateMachine::getInstance().motorDirection == -1)
-        {
-            if (leftValue[2] == SIDE_DETECT)
-                leftBack = true;
-            if (rightValue[2] == SIDE_DETECT)
-                rightBack = true;
-            if (midCount >= 3 && leftBack && rightBack && (leftCount + rightCount) < 6)
+        {   
+            if (midCount >= 3)
             {
                 atCross = true;
-                leftBack = false;
-                rightBack = false;
-                if (angle == 90 || angle == -90)
+                if (backFlag)
                 {
                     Motor::targetSpeed = 30;
                     StateMachine::getInstance().motorDirection = 1;
                     StateMachine::getInstance().lastMazeIndex = 2 * StateMachine::getInstance().nowMazeIndex - StateMachine::getInstance().lastMazeIndex;
                 }
-                else
-                    Motor::targetSpeed = 30;
+                else backFlag = true;
             }
         }
     }
@@ -95,6 +81,8 @@ int IRReceiver::angleOffset()
     int offset = 0;
     for (int i = 0; i < MID_IR_COUNT; ++i)
         offset += midWeight[i] * (midValue[i] == MID_DETECT);
+    // if (StateMachine::getInstance().motorDirection == -1)
+    //     offset = 0;
     return offset;
 }
 
@@ -103,5 +91,4 @@ int IRReceiver::rightValue[SIDE_IR_COUNT];
 int IRReceiver::midValue[MID_IR_COUNT];
 int IRReceiver::midWeight[MID_IR_COUNT];
 bool IRReceiver::atCross = false;
-bool IRReceiver::leftBack = false;
-bool IRReceiver::rightBack = false;
+bool IRReceiver::backFlag = true;

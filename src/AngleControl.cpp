@@ -12,7 +12,7 @@ void AngleControl::initialize()
     pid.SetOutputLimits(-100, 100);
 
     JY61::read();
-    delay(100);
+    delay(500);
     JY61::read();
 
     initAngle = JY61::Angle[2];
