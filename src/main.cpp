@@ -28,9 +28,13 @@ StateMachine &sm = StateMachine::getInstance();
 void setup()
 {
 	sm.init();
+	// Motor::initialize();
 }
 
 void loop()
 {
     sm.updateInfo();
+	// Motor::setPWM(100,true);
+	// Motor::setPWM(100,false);
+	// Motor::targetSpeed = 30;
 }

@@ -27,8 +27,8 @@ void encoder::Reset()
     leftEnc.write(0);
 }
 
-const pin_2 encoder::left_pin = {21, 20};
-const pin_2 encoder::right_pin = {19, 18};
+const pin_2 encoder::left_pin = {19, 18};
+const pin_2 encoder::right_pin = {21, 20};
 decltype(encoder::counter) encoder::counter;
 
 Encoder encoder::rightEnc(encoder::right_pin.A, encoder::right_pin.B);
@@ -87,8 +87,9 @@ void Motor::PID_compute()
     encoder::Read();
     // Serial.println("Left encoder : " + String(encoder::counter.left));
     // Serial.println("right encoder : " + String(encoder::counter.right));
+    // Serial.println("mills : "+String(millis()));
     leftPID.Compute();
-    // rightPID.Compute();
+    rightPID.Compute();
     // Serial.print("Left Motor Counter: " + String(encoder::counter.left) + ";\t");
     // Serial.print("Right Motor Counter: " + String(encoder::counter.right) + ";\t");
     // Serial.print("motor left output: " + String(leftOutput) + ";\t");
@@ -108,6 +109,9 @@ void Motor::updatePWM()
     double diff_velocity_in = AngleControl::getOutput() + (fabs(AngleControl::getOutput()) < 10 ? 20 : 0) * IRReceiver::angleOffset();
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
+    // Serial.println(targetSpeed);
+    // Serial.println("Diff velocity in : "+ String(diff_velocity_in));
+    // Serial.println("left output : "+ String(leftOutput));
     setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(diff_velocity_in), true);
     setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(-diff_velocity_in), false);
 }

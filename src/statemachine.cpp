@@ -54,7 +54,7 @@ void StateMachine::init()
     if (info.getCartask() == 0) nowHalf = FIRST_HALF;
     else nowHalf = SECOND_HALF;
 
-    // Maze::initialize(Information::getInstance());
+    Maze::initialize(Information::getInstance());
 
     if (nowHalf == FIRST_HALF)
     {
@@ -226,6 +226,8 @@ void StateMachine::updateAction(Information &info)
     }
     else if (nowMission == SEARCH_MAZE || nowMission == GO_OUT_MAZE)
     {
+        Serial.println("InsideTarget: " + String(insideTarget.front()));
+        
         if (insideTarget.empty())
         {
             Motor::targetSpeed = 0;

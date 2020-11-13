@@ -52,6 +52,11 @@ void Maze::initialize(Information &info)
                 barrier.push_back({yoffsetA * MAZE_SIZE + i, (yoffsetA + 1) * MAZE_SIZE + i});
         }
     }
+
+    for (auto it : barrier)
+    {
+        Serial.println(String(it.A) + "-->" + String(it.B));
+    }
     
     std::sort(barrier.begin(), barrier.end());
     //adding the edges in the Maze
