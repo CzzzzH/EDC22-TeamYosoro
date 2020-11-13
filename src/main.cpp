@@ -20,21 +20,16 @@ TimerInterrupt angleTimer(10, [] {
 	IRReceiver::updateValue();
 	JY61::read();
 	AngleControl::Compute();
-	Motor::updatePWM();
 });
 
 StateMachine &sm = StateMachine::getInstance();
 
 void setup()
 {
-	sm.init();
-	// Motor::initialize();
+	sm.init(); // 一切的初始化
 }
 
 void loop()
 {
-    sm.updateInfo();
-	// Motor::setPWM(100,true);
-	// Motor::setPWM(100,false);
-	// Motor::targetSpeed = 30;
+    sm.updateInfo(); // 轮询更新串口信息
 }
