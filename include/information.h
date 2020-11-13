@@ -76,6 +76,7 @@ public:
     struct Position getObstacleApos(int ObstacleNo); 
     struct Position getObstacleBpos(int ObstacleNo); 
     int positonTransform(Position &pos);
+    bool indexNotExist(int index);
     ~Information() {}
     static Information &getInstance();
 };

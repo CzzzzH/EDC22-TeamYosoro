@@ -15,11 +15,15 @@ public:
     // Attributes
     Match nowHalf;
     Mission nowMission;
-    Action nowAction;
+    Position lastPosition = {0, 0};
+    Position nowPosition = {0, 0};
+    unsigned int midLine = 0;
     int lastMazeIndex, nowMazeIndex;
+    int targetTransportCount = 0;
     int counter = 0;
     int offset = 0;
     int motorDirection = 1;
+    int backTime = 0;
     
     std::deque<Position> outsideTarget;
     std::deque<int> insideTarget;

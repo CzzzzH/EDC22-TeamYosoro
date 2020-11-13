@@ -1,5 +1,6 @@
 #include "information.h"
 #include "statemachine.h"
+#include <deque>
 #include <string>
 
 Information &Information::getInstance()
@@ -372,4 +373,10 @@ int Information::positonTransform(Position &pos)
     int xOffset = (pos.X - 37)/30 + 1;
     int yOffset = (pos.Y - 37)/30;
     return (xOffset + yOffset * MAZE_SIZE);
+}
+
+bool Information::indexNotExist(int index)
+{
+    std::deque<int> &insideTarget = StateMachine::getInstance().insideTarget;
+    return std::find(insideTarget.begin(), insideTarget.end(), index) == insideTarget.end();
 }

@@ -32,4 +32,5 @@ void setup()
 
 void loop()
 {
+    sm.updateInfo();
 }

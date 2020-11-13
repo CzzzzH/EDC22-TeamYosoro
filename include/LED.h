@@ -2,7 +2,7 @@
 #define LED_H
 
 #include <Arduino.h>
-#define portLED 3
+#define portLED 12
 
 class LED
 {

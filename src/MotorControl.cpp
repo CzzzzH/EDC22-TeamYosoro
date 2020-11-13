@@ -44,6 +44,7 @@ void Motor::PID_initialize()
     rightPID.SetSampleTime(timePeriod);
     rightPID.SetOutputLimits(-100, 100);
 }
+
 void Motor::initialize()
 {
     pinMode(left_pin.A, OUTPUT);
@@ -87,7 +88,7 @@ void Motor::PID_compute()
     // Serial.println("Left encoder : " + String(encoder::counter.left));
     // Serial.println("right encoder : " + String(encoder::counter.right));
     leftPID.Compute();
-    rightPID.Compute();
+    // rightPID.Compute();
     // Serial.print("Left Motor Counter: " + String(encoder::counter.left) + ";\t");
     // Serial.print("Right Motor Counter: " + String(encoder::counter.right) + ";\t");
     // Serial.print("motor left output: " + String(leftOutput) + ";\t");
@@ -97,7 +98,7 @@ void Motor::PID_compute()
 
 double diffVelocity(const double angle)
 {
-    double result_angle = 4.5 * angle + pow(angle / 14, 3);
+    double result_angle = 4 * angle + pow(angle / 14, 3);
     return result_angle;
 }
 

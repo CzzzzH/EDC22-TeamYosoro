@@ -1,6 +1,9 @@
 #include "IRReceiver.h"
 #include "MotorControl.h"
 #include "statemachine.h"
+#include "information.h"
+
+#define ZIGBEE_OFFSET 0.1
 
 void IRReceiver::initialize()
 {
@@ -16,10 +19,10 @@ void IRReceiver::initialize()
         pinMode(MID_BEGIN + i, INPUT);
 
     midWeight[0] = 1.5;  // * 0
-    midWeight[1] = 0.7;  // * 0 
-    midWeight[2] = 0.3; // * 1
-    midWeight[3] = -0.3; // * 1
-    midWeight[4] = -0.7; // * 0
+    midWeight[1] = 1;  // * 0 
+    midWeight[2] = 0.5; // * 1
+    midWeight[3] = -0.5; // * 1
+    midWeight[4] = -1; // * 0
     midWeight[5] = -1.5; // * 0
 }
 
@@ -48,11 +51,11 @@ bool IRReceiver::atCrossroad(int angle)
     {
         int midCount = 0;
         for (int i = 0; i < MID_IR_COUNT; ++i)
-            midCount += (midValue[i] == MID_DETECT);
+            midCount += ( (i < 2 || i > 3) && midValue[i] == MID_DETECT);
 
         if (StateMachine::getInstance().motorDirection == 1)
         {
-            if (midCount >= 4)
+            if (midCount >= 3)
             {
                 atCross = true;
                 if (angle == 90 || angle == -90)
@@ -63,7 +66,7 @@ bool IRReceiver::atCrossroad(int angle)
         }
         else if (StateMachine::getInstance().motorDirection == -1)
         {   
-            if (midCount >= 4)
+            if (midCount >= 3)
             {
                 atCross = true;
                 if (backFlag)
@@ -80,10 +83,35 @@ bool IRReceiver::atCrossroad(int angle)
 }
 
 double IRReceiver::angleOffset()
-{
-    int offset = 0;
-    for (int i = 0; i < MID_IR_COUNT; ++i)
-        offset += midWeight[i] * (midValue[i] == MID_DETECT);
+{   
+    StateMachine &sm = StateMachine::getInstance();
+    double offset = 0;
+    if (sm.nowMission == SEARCH_MAZE || sm.nowMission == GO_OUT_MAZE)
+    {
+        for (int i = 0; i < MID_IR_COUNT; ++i)
+            offset += midWeight[i] * (midValue[i] == MID_DETECT);
+    }
+    else if (sm.nowMission == GO_TO_MAZE)
+    {
+        if (sm.outsideTarget.size() == 2)
+        {
+            if (sm.nowPosition.X > sm.midLine + 1) offset = ZIGBEE_OFFSET;
+            else if (sm.nowPosition.X < sm.midLine - 1) offset = ZIGBEE_OFFSET;
+        }
+        // else if (sm.outsideTarget.size() == 1)
+        // {
+        //     if (sm.nowPosition.Y > 240) offset = ZIGBEE_OFFSET;
+        //     else if (sm.nowPosition.Y < 236) offset = -ZIGBEE_OFFSET;
+        // }
+    }
+    else if (sm.nowMission == RETURN)
+    {   
+        if (sm.outsideTarget.size() == 1)
+        {
+            if (sm.nowPosition.Y > sm.midLine + 1) offset = -ZIGBEE_OFFSET;
+            else if (sm.nowPosition.Y < sm.midLine -1) offset = ZIGBEE_OFFSET;
+        }
+    }
     return offset;
 }
 
