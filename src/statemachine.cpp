@@ -73,11 +73,17 @@ void StateMachine::init()
     // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
     if (nowHalf == FIRST_HALF)
     {
+        /*
+            如果是上半场，那只点灯就行了
+            我就随便加了个迷宫中心的目标点作为唯一目标
+            按我的算法它到那就会自动停下了（因为目标集合变空）
+        */
         insideTarget.push_back(15);
         backTime = 200;
     }
     else
     {
+        // 下半场不需要在这加目标点，updateInfo里会自己加的
         backTime = 500;
     }
 
@@ -89,14 +95,17 @@ void StateMachine::init()
         小车初始任务：
         标准模式下，应该写 GO_TO_MAZE（因为执行到这的时候已经接收到上位机的游戏开始信号了，所以需要出发）
         其他写法用于调试：
-        1. WAIT_FOR_START: 该状态下小车不会动
-        2. SEARCH_MAZE: 该状态下小车会直接开始在迷宫进行搜寻工作
+        1. WAIT_FOR_START: 该任务状态下小车不会动
+        2. SEARCH_MAZE: 该任务状态下小车会直接开始在迷宫进行搜寻工作
+        3. RETURN: 该任务状态可以测试小车走出迷宫到返回起点的一段路
     */
     nowMission = WAIT_FOR_START;
     
-    // 迷宫中的初始坐标
+    // 小车在迷宫中的初始序号
     nowMazeIndex = 32;
     lastMazeIndex = 38;
+    
+    // 小车的初始方向和速度
     motorDirection = 1;
     Motor::targetSpeed = 30;
 
@@ -201,7 +210,7 @@ void StateMachine::updateInfo()
 void StateMachine::updateAction(Information &info)
 {
     /*
-        这里是迷宫外的两个任务（状态）的动作执行
+        这里是迷宫外的两个任务状态的动作执行
         它的思路就是判断当前坐标和队首目标的坐标（即将前往的坐标）距离是不是低于一个值
         如果是就认为到达了，做相应动作并把队首目标pop掉
     */
@@ -232,7 +241,7 @@ void StateMachine::updateAction(Information &info)
         }
     }
     /*
-        这里是迷宫内的两个任务（状态）的动作执行
+        这里是迷宫内的两个任务状态的动作执行
         它的思路就是不断把target集合丢给Maze组件让它寻路，返回一个动作
     */
     else if (nowMission == SEARCH_MAZE || nowMission == GO_OUT_MAZE)
@@ -301,7 +310,7 @@ void StateMachine::updateMission(Information &info)
     /*
         如果当前任务是退出迷宫且迷宫内节点（任务开始时就只有一个出口）
         就把任务切换为回程，然后加入两个迷宫外目标点指导回程
-        之所以现在才加而不是初始化就加，是因为我们的任务（状态）切换依赖于目标队列（集合）是否为空
+        之所以现在才加而不是初始化就加，是因为我们的任务状态切换依赖于目标队列（集合）是否为空
     */
     if (nowMission == GO_OUT_MAZE && insideTarget.empty())
     {
