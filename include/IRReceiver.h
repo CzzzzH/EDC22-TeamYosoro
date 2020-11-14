@@ -20,7 +20,7 @@ public:
     static int rightValue[SIDE_IR_COUNT];
     static double midWeight[MID_IR_COUNT];
     static int leftPointer, rightPointer;
-    static bool atCross;
+    static bool turn, ahead;
     static bool backFlag;
     static void initialize();
     static void updateValue();
