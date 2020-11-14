@@ -109,7 +109,7 @@ void Motor::updatePWM()
     double IRcoff = 10;
     if (targetSpeed < 0)
         IRcoff = -0.7 * IRcoff;
-    double diff_velocity_in = AngleControl::getOutput() + (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::angleOffset();
+    double diff_velocity_in = -AngleControl::getOutput() + (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::angleOffset();
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
     // Serial.println(targetSpeed);
