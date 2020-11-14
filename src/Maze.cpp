@@ -129,7 +129,7 @@ int Maze::getWay(int now, std::deque<int> &target)
 
 CrossroadAction Maze::getDirection(int last, int now, std::deque<int> &target)
 {  
-    if(target.front() == 0)
+    if(target.front() == 0 && now == 5)
     {
         if(last == 4)
             return {90, 0};
