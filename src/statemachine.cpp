@@ -54,9 +54,9 @@ void StateMachine::init()
     LED::initialize();
 
     // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
-    info.updateInfo();
-    while (info.getGameState() != GameGoing)
-        info.updateInfo();
+    // info.updateInfo();
+    // while (info.getGameState() != GameGoing)
+    //     info.updateInfo();
     
     // 设置第一步直线走的中轴线，就是小车初始的X坐标
     midLine = info.getCarposX();

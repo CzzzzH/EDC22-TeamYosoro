@@ -12,7 +12,7 @@ std::list<TimerInterrupt *>
 	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();
 
 TimerInterrupt motorTimer(INTERRUPT_INTERVAL, [] {
-	StateMachine::getInstance().process();
+	// StateMachine::getInstance().process();
     Motor::PID_compute();
 });
 
@@ -33,6 +33,6 @@ void setup()
 
 void loop()
 {
-    sm.updateInfo(); // 轮询更新串口信息
-	// Motor::targetSpeed = -30;
+    // sm.updateInfo(); // 轮询更新串口信息
+	Motor::targetSpeed = 30;
 }
