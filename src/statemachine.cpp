@@ -80,6 +80,8 @@ void StateMachine::init()
         */
         insideTarget.push_back(15);
         backTime = 200;
+        Serial.println("nowHalf : " + String(nowHalf));
+        Serial.println("insideTarget size : " + String(insideTarget.size()));
     }
     else
     {
@@ -99,7 +101,7 @@ void StateMachine::init()
         2. SEARCH_MAZE: 该任务状态下小车会直接开始在迷宫进行搜寻工作
         3. RETURN: 该任务状态可以测试小车走出迷宫到返回起点的一段路
     */
-    nowMission = WAIT_FOR_START;
+    nowMission = SEARCH_MAZE;
     
     // 小车在迷宫中的初始序号
     nowMazeIndex = 32;
@@ -126,11 +128,12 @@ void StateMachine::init()
 void StateMachine::process()
 {
     Information &info = Information::getInstance();
-    Serial.println(backTime);
+    // Serial.println(backTime);
     updateAction(info);
     updateMission(info);
     updateMotor(info);
     // counter++;
+    // Serial.println("get Game Time  : " + String(info.getGameTime()));
 
 // 一些debug代码
 #ifdef DEBUG_MOTOR
@@ -249,6 +252,7 @@ void StateMachine::updateAction(Information &info)
         // 如果目标集合为空，点亮灯并且停下（显然只有新的目标出现才会继续启动）
         if (insideTarget.empty())
         {
+            Serial.println("insideTarget: fuck your shit");
             Motor::targetSpeed = 0;
             LED::ledOn();
         }
@@ -286,7 +290,10 @@ void StateMachine::updateAction(Information &info)
                     那 
                 */
                 if (nowMazeIndex == insideTarget.front())
+                {
                     insideTarget.pop_front();
+                    // Serial.println("Now max index == insideTarget front");
+                }
             }
         }
         
@@ -306,6 +313,7 @@ void StateMachine::updateMission(Information &info)
         insideTarget.clear();
         insideTarget.push_back(-1);
         nowMission = GO_OUT_MAZE;
+        // Serial.println("clear insideTarget");
     }
     /*
         如果当前任务是退出迷宫且迷宫内节点（任务开始时就只有一个出口）

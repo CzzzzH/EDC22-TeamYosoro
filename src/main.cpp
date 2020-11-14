@@ -20,6 +20,7 @@ TimerInterrupt angleTimer(10, [] {
 	IRReceiver::updateValue();
 	JY61::read();
 	AngleControl::Compute();
+	Motor::updatePWM();
 });
 
 StateMachine &sm = StateMachine::getInstance();
