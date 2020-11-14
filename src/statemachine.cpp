@@ -62,7 +62,7 @@ void StateMachine::init()
     midLine = info.getCarposX();
 
     // 设置上下半场
-    nowHalf = SECOND_HALF;
+    nowHalf = FIRST_HALF;
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
@@ -75,7 +75,8 @@ void StateMachine::init()
             我就随便加了个迷宫中心的目标点作为唯一目标
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        insideTarget.push_back(15);
+        insideTarget.push_back(35);
+        insideTarget.push_back(31);
         backTime = 10;
         // Serial.println("nowHalf : " + String(nowHalf));
         // Serial.println("insideTarget size : " + String(insideTarget.size()));
@@ -357,5 +358,4 @@ void StateMachine::updateMotor(Information &info)
     // 如果当前游戏还没开始（实际不可能出现该情况）或者游戏已经结束，就直接停车
     if (nowMission == WAIT_FOR_START || nowMission == END_GAME) Motor::targetSpeed = 0;
     else Motor::targetSpeed = fabs(Motor::targetSpeed) * motorDirection;
-    Motor::PID_compute();
 }
