@@ -301,7 +301,6 @@ void StateMachine::updateAction(Information &info)
 // 更新任务放在最后做
 void StateMachine::updateMission(Information &info)
 {
-
     // 如果当前任务是进入迷宫而且已经走完所有迷宫外目标点了，就把任务切换为搜寻迷宫
     if (nowMission == GO_TO_MAZE && outsideTarget.empty())
         nowMission = SEARCH_MAZE;

@@ -23,7 +23,7 @@ public:
     int counter = 0;
     int offset = 0;
     int motorDirection = 1;
-    int backTime = 0;
+    uint16_t backTime = 0;
     
     std::deque<Position> outsideTarget;
     std::deque<int> insideTarget;
