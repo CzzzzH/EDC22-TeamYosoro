@@ -80,6 +80,8 @@ void Maze::initialize(Information &info)
             }
         }
     }
+    Maze::addEdge(-1, 5);
+    Maze::addEdge(32, 38);
 }
 
 int Maze::getWay(int now, std::deque<int> &target)

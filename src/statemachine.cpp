@@ -53,8 +53,6 @@ void StateMachine::init()
     IRReceiver::initialize();
     LED::initialize();
 
-    // LED::ledOn();
-
     // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
     info.updateInfo();
     while (info.getGameState() != GameGoing)

@@ -9,7 +9,7 @@ void LED::ledOff()
 void LED::ledOn()
 {
     ledReg = HIGH;
-    analogWrite(portLED, 255);
+    digitalWrite(portLED, ledReg);
     //Serial.println(portLED);
 }
 
