@@ -65,7 +65,7 @@ void Maze::initialize(Information &info)
             }
         }
     }
-    Maze::addEdge(-1, 5);
+    Maze::addEdge(0, 5);
     Maze::addEdge(32, 38);
 }
 
@@ -129,6 +129,15 @@ int Maze::getWay(int now, std::deque<int> &target)
 
 CrossroadAction Maze::getDirection(int last, int now, std::deque<int> &target)
 {  
+    if(target.front() == 0)
+    {
+        if(last == 4)
+            return {90, 0};
+        else if(last == 6)
+            return {-90, 0};
+        else
+            return {0, 0};
+    }
     int index1 = getWay(now, target);
     int rotate = 0;
     int diff1 = now - last;
