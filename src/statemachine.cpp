@@ -62,8 +62,7 @@ void StateMachine::init()
     midLine = info.getCarposX();
 
     // 设置上下半场
-    if (info.getCartask() == 0) nowHalf = FIRST_HALF;
-    else nowHalf = SECOND_HALF;
+    nowHalf = SECOND_HALF;
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
@@ -76,8 +75,8 @@ void StateMachine::init()
             我就随便加了个迷宫中心的目标点作为唯一目标
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        insideTarget.push_back(29);
-        backTime = 15;
+        insideTarget.push_back(15);
+        backTime = 10;
         // Serial.println("nowHalf : " + String(nowHalf));
         // Serial.println("insideTarget size : " + String(insideTarget.size()));
     }
@@ -181,7 +180,7 @@ void StateMachine::updateInfo()
         注意运输病人先要经过起点再经过目标点，至于判断当前应该是去起点还是目标
         靠info.getCartransport()这个函数就可以知道车上是否载有病人了
     */
-    if (nowHalf == SECOND_HALF && (nowMission == GO_TO_MAZE || nowMission == SEARCH_MAZE))
+    if (insideTarget.empty() && nowHalf == SECOND_HALF && (nowMission == GO_TO_MAZE || nowMission == SEARCH_MAZE))
     {
         // 添加物资包到target中
         bool addNew = false;
@@ -197,24 +196,24 @@ void StateMachine::updateInfo()
             }
         }
         // 初步debug的时候，建议注释掉下面的代码，只加入物资
-        if (!info.getCartransport())
-        {
-            int targetIndex = info.positonTransform(info.Passenger.startpos);
-            if (info.indexNotExist(targetIndex))
-            {
-                insideTarget.push_back(targetIndex);
-                addNew = true;
-            }
-        }
-        else if (info.getCartransport())
-        {
-            int targetIndex = info.positonTransform(info.Passenger.finalpos);
-            if (info.indexNotExist(targetIndex))
-            {
-                insideTarget.push_back(targetIndex);
-                addNew = true;
-            }
-        }
+        // if (!havePatient)
+        // {
+        //     int targetIndex = info.positonTransform(info.Passenger.startpos);
+        //     if (info.indexNotExist(targetIndex))
+        //     {
+        //         insideTarget.push_back(targetIndex);
+        //         addNew = true;
+        //     }
+        // }
+        // else if (havePatient)
+        // {
+        //     int targetIndex = info.positonTransform(info.Passenger.finalpos);
+        //     if (info.indexNotExist(targetIndex))
+        //     {
+        //         insideTarget.push_back(targetIndex);
+        //         addNew = true;
+        //     }
+        // }
         if (addNew)
             crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
     }
@@ -301,7 +300,13 @@ void StateMachine::updateAction(Information &info)
                     那 
                 */
                 if (nowMazeIndex == insideTarget.front())
+                {
+                    if (nowMazeIndex == info.positonTransform(info.Passenger.startpos))
+                        havePatient = true;
+                    else if (nowMazeIndex == info.positonTransform(info.Passenger.finalpos))
+                        havePatient = false;
                     insideTarget.pop_front();
+                }
                 if (!insideTarget.empty())
                     crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
             }

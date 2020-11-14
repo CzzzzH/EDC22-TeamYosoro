@@ -2,6 +2,7 @@
 #include "MotorControl.h"
 #include "statemachine.h"
 #include "information.h"
+#include "Maze.h"
 
 #define ZIGBEE_OFFSET 0.1
 
@@ -48,13 +49,13 @@ void IRReceiver::updateValue()
 
 bool IRReceiver::atCrossroad(int angle)
 {   
-    
+    StateMachine &sm = StateMachine::getInstance();
     // 当前位置处于十字路口正中央，重置atCross并返回true
     if (atCross && (leftValue[1] == SIDE_DETECT || rightValue[1] == SIDE_DETECT))
     {
         atCross = false;
         Motor::targetSpeed = 30;
-        return StateMachine::getInstance().motorDirection == 1; 
+        return sm.motorDirection == 1; 
         // ↑ 这里可以看到如果小车是倒走就会返回false，这样设计使得倒走状态不会被判定过路口，而是先调整为正走再过
     }
     else if (!atCross)
@@ -66,7 +67,7 @@ bool IRReceiver::atCrossroad(int angle)
             midCount += ( (i < 2 || i > 3) && midValue[i] == MID_DETECT);
 
         
-        if (StateMachine::getInstance().motorDirection == 1)
+        if (sm.motorDirection == 1)
         {   
             // 正走时前置红外碰到足够多的黑线，则进入预备转弯状态(atCross置为true)
             if (midCount >= 3)
@@ -78,7 +79,7 @@ bool IRReceiver::atCrossroad(int angle)
                     Motor::targetSpeed = 30;
             }
         }
-        else if (StateMachine::getInstance().motorDirection == -1)
+        else if (sm.motorDirection == -1)
         {   
             /* 
                 反走时前置红外碰到足够多的黑线，则分两种情况进入预备转弯状态(atCross置为true)
@@ -93,8 +94,9 @@ bool IRReceiver::atCrossroad(int angle)
                 if (backFlag)
                 {
                     Motor::targetSpeed = 30;
-                    StateMachine::getInstance().motorDirection = 1;
-                    StateMachine::getInstance().lastMazeIndex = 2 * StateMachine::getInstance().nowMazeIndex - StateMachine::getInstance().lastMazeIndex;
+                    sm.motorDirection = 1;
+                    sm.lastMazeIndex = 2 * sm.nowMazeIndex - sm.lastMazeIndex;
+                    sm.crossroadAction = Maze::getDirection(sm.lastMazeIndex, sm.nowMazeIndex, sm.insideTarget);
                 }
                 else backFlag = true;
             }

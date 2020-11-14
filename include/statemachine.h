@@ -26,6 +26,9 @@ public:
     int motorDirection = 1;
     uint16_t backTime = 0;
     
+    bool havePatient = false;
+    bool getItems = false;
+    
     std::deque<Position> outsideTarget;
     std::deque<int> insideTarget;
 
