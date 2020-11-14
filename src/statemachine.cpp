@@ -216,7 +216,10 @@ void StateMachine::updateInfo()
         //     }
         // }
         if (addNew)
+        {
+            if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
             crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
+        }
     }
 }
 
@@ -285,12 +288,12 @@ void StateMachine::updateAction(Information &info)
             {
                 // 如果是要转180度，那就不转，把motorDirection取反（表示方向取反）
                 if (crossroadAction.rotateAngle == 180)
-                {
                     motorDirection = -motorDirection;
-                    if (motorDirection == -1) IRReceiver::backFlag = false;
-                }
                 // 否则改变目标角度让车转弯
-                else AngleControl::target += crossroadAction.rotateAngle;
+                else AngleControl::target -= crossroadAction.rotateAngle;
+
+                if (crossroadAction.rotateAngle == 90 || crossroadAction.rotateAngle == -90)
+                    motorDirection = 1;
 
                 // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果），再进行一次寻路
                 lastMazeIndex = nowMazeIndex;
@@ -309,7 +312,10 @@ void StateMachine::updateAction(Information &info)
                     insideTarget.pop_front();
                 }
                 if (!insideTarget.empty())
+                {   
+                    if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
                     crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
+                }
             }
         }
         
@@ -327,6 +333,7 @@ void StateMachine::updateMission(Information &info)
     {
         insideTarget.clear();
         insideTarget.push_back(0);
+        if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
         crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
         nowMission = GO_OUT_MAZE;
     }

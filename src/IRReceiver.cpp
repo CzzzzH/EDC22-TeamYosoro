@@ -3,6 +3,7 @@
 #include "statemachine.h"
 #include "information.h"
 #include "Maze.h"
+#include "AngleControl.h"
 
 #define ZIGBEE_OFFSET 0.1
 
@@ -19,12 +20,12 @@ void IRReceiver::initialize()
     for (int i = 0; i < MID_IR_COUNT; i++)
         pinMode(MID_BEGIN + i, INPUT);
 
-    midWeight[0] = 1.5;  // * 0
-    midWeight[1] = 1;  // * 0 
-    midWeight[2] = 0.5; // * 1
-    midWeight[3] = -0.5; // * 1
-    midWeight[4] = -1; // * 0
-    midWeight[5] = -1.5; // * 0
+    midWeight[0] = -1.5;  // * 0
+    midWeight[1] = -1;  // * 0 
+    midWeight[2] = -0.5; // * 1
+    midWeight[3] = 0.5; // * 1
+    midWeight[4] = 1; // * 0
+    midWeight[5] = 1.5; // * 0
 }
 
 void IRReceiver::updateValue()
@@ -50,56 +51,23 @@ void IRReceiver::updateValue()
 bool IRReceiver::atCrossroad(int angle)
 {   
     StateMachine &sm = StateMachine::getInstance();
-    // 当前位置处于十字路口正中央，重置atCross并返回true
-    if (atCross && (leftValue[1] == SIDE_DETECT || rightValue[1] == SIDE_DETECT))
-    {
-        atCross = false;
-        Motor::targetSpeed = 30;
-        return sm.motorDirection == 1; 
-        // ↑ 这里可以看到如果小车是倒走就会返回false，这样设计使得倒走状态不会被判定过路口，而是先调整为正走再过
-    }
-    else if (!atCross)
+    // 转弯结束
+    if (turn && AngleControl::getAngleDist() < 15) 
+        turn = false;
+    else if (ahead && (leftValue[1] == SIDE_DETECT || rightValue[1] == SIDE_DETECT))
+        ahead = false;
+    else if (!turn && !ahead)
     {   
-
         // 计算前置红外的碰黑线数目
         int midCount = 0;
         for (int i = 0; i < MID_IR_COUNT; ++i)
             midCount += ( (i < 2 || i > 3) && midValue[i] == MID_DETECT);
 
-        
-        if (sm.motorDirection == 1)
-        {   
-            // 正走时前置红外碰到足够多的黑线，则进入预备转弯状态(atCross置为true)
-            if (midCount >= 3)
-            {
-                atCross = true;
-                if (angle == 90 || angle == -90)
-                    Motor::targetSpeed = 30;
-                else
-                    Motor::targetSpeed = 30;
-            }
-        }
-        else if (sm.motorDirection == -1)
-        {   
-            /* 
-                反走时前置红外碰到足够多的黑线，则分两种情况进入预备转弯状态(atCross置为true)
-                1. backFlag = true，说明倒走已经过了第二根黑线了，置为正走并强制更改上一个经过的十字路口坐标，避免转向错误
-                2. backFlag = false，说明倒走刚过第一根线，应该什么都不做，所以把backFlag置为true，以便下一次碰到黑线执行1
-                注意不管是1、2状态都会进入预备转弯状态，但是状态2下正式转弯的时候由于还是倒走状态所以会强制返回false（见58行注释）
-                这样使得倒退具有严格的完备性
-            */
-            if (midCount >= 3)
-            {
-                atCross = true;
-                if (backFlag)
-                {
-                    Motor::targetSpeed = 30;
-                    sm.motorDirection = 1;
-                    sm.lastMazeIndex = 2 * sm.nowMazeIndex - sm.lastMazeIndex;
-                    sm.crossroadAction = Maze::getDirection(sm.lastMazeIndex, sm.nowMazeIndex, sm.insideTarget);
-                }
-                else backFlag = true;
-            }
+        if (midCount >= 3)
+        {
+            if (angle == 90 || angle == -90) turn = true;
+            else ahead = true;
+            return true;
         }
     }
     return false;
@@ -126,7 +94,7 @@ double IRReceiver::angleOffset()
         if (sm.outsideTarget.size() == 2)
         {
             if (sm.nowPosition.X > sm.midLine + 1) offset = ZIGBEE_OFFSET;
-            else if (sm.nowPosition.X < sm.midLine - 1) offset = ZIGBEE_OFFSET;
+            else if (sm.nowPosition.X < sm.midLine - 1) offset = -ZIGBEE_OFFSET;
         }
         // else if (sm.outsideTarget.size() == 1)
         // {
@@ -138,8 +106,8 @@ double IRReceiver::angleOffset()
     {   
         if (sm.outsideTarget.size() == 1)
         {
-            if (sm.nowPosition.Y > sm.midLine + 1) offset = -ZIGBEE_OFFSET;
-            else if (sm.nowPosition.Y < sm.midLine -1) offset = ZIGBEE_OFFSET;
+            if (sm.nowPosition.Y > sm.midLine + 1) offset = ZIGBEE_OFFSET;
+            else if (sm.nowPosition.Y < sm.midLine -1) offset = -ZIGBEE_OFFSET;
         }
     }
     return offset;
@@ -149,5 +117,6 @@ int IRReceiver::leftValue[SIDE_IR_COUNT];
 int IRReceiver::rightValue[SIDE_IR_COUNT];
 int IRReceiver::midValue[MID_IR_COUNT];
 double IRReceiver::midWeight[MID_IR_COUNT];
-bool IRReceiver::atCross = false;
+bool IRReceiver::turn = false;
+bool IRReceiver::ahead = false;
 bool IRReceiver::backFlag = true;
