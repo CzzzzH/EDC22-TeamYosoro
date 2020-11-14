@@ -76,10 +76,10 @@ void StateMachine::init()
             我就随便加了个迷宫中心的目标点作为唯一目标
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        insideTarget.push_back(15);
-        backTime = 20;
-        Serial.println("nowHalf : " + String(nowHalf));
-        Serial.println("insideTarget size : " + String(insideTarget.size()));
+        insideTarget.push_back(29);
+        backTime = 15;
+        // Serial.println("nowHalf : " + String(nowHalf));
+        // Serial.println("insideTarget size : " + String(insideTarget.size()));
     }
     else
     {
@@ -320,7 +320,7 @@ void StateMachine::updateMission(Information &info)
     else if (nowMission == SEARCH_MAZE && info.getGameTime() > backTime)
     {
         insideTarget.clear();
-        insideTarget.push_back(-1);
+        insideTarget.push_back(0);
         crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
         nowMission = GO_OUT_MAZE;
     }

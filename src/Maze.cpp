@@ -71,7 +71,7 @@ void Maze::initialize(Information &info)
 
 int Maze::getWay(int now, std::deque<int> &target)
 {
-    std::vector<int> Stack(MAZE_SIZE * MAZE_SIZE);
+    std::vector<int> Stack(MAZE_SIZE * MAZE_SIZE + 5);
     bool Break = false;
     std::queue<int> q;
     std::vector<int> history;
