@@ -9,21 +9,6 @@ void Maze::addEdge(int u, int v, bool dir = 1)
         adjList[v].push_back(u);
 }
 
-// void Maze::initialize(Information &info)
-// {
-//     //adding the edges in the Maze
-//     for (int i = 0;i <= MAZE_SIZE;i++)
-//     {
-//         for(int j = 1;j <= MAZE_SIZE;j++)
-//         {
-//             if(j + 1 <= MAZE_SIZE)
-//                 Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + 1);
-//             if(i < MAZE_SIZE - 1)
-//                 Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + MAZE_SIZE);
-//         }
-//     }
-// }
-
 void Maze::initialize(Information &info)
 {
     std::vector<barrierEdge> barrier;
@@ -86,8 +71,7 @@ void Maze::initialize(Information &info)
 
 int Maze::getWay(int now, std::deque<int> &target)
 {
-    int Stack[MAZE_SIZE * MAZE_SIZE];
-    memset(Stack, 0, sizeof(Stack));
+    std::vector<int> Stack(MAZE_SIZE * MAZE_SIZE);
     bool Break = false;
     std::queue<int> q;
     std::vector<int> history;
@@ -106,7 +90,7 @@ int Maze::getWay(int now, std::deque<int> &target)
 
     q.push(now);
     visited[now] = true;
-
+    
     while (!q.empty())
     {
         int node = q.front();
@@ -144,7 +128,7 @@ int Maze::getWay(int now, std::deque<int> &target)
 }
 
 CrossroadAction Maze::getDirection(int last, int now, std::deque<int> &target)
-{
+{  
     int index1 = getWay(now, target);
     int rotate = 0;
     int diff1 = now - last;

@@ -77,14 +77,14 @@ void StateMachine::init()
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
         insideTarget.push_back(15);
-        backTime = 200;
+        backTime = 20;
         Serial.println("nowHalf : " + String(nowHalf));
         Serial.println("insideTarget size : " + String(insideTarget.size()));
     }
     else
     {
         // 下半场不需要在这加目标点，updateInfo里会自己加的
-        backTime = 500;
+        backTime = 50;
     }
 
     // 初始化进迷宫前的坐标（小车会先走到{16, 244}，然后转弯然后再走到{87, 236}
@@ -104,6 +104,9 @@ void StateMachine::init()
     // 小车在迷宫中的初始序号
     nowMazeIndex = 32;
     lastMazeIndex = 38;
+
+    // 求第一次转弯的路径
+    crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
     
     // 小车的初始方向和速度
     motorDirection = 1;
@@ -126,12 +129,11 @@ void StateMachine::init()
 void StateMachine::process()
 {
     Information &info = Information::getInstance();
-    // Serial.println(backTime);
     updateAction(info);
     updateMission(info);
     updateMotor(info);
+    // Serial.println(info.getGameTime());
     // counter++;
-    // Serial.println("get Game Time  : " + String(info.getGameTime()));
 
 // 一些debug代码
 #ifdef DEBUG_MOTOR
@@ -169,10 +171,9 @@ void StateMachine::updateInfo()
 
     // 直接调用zigbee的接收函数，更新一系列信息
     info.updateInfo();
-
+    // Serial.println("Update Success!");
     // 记录当前坐标
     nowPosition = info.getCarpos();
-    
     /*
         如果当前是在下半场且现在还在进入迷宫或者搜寻迷宫的过程
         那我们就需要更新物资、病人的信息了（其实就是要去的目标节点）
@@ -183,27 +184,39 @@ void StateMachine::updateInfo()
     if (nowHalf == SECOND_HALF && (nowMission == GO_TO_MAZE || nowMission == SEARCH_MAZE))
     {
         // 添加物资包到target中
+        bool addNew = false;
         for (int i = 0; i < 6; ++i)
         {
             PackageInfo package = info.Package[i];
             if (package.whetherpicked) continue;
             int packageIndex = info.positonTransform(package.pos);
             if (info.indexNotExist(packageIndex))
+            {
                 insideTarget.push_back(packageIndex);
+                addNew = true;
+            }
         }
         // 初步debug的时候，建议注释掉下面的代码，只加入物资
         if (!info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.startpos);
             if (info.indexNotExist(targetIndex))
+            {
                 insideTarget.push_back(targetIndex);
+                addNew = true;
+            }
         }
         else if (info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.finalpos);
             if (info.indexNotExist(targetIndex))
+            {
                 insideTarget.push_back(targetIndex);
+                addNew = true;
+            }
         }
+        if (addNew)
+            crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
     }
 }
 
@@ -250,7 +263,7 @@ void StateMachine::updateAction(Information &info)
         // 如果目标集合为空，点亮灯并且停下（显然只有新的目标出现才会继续启动）
         if (insideTarget.empty())
         {
-            Serial.println("insideTarget: fuck your shit");
+            // Serial.println("insideTarget: fuck your shit");
             Motor::targetSpeed = 0;
             LED::ledOn();
         }
@@ -262,7 +275,7 @@ void StateMachine::updateAction(Information &info)
             LED::ledOff();
 
             // 通过Maze寻路得到一个结构体，包含转角和下一个交叉点的序号
-            CrossroadAction crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
+            // Serial.println("Begin crossroad: " + String(lastMazeIndex) + " " + String(nowMazeIndex) + " " + String(insideTarget.front()));
             
             /*
                 这里请仔细阅读 IRReceiver::atCrossroad() 函数!!!
@@ -279,19 +292,18 @@ void StateMachine::updateAction(Information &info)
                 // 否则改变目标角度让车转弯
                 else AngleControl::target += crossroadAction.rotateAngle;
 
-                // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果）
+                // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果），再进行一次寻路
                 lastMazeIndex = nowMazeIndex;
                 nowMazeIndex = crossroadAction.nextPosition;
-
+                
                 /*
                     如果当前交叉点（也就是下一个到达的交叉点）序号正好是最近的目标
                     那 
                 */
                 if (nowMazeIndex == insideTarget.front())
-                {
                     insideTarget.pop_front();
-                    // Serial.println("Now max index == insideTarget front");
-                }
+                if (!insideTarget.empty())
+                    crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
             }
         }
         
@@ -300,24 +312,24 @@ void StateMachine::updateAction(Information &info)
 
 // 更新任务放在最后做
 void StateMachine::updateMission(Information &info)
-{
+{   
     // 如果当前任务是进入迷宫而且已经走完所有迷宫外目标点了，就把任务切换为搜寻迷宫
     if (nowMission == GO_TO_MAZE && outsideTarget.empty())
         nowMission = SEARCH_MAZE;
     // 如果当前任务是搜寻迷宫且预定的返回时间到了，就把任务切换为退出迷宫，并清空迷宫内目标，只留下一个出口
-    if (nowMission == SEARCH_MAZE && info.getGameTime() > backTime)
+    else if (nowMission == SEARCH_MAZE && info.getGameTime() > backTime)
     {
         insideTarget.clear();
         insideTarget.push_back(-1);
+        crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
         nowMission = GO_OUT_MAZE;
-        // Serial.println("clear insideTarget");
     }
     /*
         如果当前任务是退出迷宫且迷宫内节点（任务开始时就只有一个出口）
         就把任务切换为回程，然后加入两个迷宫外目标点指导回程
         之所以现在才加而不是初始化就加，是因为我们的任务状态切换依赖于目标队列（集合）是否为空
     */
-    if (nowMission == GO_OUT_MAZE && insideTarget.empty())
+    else if (nowMission == GO_OUT_MAZE && insideTarget.empty())
     {
 
         // 如果想在单独调试迷宫内行为的化，可以把nowMission换成下面的END_GAME直接结束游戏
@@ -330,7 +342,7 @@ void StateMachine::updateMission(Information &info)
         outsideTarget.push_back({5, 12});
     }
     // 如果当前任务是回程且迷宫外的目标点已经为空，那说明已经到起点了，结束游戏（停车）
-    if (nowMission == RETURN && outsideTarget.empty())
+    else if (nowMission == RETURN && outsideTarget.empty())
         nowMission = END_GAME;
 }
 

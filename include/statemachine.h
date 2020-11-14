@@ -17,6 +17,7 @@ public:
     Mission nowMission;
     Position lastPosition = {0, 0};
     Position nowPosition = {0, 0};
+    CrossroadAction crossroadAction;
     unsigned int midLine = 0;
     int lastMazeIndex, nowMazeIndex;
     int targetTransportCount = 0;
