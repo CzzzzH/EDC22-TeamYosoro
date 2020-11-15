@@ -21,11 +21,12 @@ public:
     unsigned int midLine = 0;
     int lastMazeIndex, nowMazeIndex;
     int targetTransportCount = 0;
-    int counter = 0;
     int offset = 0;
     int motorDirection = 1;
     uint16_t backTime = 0;
     
+    unsigned long lastCrossTime, nowCrossTime;
+
     bool havePatient = false;
     bool getItems = false;
     
@@ -38,6 +39,7 @@ public:
 
     void init();
     void process();
+    void exceptionHandle();
     void updateInfo();
     void updateMission(Information &info);
     void updateAction(Information &info);

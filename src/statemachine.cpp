@@ -62,7 +62,7 @@ void StateMachine::init()
     midLine = info.getCarposX();
 
     // 设置上下半场
-    nowHalf = FIRST_HALF;
+    nowHalf = SECOND_HALF;
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
@@ -76,14 +76,14 @@ void StateMachine::init()
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
         insideTarget.push_back(15);
-        backTime = 10;
+        backTime = 8;
         // Serial.println("nowHalf : " + String(nowHalf));
         // Serial.println("insideTarget size : " + String(insideTarget.size()));
     }
     else
     {
         // 下半场不需要在这加目标点，updateInfo里会自己加的
-        backTime = 50;
+        backTime = 60;
     }
 
     // 初始化进迷宫前的坐标（小车会先走到{16, 244}，然后转弯然后再走到{87, 236}
@@ -106,6 +106,7 @@ void StateMachine::init()
     // 小车在迷宫中的初始序号
     nowMazeIndex = 32;
     lastMazeIndex = 38;
+    lastCrossTime = nowCrossTime = 0;
 
     // 求第一次转弯的路径
     crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
@@ -131,6 +132,7 @@ void StateMachine::init()
 void StateMachine::process()
 {
     Information &info = Information::getInstance();
+    exceptionHandle();
     updateAction(info);
     updateMission(info);
     updateMotor(info);
@@ -163,6 +165,14 @@ void StateMachine::process()
     Serial.println("Counter: " + String(counter));
     Serial.println("Milli Seconds: " + String(millis()));
 #endif
+}
+
+void StateMachine::exceptionHandle()
+{
+    if (nowMission != SEARCH_MAZE && nowMission != GO_OUT_MAZE)
+        return;
+    if (millis() - lastCrossTime > 20000)
+        nowMission = END_GAME;
 }
 
 // 上位机信息更新（注意必须在Loop中执行而不是中断，避免阻塞超过中断时间)
@@ -199,7 +209,7 @@ void StateMachine::updateInfo()
             }
         }
         // 初步debug的时候，建议注释掉下面的代码，只加入物资
-        if (!havePatient)
+        if (!info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.startpos);
             if (info.indexNotExist(targetIndex))
@@ -208,7 +218,7 @@ void StateMachine::updateInfo()
                 addNew = true;
             }
         }
-        else if (havePatient)
+        else if (info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.finalpos);
             if (info.indexNotExist(targetIndex))
@@ -278,7 +288,6 @@ void StateMachine::updateAction(Information &info)
             // 设置LED和车速
             Motor::targetSpeed = 30;
             LED::ledOff();
-
             // 通过Maze寻路得到一个结构体，包含转角和下一个交叉点的序号
             // Serial.println("Begin crossroad: " + String(lastMazeIndex) + " " + String(nowMazeIndex) + " " + String(insideTarget.front()));
             
@@ -288,12 +297,8 @@ void StateMachine::updateAction(Information &info)
             */
             if (IRReceiver::atCrossroad(crossroadAction.rotateAngle))
             {
-                // 如果是要转180度，那就不转，把motorDirection取反（表示方向取反）
-                // if (crossroadAction.rotateAngle == 180)
-                //     motorDirection = -motorDirection;
-                // // 否则改变目标角度让车转弯
-                // else 
-                
+                lastCrossTime = nowCrossTime;
+                nowCrossTime = millis();
                 AngleControl::target += crossroadAction.rotateAngle;
 
                 // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果），再进行一次寻路
