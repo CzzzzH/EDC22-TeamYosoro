@@ -5,14 +5,14 @@
 #include "Maze.h"
 #include "AngleControl.h"
 
-#define ZIGBEE_OFFSET 0.1
+#define ZIGBEE_OFFSET 0.5
 
 void IRReceiver::initialize()
 {
     memset(leftValue, 0, sizeof(leftValue));
     memset(midValue, 0, sizeof(midValue));
     memset(rightValue, 0, sizeof(rightValue));
-    for (int i = 0; i < SIDE_IR_COUNT; i++)
+    for (int i = 1; i < SIDE_IR_COUNT; i++)
     {
         pinMode(LEFT_BEGIN + i, INPUT);
         pinMode(RIGHT_BEGIN + i, INPUT);
@@ -20,17 +20,17 @@ void IRReceiver::initialize()
     for (int i = 0; i < MID_IR_COUNT; i++)
         pinMode(MID_BEGIN + i, INPUT);
 
-    midWeight[0] = -1.5;  // * 0
-    midWeight[1] = -1;  // * 0 
-    midWeight[2] = -0.5; // * 1
-    midWeight[3] = 0.5; // * 1
-    midWeight[4] = 1; // * 0
-    midWeight[5] = 1.5; // * 0
+    midWeight[0] = 1.5;  // * 0
+    midWeight[1] = 1;  // * 0 
+    midWeight[2] = 0.5; // * 1
+    midWeight[3] = -0.5; // * 1
+    midWeight[4] = -1; // * 0
+    midWeight[5] = -1.5; // * 0
 }
 
 void IRReceiver::updateValue()
 {
-    for (int i = 0; i < SIDE_IR_COUNT; ++i)
+    for (int i = 1; i < SIDE_IR_COUNT; ++i)
     {
         leftValue[i] = digitalRead(LEFT_BEGIN + i);
         rightValue[i] = digitalRead(RIGHT_BEGIN + i);
@@ -52,7 +52,7 @@ bool IRReceiver::atCrossroad(int angle)
 {   
     StateMachine &sm = StateMachine::getInstance();
     // 转弯结束
-    if (turn && AngleControl::getAngleDist() < 15) 
+    if (turn && AngleControl::getAngleDist() < 15 && sm.counter > 10) 
         turn = false;
     else if (ahead && (leftValue[1] == SIDE_DETECT || rightValue[1] == SIDE_DETECT))
         ahead = false;
@@ -65,11 +65,13 @@ bool IRReceiver::atCrossroad(int angle)
 
         if (midCount >= 3)
         {
-            if (angle == 90 || angle == -90) turn = true;
+            sm.counter = 0;
+            if (angle) turn = true;
             else ahead = true;
             return true;
         }
     }
+    sm.counter ++;
     return false;
 }
 
@@ -82,6 +84,7 @@ bool IRReceiver::atCrossroad(int angle)
 */
 double IRReceiver::angleOffset()
 {   
+    return 0;
     StateMachine &sm = StateMachine::getInstance();
     double offset = 0;
     if (sm.nowMission == SEARCH_MAZE || sm.nowMission == GO_OUT_MAZE)

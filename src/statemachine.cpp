@@ -54,9 +54,9 @@ void StateMachine::init()
     LED::initialize();
 
     // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
-    // info.updateInfo();
-    // while (info.getGameState() != GameGoing)
-    //     info.updateInfo();
+    info.updateInfo();
+    while (info.getGameState() != GameGoing)
+        info.updateInfo();
     
     // 设置第一步直线走的中轴线，就是小车初始的X坐标
     midLine = info.getCarposX();
@@ -75,8 +75,7 @@ void StateMachine::init()
             我就随便加了个迷宫中心的目标点作为唯一目标
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        insideTarget.push_back(35);
-        insideTarget.push_back(31);
+        insideTarget.push_back(15);
         backTime = 10;
         // Serial.println("nowHalf : " + String(nowHalf));
         // Serial.println("insideTarget size : " + String(insideTarget.size()));
@@ -88,8 +87,11 @@ void StateMachine::init()
     }
 
     // 初始化进迷宫前的坐标（小车会先走到{16, 244}，然后转弯然后再走到{87, 236}
-    outsideTarget.push_back({16, 244});
-    outsideTarget.push_back({87, 236});
+    // outsideTarget.push_back({16, 244});
+    // outsideTarget.push_back({87, 236});
+
+    outsideTarget.push_back({172, 17});
+    outsideTarget.push_back({16, 18});
 
     /*
         小车初始任务：
@@ -173,7 +175,7 @@ void StateMachine::updateInfo()
     info.updateInfo();
     // Serial.println("Update Success!");
     // 记录当前坐标
-    nowPosition = info.getCarpos();
+
     /*
         如果当前是在下半场且现在还在进入迷宫或者搜寻迷宫的过程
         那我们就需要更新物资、病人的信息了（其实就是要去的目标节点）
@@ -197,24 +199,24 @@ void StateMachine::updateInfo()
             }
         }
         // 初步debug的时候，建议注释掉下面的代码，只加入物资
-        // if (!havePatient)
-        // {
-        //     int targetIndex = info.positonTransform(info.Passenger.startpos);
-        //     if (info.indexNotExist(targetIndex))
-        //     {
-        //         insideTarget.push_back(targetIndex);
-        //         addNew = true;
-        //     }
-        // }
-        // else if (havePatient)
-        // {
-        //     int targetIndex = info.positonTransform(info.Passenger.finalpos);
-        //     if (info.indexNotExist(targetIndex))
-        //     {
-        //         insideTarget.push_back(targetIndex);
-        //         addNew = true;
-        //     }
-        // }
+        if (!havePatient)
+        {
+            int targetIndex = info.positonTransform(info.Passenger.startpos);
+            if (info.indexNotExist(targetIndex))
+            {
+                insideTarget.push_back(targetIndex);
+                addNew = true;
+            }
+        }
+        else if (havePatient)
+        {
+            int targetIndex = info.positonTransform(info.Passenger.finalpos);
+            if (info.indexNotExist(targetIndex))
+            {
+                insideTarget.push_back(targetIndex);
+                addNew = true;
+            }
+        }
         if (addNew)
         {
             if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
@@ -287,13 +289,12 @@ void StateMachine::updateAction(Information &info)
             if (IRReceiver::atCrossroad(crossroadAction.rotateAngle))
             {
                 // 如果是要转180度，那就不转，把motorDirection取反（表示方向取反）
-                if (crossroadAction.rotateAngle == 180)
-                    motorDirection = -motorDirection;
-                // 否则改变目标角度让车转弯
-                else AngleControl::target -= crossroadAction.rotateAngle;
-
-                if (crossroadAction.rotateAngle == 90 || crossroadAction.rotateAngle == -90)
-                    motorDirection = 1;
+                // if (crossroadAction.rotateAngle == 180)
+                //     motorDirection = -motorDirection;
+                // // 否则改变目标角度让车转弯
+                // else 
+                
+                AngleControl::target += crossroadAction.rotateAngle;
 
                 // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果），再进行一次寻路
                 lastMazeIndex = nowMazeIndex;
@@ -303,7 +304,7 @@ void StateMachine::updateAction(Information &info)
                     如果当前交叉点（也就是下一个到达的交叉点）序号正好是最近的目标
                     那 
                 */
-                if (nowMazeIndex == insideTarget.front())
+                if (nowMazeIndex == insideTarget.front() && nowHalf == SECOND_HALF)
                 {
                     if (nowMazeIndex == info.positonTransform(info.Passenger.startpos))
                         havePatient = true;
@@ -351,8 +352,6 @@ void StateMachine::updateMission(Information &info)
 
         // 更新中轴线（因为这段路也不短，所以必须要用上位机较正方向）
         midLine = nowPosition.Y;
-        outsideTarget.push_back({172, 8});
-        outsideTarget.push_back({5, 12});
     }
     // 如果当前任务是回程且迷宫外的目标点已经为空，那说明已经到起点了，结束游戏（停车）
     else if (nowMission == RETURN && outsideTarget.empty())

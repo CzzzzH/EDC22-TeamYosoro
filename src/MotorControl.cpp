@@ -99,7 +99,7 @@ void Motor::PID_compute()
 
 double diffVelocity(const double angle)
 {
-    double result_angle = 4 * angle + pow(angle / 14, 3);
+    double result_angle = 2 * angle + pow(angle / 14, 3);
     return result_angle;
 }
 
