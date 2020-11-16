@@ -2,6 +2,8 @@
 #include "Maze.h"
 #include "util.h"
 
+//#define MAZE_DEBUG
+
 void Maze::addEdge(int u, int v, bool dir = 1)
 {
     adjList[u].push_back(v);
@@ -37,12 +39,12 @@ void Maze::initialize(Information &info)
                 barrier.push_back({yoffsetA * MAZE_SIZE + i, (yoffsetA + 1) * MAZE_SIZE + i});
         }
     }
-
+    #ifdef MAZE_DEBUG
     for (auto it : barrier)
     {
         Serial.println(String(it.A) + "-->" + String(it.B));
     }
-    
+    #endif
     std::sort(barrier.begin(), barrier.end());
     //adding the edges in the Maze
     for (int i = 0;i < MAZE_SIZE;i++)
