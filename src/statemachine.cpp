@@ -132,7 +132,7 @@ void StateMachine::init()
 void StateMachine::process()
 {
     Information &info = Information::getInstance();
-    exceptionHandle();
+    // exceptionHandle();
     updateAction(info);
     updateMission(info);
     updateMotor(info);
@@ -202,26 +202,26 @@ void StateMachine::updateInfo()
             PackageInfo package = info.Package[i];
             if (package.whetherpicked) continue;
             int packageIndex = info.positonTransform(package.pos);
-            if (info.indexNotExist(packageIndex))
+            if (info.indexNotExist(packageIndex) && packageIndex != nowMazeIndex && packageIndex != lastMazeIndex)
             {
                 insideTarget.push_back(packageIndex);
                 addNew = true;
             }
         }
         // 初步debug的时候，建议注释掉下面的代码，只加入物资
-        if (!info.getCartransport())
+        if (!info.getCartransport() && !havePatient)
         {
             int targetIndex = info.positonTransform(info.Passenger.startpos);
-            if (info.indexNotExist(targetIndex))
+            if (info.indexNotExist(targetIndex) && targetIndex != nowMazeIndex)
             {
                 insideTarget.push_back(targetIndex);
                 addNew = true;
             }
         }
-        else if (info.getCartransport())
+        else if (info.getCartransport() && havePatient)
         {
             int targetIndex = info.positonTransform(info.Passenger.finalpos);
-            if (info.indexNotExist(targetIndex))
+            if (info.indexNotExist(targetIndex) && targetIndex != nowMazeIndex)
             {
                 insideTarget.push_back(targetIndex);
                 addNew = true;
@@ -321,6 +321,11 @@ void StateMachine::updateAction(Information &info)
                 {   
                     if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
                     crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
+                }
+                else if (nowMission == SECOND_HALF)
+                {
+                    if (havePatient) insideTarget.push_back(info.positonTransform(info.Passenger.finalpos));
+                    else insideTarget.push_back(info.positonTransform(info.Passenger.startpos));
                 }
             }
         }

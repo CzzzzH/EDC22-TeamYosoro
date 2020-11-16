@@ -9,14 +9,9 @@
 
 void IRReceiver::initialize()
 {
-    memset(leftValue, 0, sizeof(leftValue));
     memset(midValue, 0, sizeof(midValue));
-    memset(rightValue, 0, sizeof(rightValue));
-    for (int i = 1; i < SIDE_IR_COUNT; i++)
-    {
-        pinMode(LEFT_BEGIN + i, INPUT);
-        pinMode(RIGHT_BEGIN + i, INPUT);
-    }
+    pinMode(LEFT_BEGIN, INPUT);
+    pinMode(RIGHT_BEGIN, INPUT);
     for (int i = 0; i < MID_IR_COUNT; i++)
         pinMode(MID_BEGIN + i, INPUT);
 
@@ -31,18 +26,15 @@ void IRReceiver::initialize()
 void IRReceiver::updateValue()
 {   
     int midCount = 0;
-    for (int i = 1; i < SIDE_IR_COUNT; ++i)
-    {
-        leftValue[i] = digitalRead(LEFT_BEGIN + i);
-        rightValue[i] = digitalRead(RIGHT_BEGIN + i);
-    }
+    leftValue = digitalRead(LEFT_BEGIN);
+    rightValue = digitalRead(RIGHT_BEGIN);
     for (int i = 0; i < MID_IR_COUNT; ++i)
     {
         midValue[i] = digitalRead(MID_BEGIN + i);
         midCount += midValue[i] == MID_DETECT;
     }
-    if (midCount == 0)
-        StateMachine::getInstance().nowMission = END_GAME;
+    // if (midCount == 0)
+    //     StateMachine::getInstance().nowMission = END_GAME;
 }
 
  /*
@@ -58,7 +50,7 @@ bool IRReceiver::atCrossroad(int angle)
     // 转弯结束
     if (turn && AngleControl::getAngleDist() < 10) 
         turn = false;
-    else if (ahead && (leftValue[1] == SIDE_DETECT || rightValue[1] == SIDE_DETECT))
+    else if (ahead && (leftValue == SIDE_DETECT || rightValue == SIDE_DETECT))
         ahead = false;
     else if (!turn && !ahead)
     {   
@@ -113,10 +105,9 @@ double IRReceiver::angleOffset()
     return offset;
 }
 
-int IRReceiver::leftValue[SIDE_IR_COUNT];
-int IRReceiver::rightValue[SIDE_IR_COUNT];
+int IRReceiver::leftValue = 0;
+int IRReceiver::rightValue = 0;
 int IRReceiver::midValue[MID_IR_COUNT];
 double IRReceiver::midWeight[MID_IR_COUNT];
 bool IRReceiver::turn = false;
 bool IRReceiver::ahead = false;
-bool IRReceiver::backFlag = true;
