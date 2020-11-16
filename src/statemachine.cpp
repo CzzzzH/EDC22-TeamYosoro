@@ -322,7 +322,7 @@ void StateMachine::updateAction(Information &info)
                     if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
                     crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
                 }
-                else if (nowMission == SECOND_HALF)
+                else if (nowHalf == SECOND_HALF)
                 {
                     if (havePatient) insideTarget.push_back(info.positonTransform(info.Passenger.finalpos));
                     else insideTarget.push_back(info.positonTransform(info.Passenger.startpos));
