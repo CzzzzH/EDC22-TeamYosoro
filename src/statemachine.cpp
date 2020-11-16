@@ -193,7 +193,7 @@ void StateMachine::updateInfo()
         注意运输病人先要经过起点再经过目标点，至于判断当前应该是去起点还是目标
         靠info.getCartransport()这个函数就可以知道车上是否载有病人了
     */
-    if (insideTarget.empty() && nowHalf == SECOND_HALF && (nowMission == GO_TO_MAZE || nowMission == SEARCH_MAZE))
+    if (nowHalf == SECOND_HALF && (nowMission == GO_TO_MAZE || nowMission == SEARCH_MAZE))
     {
         // 添加物资包到target中
         bool addNew = false;
@@ -326,6 +326,7 @@ void StateMachine::updateAction(Information &info)
                 {
                     if (havePatient) insideTarget.push_back(info.positonTransform(info.Passenger.finalpos));
                     else insideTarget.push_back(info.positonTransform(info.Passenger.startpos));
+                    crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
                 }
             }
         }
@@ -342,11 +343,12 @@ void StateMachine::updateMission(Information &info)
     // 如果当前任务是搜寻迷宫且预定的返回时间到了，就把任务切换为退出迷宫，并清空迷宫内目标，只留下一个出口
     else if (nowMission == SEARCH_MAZE && info.getGameTime() > backTime)
     {
-        insideTarget.clear();
-        insideTarget.push_back(0);
-        if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
-        crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
-        nowMission = GO_OUT_MAZE;
+        nowMission = END_GAME;
+        // insideTarget.clear();
+        // insideTarget.push_back(0);
+        // if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
+        // crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
+        // nowMission = GO_OUT_MAZE;
     }
     /*
         如果当前任务是退出迷宫且迷宫内节点（任务开始时就只有一个出口）

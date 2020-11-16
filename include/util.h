@@ -25,7 +25,13 @@ struct barrierEdge
     int B;
     friend bool operator < (barrierEdge u,barrierEdge v)
     {
-        return u.A > v.A;   //Delibrately sort from big to small
+        if(u.A > v.A)
+            return true;
+        else if(u.A == v.A)
+            return u.B > v.B;
+        else
+            return false;  
+        //Delibrately sort from big to small
     }
 };
 struct Position

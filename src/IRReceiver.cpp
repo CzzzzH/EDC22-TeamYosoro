@@ -59,7 +59,7 @@ bool IRReceiver::atCrossroad(int angle)
         for (int i = 0; i < MID_IR_COUNT; ++i)
             midCount += ( (i < 2 || i > 3) && midValue[i] == MID_DETECT);
 
-        if (midCount >= 3 && millis() - sm.lastCrossTime > 500)
+        if (midCount >= 3 && millis() - sm.lastCrossTime > 800)
         {
             if (angle) turn = true;
             else ahead = true;
