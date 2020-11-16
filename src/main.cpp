@@ -35,12 +35,4 @@ void loop()
 {
 	sm.updateInfo(); // 轮询更新串口信息
 	// Motor::targetSpeed = 30;
-	// delay(2000);
-	// AngleControl::target += 90;
-	// Serial.println("!!!");
-	// while (true)
-	// {
-	// 	;
-	// }
-	
 }

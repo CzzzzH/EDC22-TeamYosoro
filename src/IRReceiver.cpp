@@ -48,7 +48,7 @@ bool IRReceiver::atCrossroad(int angle)
 {   
     StateMachine &sm = StateMachine::getInstance();
     // 转弯结束
-    if (turn && AngleControl::getAngleDist() < 10) 
+    if (turn && AngleControl::getAngleDist() < 10 && millis() - sm.lastCrossTime > 1000) 
         turn = false;
     else if (ahead && (leftValue == SIDE_DETECT || rightValue == SIDE_DETECT))
         ahead = false;
@@ -58,8 +58,7 @@ bool IRReceiver::atCrossroad(int angle)
         int midCount = 0;
         for (int i = 0; i < MID_IR_COUNT; ++i)
             midCount += ( (i < 2 || i > 3) && midValue[i] == MID_DETECT);
-
-        if (midCount >= 3 && millis() - sm.lastCrossTime > 800)
+        if (midCount >= 3 )
         {
             if (angle) turn = true;
             else ahead = true;
@@ -78,7 +77,7 @@ bool IRReceiver::atCrossroad(int angle)
 */
 double IRReceiver::angleOffset()
 {   
-    if (turn) return false;
+    if (AngleControl::getAngleDist() > 30) return 0;
     StateMachine &sm = StateMachine::getInstance();
     double offset = 0;
     if (sm.nowMission == SEARCH_MAZE || sm.nowMission == GO_OUT_MAZE)
