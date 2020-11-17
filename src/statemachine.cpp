@@ -62,7 +62,7 @@ void StateMachine::init()
     midLine = info.getCarposX();
 
     // 设置上下半场
-    nowHalf = FIRST_HALF;
+    nowHalf = SECOND_HALF;
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
