@@ -48,7 +48,7 @@ bool IRReceiver::atCrossroad(int angle)
 {   
     StateMachine &sm = StateMachine::getInstance();
     // 转弯结束
-    if (turn && AngleControl::getAngleDist() < 15 && millis() - sm.lastCrossTime > 1000) 
+    if (turn && AngleControl::getAngleDist() < 10 && millis() - sm.lastCrossTime > 1500) 
         turn = false;
     else if (ahead && (leftValue == SIDE_DETECT || rightValue == SIDE_DETECT))
         ahead = false;

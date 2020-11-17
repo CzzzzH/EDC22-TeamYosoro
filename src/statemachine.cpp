@@ -112,6 +112,7 @@ void StateMachine::init()
     nowMazeIndex = 32;
     lastMazeIndex = 38;
     lastCrossTime = nowCrossTime = 0;
+    lastScore = nowScore = 0;
 
     // 求第一次转弯的路径
     crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
@@ -214,7 +215,7 @@ void StateMachine::updateInfo()
             }
         }
         // 初步debug的时候，建议注释掉下面的代码，只加入物资
-        if (!info.getCartransport() && !havePatient)
+        if (!info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.startpos);
             if (info.indexNotExist(targetIndex) && targetIndex != nowMazeIndex)
@@ -223,7 +224,7 @@ void StateMachine::updateInfo()
                 addNew = true;
             }
         }
-        else if (info.getCartransport() && havePatient)
+        else if (info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.finalpos);
             if (info.indexNotExist(targetIndex) && targetIndex != nowMazeIndex)
@@ -304,6 +305,16 @@ void StateMachine::updateAction(Information &info)
             {
                 lastCrossTime = nowCrossTime;
                 nowCrossTime = millis();
+
+                lastScore = nowScore;
+                nowScore = info.getCarscore();
+
+                if (nowScore < lastScore)
+                {
+                    nowMission = END_GAME;
+                    return;
+                }
+
                 AngleControl::target += crossroadAction.rotateAngle;
 
                 // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果），再进行一次寻路
@@ -316,21 +327,15 @@ void StateMachine::updateAction(Information &info)
                 */
                 if (nowMazeIndex == insideTarget.front() && nowHalf == SECOND_HALF)
                 {
-                    if (nowMazeIndex == info.positonTransform(info.Passenger.startpos))
-                        havePatient = true;
-                    else if (nowMazeIndex == info.positonTransform(info.Passenger.finalpos))
-                        havePatient = false;
+                    // if (nowMazeIndex == info.positonTransform(info.Passenger.startpos))
+                    //     havePatient = true;
+                    // else if (nowMazeIndex == info.positonTransform(info.Passenger.finalpos))
+                    //     havePatient = false;
                     insideTarget.pop_front();
                 }
                 if (!insideTarget.empty())
                 {   
                     if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
-                    crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
-                }
-                else if (nowHalf == SECOND_HALF)
-                {
-                    if (havePatient) insideTarget.push_back(info.positonTransform(info.Passenger.finalpos));
-                    else insideTarget.push_back(info.positonTransform(info.Passenger.startpos));
                     crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
                 }
             }

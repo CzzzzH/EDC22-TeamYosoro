@@ -24,7 +24,8 @@ public:
     int offset = 0;
     int motorDirection = 1;
     uint16_t backTime = 0;
-    
+    int lastScore, nowScore;
+
     unsigned long lastCrossTime, nowCrossTime;
 
     bool havePatient = false;

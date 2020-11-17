@@ -99,14 +99,14 @@ void Motor::PID_compute()
 
 double diffVelocity(const double angle)
 {
-    double result_angle = 3 * angle + pow(angle / 30, 3);
+    double result_angle = 2.6 * angle + pow(angle / 35, 3);
     return result_angle;
 }
 
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 10;
+    double IRcoff = 13;
     if (targetSpeed < 0)
         IRcoff = -0.7 * IRcoff;
     double diff_velocity_in = -AngleControl::getOutput() + (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::angleOffset();
