@@ -109,8 +109,8 @@ void StateMachine::init()
     nowMission = SEARCH_MAZE;
     
     // 小车在迷宫中的初始序号
-    nowMazeIndex = 32;
-    lastMazeIndex = 38;
+    nowMazeIndex = 38;
+    lastMazeIndex = 44;
     lastCrossTime = nowCrossTime = 0;
     lastScore = nowScore = 0;
 
@@ -202,41 +202,26 @@ void StateMachine::updateInfo()
     if (nowHalf == SECOND_HALF && (nowMission == GO_TO_MAZE || nowMission == SEARCH_MAZE))
     {
         // 添加物资包到target中
-        bool addNew = false;
         for (int i = 0; i < 6; ++i)
         {
             PackageInfo package = info.Package[i];
             if (package.whetherpicked) continue;
             int packageIndex = info.positonTransform(package.pos);
             if (info.indexNotExist(packageIndex) && packageIndex != nowMazeIndex && packageIndex != lastMazeIndex)
-            {
                 insideTarget.push_back(packageIndex);
-                addNew = true;
-            }
         }
         // 初步debug的时候，建议注释掉下面的代码，只加入物资
         if (!info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.startpos);
             if (info.indexNotExist(targetIndex) && targetIndex != nowMazeIndex)
-            {
                 insideTarget.push_back(targetIndex);
-                addNew = true;
-            }
         }
         else if (info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.finalpos);
             if (info.indexNotExist(targetIndex) && targetIndex != nowMazeIndex)
-            {
                 insideTarget.push_back(targetIndex);
-                addNew = true;
-            }
-        }
-        if (addNew)
-        {
-            if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
-            crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
         }
     }
 }
