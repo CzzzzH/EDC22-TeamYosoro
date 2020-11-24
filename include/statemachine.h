@@ -25,6 +25,7 @@ public:
     int motorDirection = 1;
     uint16_t backTime = 0;
     int lastScore, nowScore;
+    int counter = 0;
 
     unsigned long lastCrossTime, nowCrossTime;
 
@@ -45,6 +46,7 @@ public:
     void updateMission(Information &info);
     void updateAction(Information &info);
     void updateMotor(Information &info);
+    void printDebugInfo(Information &info);
 };
 
 #endif

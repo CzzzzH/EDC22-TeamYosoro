@@ -5,8 +5,10 @@
 #include "JY61.h"
 #include "MotorControl.h"
 #include "IRReceiver.h"
+#include "SoftwareSerial.h"
 
 #define INTERRUPT_INTERVAL 50
+// #define USE_ZIGBEE
 
 std::list<TimerInterrupt *>
 	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();
@@ -17,7 +19,6 @@ TimerInterrupt motorTimer(INTERRUPT_INTERVAL, [] {
 });
 
 TimerInterrupt angleTimer(10, [] {
-	// Serial.println("mills : " + String(millis()));
 	IRReceiver::updateValue();
 	JY61::read();
 	AngleControl::Compute();
@@ -25,7 +26,6 @@ TimerInterrupt angleTimer(10, [] {
 });
 
 StateMachine &sm = StateMachine::getInstance();
-
 void setup()
 {
 	sm.init(); // 一切的初始化
@@ -33,6 +33,7 @@ void setup()
 
 void loop()
 {
-	sm.updateInfo(); // 轮询更新串口信息
-	// Motor::targetSpeed = 30;
+    #ifdef USE_ZIGBEE
+	    sm.updateInfo(); // 轮询更新串口信息
+    #endif
 }

@@ -13,11 +13,13 @@
 
 // 各种Define，用于debug
 
+// #define USE_ZIGBEE
 // #define DEBUG_MOTOR
 // #define DEBUG_ANGLECONTROLER
 // #define DEBUG_IRRECEIVER
 // #define DEBUG_ZIGBEE
 // #define DEBUG_TIMER
+
 
 // 获取状态机的实例（在其他源文件要用到状态机时调用这个函数就能获得状态机实例引用） 
 StateMachine &StateMachine::getInstance()
@@ -37,7 +39,7 @@ void StateMachine::init()
     Motor::isDebug = false;
 
     // 初始化串口
-    Serial.begin(9600);
+    Serial.begin(115200);
     Serial2.begin(115200);
     Serial3.begin(115200);
 
@@ -54,9 +56,12 @@ void StateMachine::init()
     LED::initialize();
 
     // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
-    info.updateInfo();
-    while (info.getGameState() != GameGoing)
+
+    #ifdef USE_ZIGBEE
         info.updateInfo();
+        while (info.getGameState() != GameGoing)
+            info.updateInfo();
+    #endif
     
     // 设置第一步直线走的中轴线，就是小车初始的X坐标
     midLine = info.getCarposX();
@@ -82,8 +87,6 @@ void StateMachine::init()
         insideTarget.push_back(13);
         insideTarget.push_back(8);
         backTime = 20;
-        // Serial.println("nowHalf : " + String(nowHalf));
-        // Serial.println("insideTarget size : " + String(insideTarget.size()));
     }
     else
     {
@@ -106,7 +109,7 @@ void StateMachine::init()
         2. SEARCH_MAZE: 该任务状态下小车会直接开始在迷宫进行搜寻工作
         3. RETURN: 该任务状态可以测试小车走出迷宫到返回起点的一段路
     */
-    nowMission = SEARCH_MAZE;
+    nowMission = WAIT_FOR_START;
     
     // 小车在迷宫中的初始序号
     nowMazeIndex = 38;
@@ -142,35 +145,8 @@ void StateMachine::process()
     updateAction(info);
     updateMission(info);
     updateMotor(info);
-    // Serial.println(info.getGameTime());
-    // counter++;
-
-// 一些debug代码
-#ifdef DEBUG_MOTOR
-    Serial.println("Target Speed: " + String(Motor::targetSpeed));
-    Serial.println("Left Motor Counter: " + String(encoder::counter.left));
-    Serial.println("Right Motor Counter: " + String(encoder::counter.right));
-#endif
-
-#ifdef DEBUG_ANGLECONTROLER
-    Serial.println("Now Angle: " + String(JY61::Angle[2]));
-    Serial.println("Target Angle: " + String(AngleControl::target));
-#endif
-
-#ifdef DEBUG_IRRECEIVER
-    Serial.println("LeftIR: " + String(IRReceiver::leftValue[0]) + " " + String(IRReceiver::leftValue[1]) + " " + String(IRReceiver::leftValue[2]));
-    Serial.println("RightIR: " + String(IRReceiver::rightValue[0]) + " " + String(IRReceiver::rightValue[1]) + " " + String(IRReceiver::rightValue[2]));
-    Serial.println("MidIR: " + String(IRReceiver::midValue[0]) + " " + String(IRReceiver::midValue[1]) + " " + String(IRReceiver::midValue[2]) + " " + String(IRReceiver::midValue[3]));
-#endif
-
-#ifdef DEBUG_ZIGBEE
-    Serial.println("Car Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
-#endif
-
-#ifdef DEBUG_TIMER
-    Serial.println("Counter: " + String(counter));
-    Serial.println("Milli Seconds: " + String(millis()));
-#endif
+    printDebugInfo(info);
+    counter++;
 }
 
 void StateMachine::exceptionHandle()
@@ -371,4 +347,35 @@ void StateMachine::updateMotor(Information &info)
     // 如果当前游戏还没开始（实际不可能出现该情况）或者游戏已经结束，就直接停车
     if (nowMission == WAIT_FOR_START || nowMission == END_GAME) Motor::targetSpeed = 0;
     else Motor::targetSpeed = fabs(Motor::targetSpeed) * motorDirection;
+}
+
+
+// Debug信息输出
+void StateMachine::printDebugInfo(Information &info)
+{
+    #ifdef DEBUG_MOTOR
+        Serial.println("Target Speed: " + String(Motor::targetSpeed));
+        Serial.println("Left Motor Counter: " + String(encoder::counter.left));
+        Serial.println("Right Motor Counter: " + String(encoder::counter.right));
+    #endif
+
+    #ifdef DEBUG_ANGLECONTROLER
+        Serial.println("Now Angle: " + String(JY61::Angle[2]));
+        Serial.println("Target Angle: " + String(AngleControl::target));
+    #endif
+
+    #ifdef DEBUG_IRRECEIVER
+        Serial.println("LeftIR: " + String(IRReceiver::leftValue[0]) + " " + String(IRReceiver::leftValue[1]) + " " + String(IRReceiver::leftValue[2]));
+        Serial.println("RightIR: " + String(IRReceiver::rightValue[0]) + " " + String(IRReceiver::rightValue[1]) + " " + String(IRReceiver::rightValue[2]));
+        Serial.println("MidIR: " + String(IRReceiver::midValue[0]) + " " + String(IRReceiver::midValue[1]) + " " + String(IRReceiver::midValue[2]) + " " + String(IRReceiver::midValue[3]));
+    #endif
+
+    #ifdef DEBUG_ZIGBEE
+        Serial.println("Car Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
+    #endif
+
+    #ifdef DEBUG_TIMER
+        Serial.println("Counter: " + String(counter));
+        Serial.println("Milli Seconds: " + String(millis()));
+    #endif
 }
