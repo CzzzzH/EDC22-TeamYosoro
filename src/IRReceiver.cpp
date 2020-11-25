@@ -15,12 +15,25 @@ void IRReceiver::initialize()
     for (int i = 0; i < MID_IR_COUNT; i++)
         pinMode(MID_BEGIN + i, INPUT);
 
-    midWeight[0] = 1.5;  // * 0
-    midWeight[1] = 1;  // * 0 
-    midWeight[2] = 0.5; // * 1
-    midWeight[3] = -0.5; // * 1
-    midWeight[4] = -1; // * 0
-    midWeight[5] = -1.5; // * 0
+    // Right 
+    midWeight[0] = 3.5; 
+    midWeight[1] = 3;  
+    midWeight[2] = 2.5; 
+    midWeight[3] = 2;
+    midWeight[4] = 1.5; 
+    midWeight[5] = 1;
+    midWeight[6] = 0.5; 
+    midWeight[7] = 0.5;  
+
+    // Left
+    midWeight[8] = -0.5; 
+    midWeight[9] = -0.5;
+    midWeight[10] = -1; 
+    midWeight[11] = -1.5;  
+    midWeight[12] = -2; 
+    midWeight[13] = -2.5;
+    midWeight[14] = -3; 
+    midWeight[15] = -3.5; 
 }
 
 void IRReceiver::updateValue()
@@ -33,37 +46,65 @@ void IRReceiver::updateValue()
         midValue[i] = digitalRead(MID_BEGIN + i);
         midCount += midValue[i] == MID_DETECT;
     }
-    // if (midCount == 0)
-    //     StateMachine::getInstance().nowMission = END_GAME;
 }
 
- /*
+/*
     判断当前位置是否处于十字路口正中央，如果是（可能立即转弯）就返回true
     
     1. 这个函数的重点在于atCross这个变量，当前置红外碰线时被置位true，标志着进入预备转弯状态
     2. 只有atCross等于true时，中间红外碰黑线线才会返回true
 */
-
 bool IRReceiver::atCrossroad(int angle)
 {   
     StateMachine &sm = StateMachine::getInstance();
+
+    // 前置红外熄灭个数
+    int midCount = 0;
+    for (int i = 0; i < MID_IR_COUNT; ++i)
+        midCount += midValue[i] == MID_DETECT;
+
     // 转弯结束
-    if (turn && AngleControl::getAngleDist() < 10 && millis() - sm.lastCrossTime > 1500) 
-        turn = false;
-    else if (ahead && (leftValue == SIDE_DETECT || rightValue == SIDE_DETECT))
-        ahead = false;
+    if (turn)
+    {
+        if (AngleControl::getAngleDist() < 10 && millis() - sm.lastCrossTime > 1000)
+            turn = false;
+    } 
+    // 直走结束
+    else if (ahead)
+    {   
+        // 正走和倒走时判断先后顺序正好相反
+        if (sm.motorDirection == 1)
+        {
+            if (leftValue == SIDE_DETECT || rightValue == SIDE_DETECT)
+                ahead = false;
+        }
+        else
+        {
+            if (midCount >= 8)
+                ahead = false;
+        }    
+    }
+    // 过交叉线
     else if (!turn && !ahead)
     {   
-        // 计算前置红外的碰黑线数目
-        int midCount = 0;
-        for (int i = 0; i < MID_IR_COUNT; ++i)
-            midCount += ( (i < 2 || i > 3) && midValue[i] == MID_DETECT);
-        if (midCount >= 3 )
+        if (sm.motorDirection == 1)
         {
-            if (angle) turn = true;
-            else ahead = true;
-            return true;
+            if (midCount >= 8)
+            {
+                if (angle) turn = true;
+                else ahead = true;
+                return true;
+            }
         }
+        else
+        {
+            if (leftValue == SIDE_DETECT || rightValue == SIDE_DETECT)
+            {
+                if (angle) turn = true;
+                else ahead = true;
+                return true;
+            }
+        }    
     }
     return false;
 }

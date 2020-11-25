@@ -270,7 +270,7 @@ void StateMachine::updateAction(Information &info)
                 lastScore = nowScore;
                 nowScore = info.getCarscore();
 
-                if (nowScore < lastScore)
+                if (lastScore - nowScore >= 50)
                 {
                     nowMission = END_GAME;
                     return;

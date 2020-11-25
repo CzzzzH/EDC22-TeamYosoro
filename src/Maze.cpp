@@ -46,7 +46,7 @@ void Maze::initialize(Information &info)
     }
     #endif
     std::sort(barrier.begin(), barrier.end());
-    //adding the edges in the Maze
+    // adding the edges in the Maze
     for (int i = 0;i < MAZE_SIZE;i++)
     {
         for(int j = 1;j <= MAZE_SIZE;j++)
@@ -73,7 +73,7 @@ void Maze::initialize(Information &info)
 
 int Maze::getWay(int now, std::deque<int> &target)
 {
-    std::vector<int> Stack(MAZE_SIZE * MAZE_SIZE + 5);
+    std::vector<int> Stack(MAZE_SIZE * MAZE_SIZE + 10);
     bool Break = false;
     std::queue<int> q;
     std::vector<int> history;

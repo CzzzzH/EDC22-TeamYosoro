@@ -1,10 +1,10 @@
 #include <Arduino.h>
 
 // From left to right
-#define LEFT_BEGIN 26
-#define MID_BEGIN 28
-#define RIGHT_BEGIN 23
-#define MID_IR_COUNT 6
+#define LEFT_BEGIN 38
+#define MID_BEGIN 22
+#define RIGHT_BEGIN 39
+#define MID_IR_COUNT 16
 #define MID_DETECT 1
 #define SIDE_DETECT 1
 #define NON_SENSITIVITY 0
