@@ -10,42 +10,49 @@
 void IRReceiver::initialize()
 {
     memset(midValue, 0, sizeof(midValue));
+    memset(midBackValue, 0, sizeof(midValue));
     pinMode(LEFT_BEGIN, INPUT);
     pinMode(RIGHT_BEGIN, INPUT);
     for (int i = 0; i < MID_IR_COUNT; i++)
         pinMode(MID_BEGIN + i, INPUT);
-
+    for (int i = 0; i < MID_BACK_IR_COUNT; i++)
+        pinMode(MID_BACK_BEGIN + i, INPUT);
+        
     // Right 
-    midWeight[0] = 3.5; 
-    midWeight[1] = 3;  
-    midWeight[2] = 2.5; 
-    midWeight[3] = 2;
-    midWeight[4] = 1.5; 
-    midWeight[5] = 1;
+    midWeight[0] = 0; 
+    midWeight[1] = 0;  
+    midWeight[2] = 1.5; 
+    midWeight[3] = 1.25;
+    midWeight[4] = 1; 
+    midWeight[5] = 0.75;
     midWeight[6] = 0.5; 
-    midWeight[7] = 0.5;  
+    midWeight[7] = 0.25;
+    midBackWeight[0] = 1;
+    midBackWeight[1] = 0.5;
+    midBackWeight[2] = 0.5;
 
     // Left
-    midWeight[8] = -0.5; 
+    midBackWeight[3] = -0.5;
+    midBackWeight[4] = -0.5;
+    midBackWeight[5] = -1;
+    midWeight[8] = -0.25; 
     midWeight[9] = -0.5;
-    midWeight[10] = -1; 
-    midWeight[11] = -1.5;  
-    midWeight[12] = -2; 
-    midWeight[13] = -2.5;
-    midWeight[14] = -3; 
-    midWeight[15] = -3.5; 
+    midWeight[10] = -0.75; 
+    midWeight[11] = -1;  
+    midWeight[12] = -1.25; 
+    midWeight[13] = -1.5;
+    midWeight[14] = 0; 
+    midWeight[15] = 0; 
 }
 
 void IRReceiver::updateValue()
 {   
-    int midCount = 0;
     leftValue = digitalRead(LEFT_BEGIN);
     rightValue = digitalRead(RIGHT_BEGIN);
     for (int i = 0; i < MID_IR_COUNT; ++i)
-    {
         midValue[i] = digitalRead(MID_BEGIN + i);
-        midCount += midValue[i] == MID_DETECT;
-    }
+    for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
+        midBackValue[i] = digitalRead(MID_BACK_BEGIN + i);
 }
 
 /*
@@ -60,8 +67,11 @@ bool IRReceiver::atCrossroad(int angle)
 
     // 前置红外熄灭个数
     int midCount = 0;
+    int midBackCount = 0;
     for (int i = 0; i < MID_IR_COUNT; ++i)
-        midCount += midValue[i] == MID_DETECT;
+        midCount += midValue[i] == IR_DETECT;
+    for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
+        midBackCount += midBackValue[i] == IR_DETECT;
 
     // 转弯结束
     if (turn)
@@ -73,9 +83,9 @@ bool IRReceiver::atCrossroad(int angle)
     else if (ahead)
     {   
         // 正走和倒走时判断先后顺序正好相反
-        if (sm.motorDirection == 1)
+        if (sm.motorDirection != 2)
         {
-            if (leftValue == SIDE_DETECT || rightValue == SIDE_DETECT)
+            if (leftValue == IR_DETECT || rightValue == IR_DETECT)
                 ahead = false;
         }
         else
@@ -87,20 +97,22 @@ bool IRReceiver::atCrossroad(int angle)
     // 过交叉线
     else if (!turn && !ahead)
     {   
-        if (sm.motorDirection == 1)
+        if (sm.motorDirection != 2)
         {
-            if (midCount >= 8)
+            if (midCount >= 8 || sm.restart)
             {
-                if (angle) turn = true;
+                sm.restart = false;
+                if (angle == 90 || angle == -90) turn = true;
                 else ahead = true;
                 return true;
             }
         }
         else
         {
-            if (leftValue == SIDE_DETECT || rightValue == SIDE_DETECT)
+            if (leftValue == IR_DETECT || rightValue == IR_DETECT || sm.restart)
             {
-                if (angle) turn = true;
+                sm.restart = false;
+                if (angle == 90 || angle == -90) turn = true;
                 else ahead = true;
                 return true;
             }
@@ -123,8 +135,16 @@ double IRReceiver::angleOffset()
     double offset = 0;
     if (sm.nowMission == SEARCH_MAZE || sm.nowMission == GO_OUT_MAZE)
     {
-        for (int i = 0; i < MID_IR_COUNT; ++i)
-            offset += midWeight[i] * (midValue[i] == MID_DETECT);
+        if (Motor::targetSpeed > 0)
+        {
+            for (int i = 0; i < MID_IR_COUNT; ++i)
+                offset += midWeight[i] * (midValue[i] == IR_DETECT);
+        }
+        else
+        {   
+            for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
+                offset += midBackWeight[i] * (midBackValue[i] == IR_DETECT);
+        }
     }
     else if (sm.nowMission == GO_TO_MAZE)
     {
@@ -148,6 +168,8 @@ double IRReceiver::angleOffset()
 int IRReceiver::leftValue = 0;
 int IRReceiver::rightValue = 0;
 int IRReceiver::midValue[MID_IR_COUNT];
+int IRReceiver::midBackValue[MID_BACK_IR_COUNT];
 double IRReceiver::midWeight[MID_IR_COUNT];
+double IRReceiver::midBackWeight[MID_BACK_IR_COUNT];
 bool IRReceiver::turn = false;
 bool IRReceiver::ahead = false;

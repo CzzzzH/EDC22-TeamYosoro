@@ -11,15 +11,7 @@
 #include "information.h"
 #include "LED.h"
 
-// 各种Define，用于debug
-
-// #define USE_ZIGBEE
-// #define DEBUG_MOTOR
-// #define DEBUG_ANGLECONTROLER
-// #define DEBUG_IRRECEIVER
-// #define DEBUG_ZIGBEE
-// #define DEBUG_TIMER
-
+#define SPEED 60
 
 // 获取状态机的实例（在其他源文件要用到状态机时调用这个函数就能获得状态机实例引用） 
 StateMachine &StateMachine::getInstance()
@@ -67,7 +59,7 @@ void StateMachine::init()
     midLine = info.getCarposX();
 
     // 设置上下半场
-    nowHalf = SECOND_HALF;
+    nowHalf = FIRST_HALF;
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
@@ -80,13 +72,8 @@ void StateMachine::init()
             我就随便加了个迷宫中心的目标点作为唯一目标
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        insideTarget.push_back(25);
-        insideTarget.push_back(21);
-        insideTarget.push_back(23);
-        insideTarget.push_back(18);
-        insideTarget.push_back(13);
-        insideTarget.push_back(8);
-        backTime = 20;
+        insideTarget.push_back(10);
+        backTime = 100;
     }
     else
     {
@@ -109,20 +96,20 @@ void StateMachine::init()
         2. SEARCH_MAZE: 该任务状态下小车会直接开始在迷宫进行搜寻工作
         3. RETURN: 该任务状态可以测试小车走出迷宫到返回起点的一段路
     */
-    nowMission = WAIT_FOR_START;
+    nowMission = SEARCH_MAZE;
     
     // 小车在迷宫中的初始序号
     nowMazeIndex = 38;
-    lastMazeIndex = 44;
+    nextMazeIndex = 32;
     lastCrossTime = nowCrossTime = 0;
     lastScore = nowScore = 0;
 
     // 求第一次转弯的路径
-    crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
+    crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
     
     // 小车的初始方向和速度
     motorDirection = 1;
-    Motor::targetSpeed = 30;
+    Motor::targetSpeed = SPEED;
 
     // 最后再初始化中断
     TimerInterrupt::initialize(interrupt_period);
@@ -183,21 +170,30 @@ void StateMachine::updateInfo()
             PackageInfo package = info.Package[i];
             if (package.whetherpicked) continue;
             int packageIndex = info.positonTransform(package.pos);
-            if (info.indexNotExist(packageIndex) && packageIndex != nowMazeIndex && packageIndex != lastMazeIndex)
+            if (info.indexNotExist(packageIndex) && packageIndex != nextMazeIndex && packageIndex != nowMazeIndex)
+            {
                 insideTarget.push_back(packageIndex);
+                addNew = true;
+            }
         }
-        // 初步debug的时候，建议注释掉下面的代码，只加入物资
+        // 添加患者和目的地到target中
         if (!info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.startpos);
-            if (info.indexNotExist(targetIndex) && targetIndex != nowMazeIndex)
+            if (info.indexNotExist(targetIndex) && targetIndex != nextMazeIndex)
+            {
                 insideTarget.push_back(targetIndex);
+                addNew = true;
+            }
         }
         else if (info.getCartransport())
         {
             int targetIndex = info.positonTransform(info.Passenger.finalpos);
-            if (info.indexNotExist(targetIndex) && targetIndex != nowMazeIndex)
+            if (info.indexNotExist(targetIndex) && targetIndex != nextMazeIndex)
+            {
                 insideTarget.push_back(targetIndex);
+                addNew = true;
+            }
         }
     }
 }
@@ -242,62 +238,70 @@ void StateMachine::updateAction(Information &info)
     */
     else if (nowMission == SEARCH_MAZE || nowMission == GO_OUT_MAZE)
     {   
+        // 如果是上半场，那就隔一段时间加一个目标点
+        if (nowHalf == FIRST_HALF && counter % 1000 == 0)
+        {   
+            if (counter == 1000) insideTarget.push_back(32);
+            if (counter == 2000) insideTarget.push_back(10);
+            crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+        }
+
         // 如果目标集合为空，点亮灯并且停下（显然只有新的目标出现才会继续启动）
-        if (insideTarget.empty())
+        if (insideTarget.empty() && stop)
         {
-            // Serial.println("insideTarget: fuck your shit");
             Motor::targetSpeed = 0;
             LED::ledOn();
+            restart = true;
         }
         // 目标集合不为空，那就做的事多了
         else
         {   
             // 设置LED和车速
-            Motor::targetSpeed = 30;
+            Motor::targetSpeed = SPEED;
             LED::ledOff();
-            // 通过Maze寻路得到一个结构体，包含转角和下一个交叉点的序号
-            // Serial.println("Begin crossroad: " + String(lastMazeIndex) + " " + String(nowMazeIndex) + " " + String(insideTarget.front()));
-            
+            stop = false;
+
+            // 如果当前物资更新了，重新寻路
+            if (addNew)
+            {
+                addNew = false;
+                if (motorDirection == -1) nowMazeIndex = 2 * nextMazeIndex - nowMazeIndex;
+                crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+            }
+
             /*
                 这里请仔细阅读 IRReceiver::atCrossroad() 函数!!!
                 否则可能很难理解是怎么实现转弯的
             */
             if (IRReceiver::atCrossroad(crossroadAction.rotateAngle))
             {
+                Serial.println("Cross!!!");
                 lastCrossTime = nowCrossTime;
                 nowCrossTime = millis();
-
-                lastScore = nowScore;
-                nowScore = info.getCarscore();
-
-                if (lastScore - nowScore >= 50)
-                {
-                    nowMission = END_GAME;
-                    return;
-                }
-
-                AngleControl::target += crossroadAction.rotateAngle;
-
-                // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果），再进行一次寻路
-                lastMazeIndex = nowMazeIndex;
-                nowMazeIndex = crossroadAction.nextPosition;
                 
-                /*
-                    如果当前交叉点（也就是下一个到达的交叉点）序号正好是最近的目标
-                    那 
-                */
-                if (nowMazeIndex == insideTarget.front() && nowHalf == SECOND_HALF)
+                if (insideTarget.empty())
                 {
-                    // if (nowMazeIndex == info.positonTransform(info.Passenger.startpos))
-                    //     havePatient = true;
-                    // else if (nowMazeIndex == info.positonTransform(info.Passenger.finalpos))
-                    //     havePatient = false;
-                    insideTarget.pop_front();
+                    stop = true;
+                    IRReceiver::ahead = false;
+                    IRReceiver::turn = false;
                 }
-                if (!insideTarget.empty())
+                else
                 {   
-                    if (motorDirection == -1) lastMazeIndex = 2 * nowMazeIndex - lastMazeIndex;
-                    crossroadAction = Maze::getDirection(lastMazeIndex, nowMazeIndex, insideTarget);
+                    if (crossroadAction.rotateAngle == 180) motorDirection = -1;
+                    else 
+                    {
+                        motorDirection = 1;
+                        AngleControl::target += crossroadAction.rotateAngle;
+                    }
+                        
+                    if (nextMazeIndex == insideTarget.front())
+                        insideTarget.pop_front();
+                    
+                    // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果），再进行一次寻路
+                    nowMazeIndex = nextMazeIndex;
+                    nextMazeIndex = crossroadAction.nextPosition;
+                    if (motorDirection == -1) nowMazeIndex = 2 * nextMazeIndex - nowMazeIndex;
+                    crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
                 }
             }
         }
@@ -339,6 +343,15 @@ void StateMachine::updateMission(Information &info)
     // 如果当前任务是回程且迷宫外的目标点已经为空，那说明已经到起点了，结束游戏（停车）
     else if (nowMission == RETURN && outsideTarget.empty())
         nowMission = END_GAME;
+
+    lastScore = nowScore;
+    nowScore = info.getCarscore();
+
+    if (lastScore - nowScore >= 50)
+    {
+        nowMission = END_GAME;
+        return;
+    }
 }
 
 // 更新电机
@@ -353,29 +366,46 @@ void StateMachine::updateMotor(Information &info)
 // Debug信息输出
 void StateMachine::printDebugInfo(Information &info)
 {
-    #ifdef DEBUG_MOTOR
-        Serial.println("Target Speed: " + String(Motor::targetSpeed));
-        Serial.println("Left Motor Counter: " + String(encoder::counter.left));
-        Serial.println("Right Motor Counter: " + String(encoder::counter.right));
-    #endif
+    if (counter % 20 == 0)
+    {
+        #ifdef DEBUG_MOTOR
+            Serial.println("Target Speed: " + String(Motor::targetSpeed));
+            Serial.println("Left Motor Counter: " + String(encoder::counter.left));
+            Serial.println("Right Motor Counter: " + String(encoder::counter.right));
+        #endif
 
-    #ifdef DEBUG_ANGLECONTROLER
-        Serial.println("Now Angle: " + String(JY61::Angle[2]));
-        Serial.println("Target Angle: " + String(AngleControl::target));
-    #endif
+        #ifdef DEBUG_ANGLECONTROLER
+            Serial.println("Now Angle: " + String(JY61::Angle[2]));
+            Serial.println("Target Angle: " + String(AngleControl::target));
+            Serial.println("Angle Dist: " + String(AngleControl::getAngleDist()));
+            Serial.println();
+        #endif
 
-    #ifdef DEBUG_IRRECEIVER
-        Serial.println("LeftIR: " + String(IRReceiver::leftValue[0]) + " " + String(IRReceiver::leftValue[1]) + " " + String(IRReceiver::leftValue[2]));
-        Serial.println("RightIR: " + String(IRReceiver::rightValue[0]) + " " + String(IRReceiver::rightValue[1]) + " " + String(IRReceiver::rightValue[2]));
-        Serial.println("MidIR: " + String(IRReceiver::midValue[0]) + " " + String(IRReceiver::midValue[1]) + " " + String(IRReceiver::midValue[2]) + " " + String(IRReceiver::midValue[3]));
-    #endif
+        #ifdef DEBUG_IRRECEIVER
+        #endif
 
-    #ifdef DEBUG_ZIGBEE
-        Serial.println("Car Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
-    #endif
+        #ifdef DEBUG_ZIGBEE
+            Serial.println("Car Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
+        #endif
 
-    #ifdef DEBUG_TIMER
-        Serial.println("Counter: " + String(counter));
-        Serial.println("Milli Seconds: " + String(millis()));
-    #endif
+        #ifdef DEBUG_TIMER
+            Serial.println("Counter: " + String(counter));
+            Serial.println("Milli Seconds: " + String(millis()));
+        #endif
+
+        #ifdef DEBUG_MAZE_POS
+            Serial.println("NowMazeIndex: " + String(nowMazeIndex));
+            Serial.println("NextMazeIndex: " + String(nextMazeIndex));
+            if (stop) Serial.println("Stop!!!");
+            if (insideTarget.empty())
+                Serial.println("Target Empty !");
+            else Serial.println("NowTarget: " + String(insideTarget.front()));
+        #endif
+
+        #ifdef DEBUG_CROSS_ACTION
+            Serial.println("CrossActionAngle: " + String(crossroadAction.rotateAngle));
+            Serial.println("NextPosition: " + String(crossroadAction.nextPosition));
+            Serial.println();
+        #endif
+    }
 }

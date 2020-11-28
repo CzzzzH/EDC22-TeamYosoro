@@ -5,6 +5,16 @@
 #include "information.h"
 #include <deque>
 
+// 各种Define，用于debug
+#define USE_ZIGBEE
+// #define DEBUG_MOTOR
+// #define DEBUG_ANGLECONTROLER
+// #define DEBUG_IRRECEIVER
+// #define DEBUG_ZIGBEE
+// #define DEBUG_TIMER
+#define DEBUG_MAZE_POS
+#define DEBUG_CROSS_ACTION
+
 class StateMachine // The statemachine of th2e car (Singleton)
 {
 private:
@@ -19,7 +29,7 @@ public:
     Position nowPosition = {0, 0};
     CrossroadAction crossroadAction;
     unsigned int midLine = 0;
-    int lastMazeIndex, nowMazeIndex;
+    int nowMazeIndex, nextMazeIndex;
     int targetTransportCount = 0;
     int offset = 0;
     int motorDirection = 1;
@@ -31,6 +41,9 @@ public:
 
     bool havePatient = false;
     bool getItems = false;
+    bool restart = false;
+    bool addNew = false;
+    bool stop = false;
     
     std::deque<Position> outsideTarget;
     std::deque<int> insideTarget;

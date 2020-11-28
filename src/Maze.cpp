@@ -45,6 +45,7 @@ void Maze::initialize(Information &info)
         Serial.println(String(it.A) + "-->" + String(it.B));
     }
     #endif
+    
     std::sort(barrier.begin(), barrier.end());
     // adding the edges in the Maze
     for (int i = 0;i < MAZE_SIZE;i++)

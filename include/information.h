@@ -26,7 +26,7 @@ public:
     uint8_t zigbeeMessage[ZIGBEE_MESSAGE_LENTH]; 
     int message_index = 0;
     int message_head = -1;
-
+    
     void Decode();
     void DecodeBasicInfo();
     void DecodeCarInfo();
