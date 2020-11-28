@@ -13,6 +13,18 @@ struct bfsInfo
     int dist;
 };
 
+struct sortNode
+{
+    int node;
+    int size;
+    friend bool operator < (sortNode u,sortNode v)
+    {
+        if(u.size < v.size)
+            return true;
+        else
+            return false;
+    }
+};
 struct CrossroadAction
 {
     int rotateAngle; // 0 90 -90 180
