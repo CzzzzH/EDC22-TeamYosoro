@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "Maze.h"
-#include "util.h"
+#include "statemachine.h"
 
 //#define MAZE_DEBUG
 
@@ -69,17 +69,27 @@ void Maze::initialize(Information &info)
     }
     Maze::addEdge(0, 5);
     Maze::addEdge(32, 38);
+    
+    if(StateMachine::getInstance().nowHalf == SECOND_HALF)
+    {
+        block.push_back(4);
+        block.push_back(17);
+        block.push_back(12);
+        block.push_back(24);
+        block.push_back(25);
+    }
 }
 
 int Maze::getWay(int now, std::deque<int> &target)
 {
-    std::vector<int> Stack(MAZE_SIZE * MAZE_SIZE + 10);
+    int Stack[MAZE_SIZE * MAZE_SIZE + 10];
+    memset(Stack, 0, sizeof(Stack));
     bool Break = false;
-    std::queue<int> q;
-    std::vector<int> history;
+    std::deque<sortNode> q;
     std::map<int, bool> visited;
+    std::vector<int> history;
 
-    q.push(now);
+    q.push_front({now, 0});
     visited[now] = true;
     int layer = 0;
     
@@ -90,19 +100,20 @@ int Maze::getWay(int now, std::deque<int> &target)
         target.pop_back();
     }
 
-    q.push(now);
-    visited[now] = true;
-    
     while (!q.empty())
     {
-        int node = q.front();
-        q.pop();
+        int node = q.front().node;
+        q.pop_front();
         layer++;
         for (auto neighbours : adjList[node])
         {
             if (!visited[neighbours])
             {
-                q.push(neighbours);
+                std::vector<int>::iterator blockFind = std::find(block.begin(), block.end(), neighbours);
+                if(blockFind != block.end())
+                    q.push_back({neighbours, layer});
+                else
+                    q.push_back({neighbours, 0});
                 visited[neighbours] = true;
                 Stack[neighbours] = node;
                 std::deque<int>::iterator it = std::find(target.begin(), target.end(), neighbours);
@@ -113,17 +124,19 @@ int Maze::getWay(int now, std::deque<int> &target)
                 }
             }
         }
+        std::sort(q.begin(), q.end());
         if(Break)
             break;
     }
     //回溯
     int t = Stack[target.front()];
     history.push_back(target.front());
-    while(t != 0)
+    while(!(t == 0 || t == 38))
     {
         history.push_back(t);
         t = Stack[t];
     }
+
     history.pop_back();
     int index1 = history.back();
     return index1;
@@ -163,3 +176,4 @@ CrossroadAction Maze::getDirection(int last, int now, std::deque<int> &target)
 }
 
 std::map <int, std::list<int>>Maze::adjList;
+std::vector<int> Maze::block;

@@ -28,6 +28,7 @@
 class Maze {
 private:
     static std::map <int, std::list<int>> adjList;
+    static std::vector<int> block;
     static int getWay(int now, std::deque<int> &target);
 public:
     static void initialize(Information &info);
