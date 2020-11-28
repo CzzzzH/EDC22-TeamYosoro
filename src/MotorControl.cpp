@@ -99,24 +99,24 @@ void Motor::PID_compute()
 
 double diffVelocity(const double angle)
 {
-    double result_angle = 2.6 * angle + pow(angle / 35, 3);
+    double result_angle = 2.5 * angle + pow(angle / 48, 3);
     return result_angle;
 }
 
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 13;
+    double IRcoff = 2;
     if (targetSpeed < 0)
-        IRcoff = -0.7 * IRcoff;
+        IRcoff = -0.99 * IRcoff;
     double diff_velocity_in = -AngleControl::getOutput() + (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::angleOffset();
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
     // Serial.println(targetSpeed);
     // Serial.println("Diff velocity in : "+ String(diff_velocity_in));
     // Serial.println("left output : "+ String(leftOutput));
-    setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(diff_velocity_in), true);
-    setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(-diff_velocity_in), false);
+    setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in), true);
+    setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in), false);
 }
 
 double Motor::estimatePWM(double targeteSpeed)

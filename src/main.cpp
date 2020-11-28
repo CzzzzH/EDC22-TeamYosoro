@@ -8,13 +8,11 @@
 #include "SoftwareSerial.h"
 
 #define INTERRUPT_INTERVAL 50
-// #define USE_ZIGBEE
 
 std::list<TimerInterrupt *>
 	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();
 
 TimerInterrupt motorTimer(INTERRUPT_INTERVAL, [] {
-	StateMachine::getInstance().process();
 	Motor::PID_compute();
 });
 
@@ -23,6 +21,7 @@ TimerInterrupt angleTimer(10, [] {
 	JY61::read();
 	AngleControl::Compute();
 	Motor::updatePWM();
+    StateMachine::getInstance().process();
 });
 
 StateMachine &sm = StateMachine::getInstance();
