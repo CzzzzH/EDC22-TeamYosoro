@@ -16,10 +16,10 @@ struct bfsInfo
 struct sortNode
 {
     int node;
-    int size;
+    int layer;
     friend bool operator < (sortNode u,sortNode v)
     {
-        if(u.size < v.size)
+        if(u.layer < v.layer)
             return true;
         else
             return false;

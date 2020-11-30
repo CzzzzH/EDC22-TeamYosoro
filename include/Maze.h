@@ -37,9 +37,11 @@ public:
     static std::vector<int> ourTrick;
     static void initialize(Information &info);
     static void addEdge(int u, int v, bool dir);
+    static void deleteEdge(int u, int v, bool dir);
     static void deleteNode(int node);
     static bool existEdge(int u, int v);
     static void putBlock();
+    static int getDist(int now, int target);
     static CrossroadAction getDirection(int last, int now, std::deque<int> &target);
 };
 

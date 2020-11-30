@@ -351,11 +351,6 @@ void Maze::putBlock()
         std::vector<int>::iterator it = std::find(nodeList.begin(), nodeList.end(), nodeNow);
         nodeList.erase(it);
     }
-    std::cout << "ourTrick" << std::endl;
-    for(auto it : ourTrick)
-    {
-        std::cout << it << std::endl;
-    }
     adjList = blockAdj;
 }
 
