@@ -8,6 +8,8 @@
 #include <algorithm>
 #include "information.h"
 
+#define INF 100
+
 // image axis
 //             END
 //             | |
@@ -29,10 +31,15 @@ class Maze {
 private:
     static std::map <int, std::list<int>> adjList;
     static std::vector<int> block;
+    std::vector<barrierEdge> barrierMaze;
+    std::vector<int> ourTrick;
     static int getWay(int now, std::deque<int> &target);
 public:
     static void initialize(Information &info);
     static void addEdge(int u, int v, bool dir);
+    static void deleteNode(int node);
+    static bool existEdge(int u, int v);
+    static void putBlock();
     static CrossroadAction getDirection(int last, int now, std::deque<int> &target);
 };
 

@@ -11,6 +11,39 @@ void Maze::addEdge(int u, int v, bool dir = 1)
         adjList[v].push_back(u);
 }
 
+void Maze::deleteEdge(int u, int v, bool dir = 1)
+{
+    std::list<int>::iterator it = std::find(adjList[u].begin(), adjList[u].end(), v);
+    if(it != adjList[u].end())
+        adjList[u].erase(it);
+    if(dir)
+    {
+        std::list<int>::iterator it_ = std::find(adjList[v].begin(), adjList[v].end(), u);
+        if(it_ != adjList[v].end())
+            adjList[v].erase(it_);
+    }
+}
+
+void Maze::deleteNode(int node)
+{
+    if(node + 6 < 37)
+        deleteEdge(node + 6, node);
+    if(node + 1 <= ((1 + ((node - 1) / 6)) * 6))
+        deleteEdge(node + 1, node);
+    if(node - 1 > ((node - 1) / 6) * 6)
+        deleteEdge(node - 1, node);
+    if(node - 6 > 0)
+        deleteEdge(node - 6, node);
+}
+
+bool Maze::existEdge(int u, int v)
+{
+    if(std::find(adjList[u].begin(), adjList[u].end(), v) == adjList[u].end())
+        return false;
+    else
+        return true;
+}
+
 void Maze::initialize(Information &info)
 {
     std::vector<barrierEdge> barrier;
@@ -89,6 +122,45 @@ void Maze::initialize(Information &info)
 
 }
 
+int Maze::getDist(int now, int target)
+{
+    if(adjList[now].empty() || adjList[target].empty())
+    {
+        return 0;
+    }
+    bool Break = false;
+    std::deque<sortNode> q;
+    std::map<int, bool> visited;
+    std::vector<int> history;
+    int layer = 0;
+    q.push_front({now, layer});
+    visited[now] = true;
+    
+    while (!q.empty())
+    {
+        int node = q.front().node;
+        layer = q.front().layer;
+        q.pop_front();
+        layer++;
+        for (auto neighbours : adjList[node])
+        {
+            if (!visited[neighbours])
+            {
+                q.push_back({neighbours, layer});
+                visited[neighbours] = true;
+                if(neighbours == target)
+                    Break = true;
+            }
+        }
+        if(Break)
+            break;
+    }
+    if(Break == false)
+        layer = INF;
+    return layer;
+}
+
+
 int Maze::getWay(int now, std::deque<int> &target)
 {
     std::vector<int> Stack(MAZE_SIZE * MAZE_SIZE + 10);
@@ -114,13 +186,13 @@ int Maze::getWay(int now, std::deque<int> &target)
     while (!q.empty())
     {
         int node = q.front().node;
+        layer = q.front().layer;
         q.pop_front();
         layer++;
         for (auto neighbours : adjList[node])
         {
             if (!visited[neighbours])
             {
-
                 std::vector<int>::iterator blockFind = std::find(block.begin(), block.end(), neighbours);
                 if(blockFind != block.end())
                     q.push_back({neighbours, layer});
@@ -190,5 +262,108 @@ CrossroadAction Maze::getDirection(int last, int now, std::deque<int> &target)
     return {rotate * 90, index1};
 }
 
+void Maze::putBlock()
+{
+    std::vector<int> nodeList;
+    // copy map
+    std::map <int, std::list<int>> blockAdj = adjList;
+    // choose barrier
+    for(auto it : barrierMaze)
+    {
+        if(abs(it.A - it.B) == 1) // vertical
+        {
+            nodeList.push_back(it.A);
+            nodeList.push_back(it.B);
+            if(it.A - MAZE_SIZE > 0)
+            {
+                nodeList.push_back(it.A - MAZE_SIZE);
+                nodeList.push_back(it.B - MAZE_SIZE);
+            }
+            if(it.A + MAZE_SIZE < MAZE_SIZE * MAZE_SIZE + 1)
+            {
+                nodeList.push_back(it.A + MAZE_SIZE);
+                nodeList.push_back(it.B + MAZE_SIZE);
+            }
+        }
+        else // horizontal
+        {
+            nodeList.push_back(it.A);
+            nodeList.push_back(it.B);
+            if(it.A - 1 > (it.A / MAZE_SIZE) * MAZE_SIZE)
+            {
+                nodeList.push_back(it.A - 1);
+                nodeList.push_back(it.B - 1);
+            }
+            if(it.B + 1 < ((it.A / MAZE_SIZE) + 1) * MAZE_SIZE)
+            {
+                nodeList.push_back(it.A + 1);
+                nodeList.push_back(it.B + 1);
+            }
+        }
+    }
+    std::sort(nodeList.begin(), nodeList.end());
+    std::vector<int>::iterator pos = std::unique(nodeList.begin(), nodeList.end());
+    nodeList.erase(pos, nodeList.end());
+    
+    // choose the node with the best score
+    for(int i = 0;i < 5;i++)
+    {
+        // bfs
+        int maxDist = 0;
+        int nodeNow = 0;
+        for(auto it : nodeList)
+        {
+            bool Add1 = false, Minus1 = false, Add6 = false, Minus6 = false;
+            if(existEdge(it, it + 1))
+                Add1 = true;
+            if(existEdge(it, it - 1))
+                Minus1 = true;
+            if(existEdge(it, it + 6))
+                Add6 = true;
+            if(existEdge(it, it - 6))
+                Minus6 = true;
+            deleteNode(it);
+            int distTmp = 0;
+            if(Add1 && Minus1)
+            {
+                int dist1 = getDist(it - 1, it + 1);
+                if(dist1 > 4)
+                    distTmp += dist1;
+            }
+            if(Add6 && Minus6)
+            {
+                int dist2 = getDist(it - 6, it + 6);
+                if(dist2 > 4)
+                    distTmp += dist2;
+            }
+            if(maxDist < distTmp)
+            {
+                maxDist = distTmp;
+                nodeNow = it;
+            }
+            if(Add1)
+                addEdge(it, it + 1);
+            if(Minus1)
+                addEdge(it, it - 1);
+            if(Add6)
+                addEdge(it, it + 6);
+            if(Minus6)
+                addEdge(it, it - 6);
+        }
+        ourTrick.push_back(nodeNow);
+        deleteNode(nodeNow);
+        std::vector<int>::iterator it = std::find(nodeList.begin(), nodeList.end(), nodeNow);
+        nodeList.erase(it);
+    }
+    std::cout << "ourTrick" << std::endl;
+    for(auto it : ourTrick)
+    {
+        std::cout << it << std::endl;
+    }
+    adjList = blockAdj;
+}
+
 std::map <int, std::list<int>>Maze::adjList;
+std::vector<barrierEdge> Maze::barrierMaze;
 std::vector<int> Maze::block;
+std::vector<int> Maze::ourTrick;
