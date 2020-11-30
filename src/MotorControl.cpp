@@ -17,7 +17,7 @@ void encoder::initialize()
 }
 
 void encoder::Read()
-{
+{   
     counter.right = rightEnc.read();
     counter.left = leftEnc.read();
 }

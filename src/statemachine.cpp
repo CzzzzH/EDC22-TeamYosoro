@@ -152,8 +152,6 @@ void StateMachine::updateInfo()
 
     // 直接调用zigbee的接收函数，更新一系列信息
     info.updateInfo();
-    // Serial.println("Update Success!");
-    // 记录当前坐标
 
     /*
         如果当前是在下半场且现在还在进入迷宫或者搜寻迷宫的过程
@@ -210,10 +208,6 @@ void StateMachine::updateAction(Information &info)
     {
         // 计算距离
         double distance = nowPosition.getDist(outsideTarget.front());
-        // Serial.println("Now Target: " + String(outsideTarget.front().X) + " " + String(outsideTarget.front().Y));
-        // Serial.println("Now Pos: " + String(nowPosition.X) + " " + String(nowPosition.Y));
-        // Serial.println("Mid Line: " + String(midLine));
-        // Serial.println("Now dist: " + String(distance));
 
         // 如果距离小于某个值，就执行动作（转弯，这个是硬编码进去的），然后pop掉队首
         if (distance < 15)
@@ -243,7 +237,8 @@ void StateMachine::updateAction(Information &info)
         {   
             if (counter == 1000) insideTarget.push_back(32);
             if (counter == 2000) insideTarget.push_back(10);
-            crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+            if (!insideTarget.empty())
+                crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
         }
 
         // 如果目标集合为空，点亮灯并且停下（显然只有新的目标出现才会继续启动）
@@ -303,6 +298,21 @@ void StateMachine::updateAction(Information &info)
                     if (motorDirection == -1) nowMazeIndex = 2 * nextMazeIndex - nowMazeIndex;
                     crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
                 }
+
+                #ifdef DEBUG_MAZE_POS
+                    Serial.println("NowMazeIndex: " + String(nowMazeIndex));
+                    Serial.println("NextMazeIndex: " + String(nextMazeIndex));
+                    if (stop) Serial.println("Stop!!!");
+                    if (insideTarget.empty())
+                        Serial.println("Target Empty !");
+                    else Serial.println("NowTarget: " + String(insideTarget.front()));
+                #endif
+
+                #ifdef DEBUG_CROSS_ACTION
+                    Serial.println("CrossActionAngle: " + String(crossroadAction.rotateAngle));
+                    Serial.println("NextPosition: " + String(crossroadAction.nextPosition));
+                    Serial.println();
+                #endif
             }
         }
         
@@ -393,19 +403,13 @@ void StateMachine::printDebugInfo(Information &info)
             Serial.println("Milli Seconds: " + String(millis()));
         #endif
 
-        #ifdef DEBUG_MAZE_POS
-            Serial.println("NowMazeIndex: " + String(nowMazeIndex));
-            Serial.println("NextMazeIndex: " + String(nextMazeIndex));
-            if (stop) Serial.println("Stop!!!");
-            if (insideTarget.empty())
-                Serial.println("Target Empty !");
-            else Serial.println("NowTarget: " + String(insideTarget.front()));
-        #endif
-
-        #ifdef DEBUG_CROSS_ACTION
-            Serial.println("CrossActionAngle: " + String(crossroadAction.rotateAngle));
-            Serial.println("NextPosition: " + String(crossroadAction.nextPosition));
-            Serial.println();
+        #ifdef DEBUG_POSITION
+            if (nowMission == GO_TO_MAZE || nowMission == RETURN)
+            {
+                Serial.println("NowPos: " + String(info.getCarposX()) + String(info.getCarposY()));
+                Serial.println("NowMidline: " + String(midLine));
+                Serial.println("Target Distance: " + String(nowPosition.getDist(outsideTarget.front())));
+            }
         #endif
     }
 }
