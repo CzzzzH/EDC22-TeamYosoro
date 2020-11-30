@@ -77,12 +77,13 @@ void StateMachine::init()
     {
         /*
             如果是上半场，那只点灯就行了
-            我就随便加了个迷宫中心的目标点作为唯一目标
+            添加我们算法生成的障碍物位置
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        insideTarget.push_back(10);
-        insideTarget.push_back(9);
-        insideTarget.push_back(11);
+        for(auto it : Maze::ourTrick)
+        {
+            insideTarget.push_back(it);
+        }
         backTime = 100;
     }
     else

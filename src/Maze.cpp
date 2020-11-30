@@ -75,7 +75,7 @@ void Maze::initialize(Information &info)
     #ifdef MAZE_DEBUG
     for (auto it : barrier)
     {
-        Serial.println(String(it.A) + "-->" + String(it.B));
+        Serial.println(String(it.A) + "<-->" + String(it.B));
     }
     #endif
 
@@ -116,10 +116,6 @@ void Maze::initialize(Information &info)
         }
     }
     */
-//    block.push_back(22);
-//    block.push_back(2);
-//    block.push_back(33);
-
 }
 
 int Maze::getDist(int now, int target)
