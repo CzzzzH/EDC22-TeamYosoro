@@ -73,11 +73,12 @@ void Maze::initialize(Information &info)
     
     if(StateMachine::getInstance().nowHalf == SECOND_HALF)
     {
-        block.push_back(4);
-        block.push_back(17);
-        block.push_back(12);
-        block.push_back(24);
-        block.push_back(25);
+        uint8_t blockCount = info.Game.stop;
+        for (int i = 0;i < blockCount;i++)
+        {
+            int blockNum = info.positonTransform(info.Flood[blockCount].pos);
+            block.push_back(blockNum);
+        }
     }
 }
 
