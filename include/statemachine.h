@@ -37,6 +37,7 @@ public:
     uint16_t backTime = 0;
     int lastScore, nowScore;
     int counter = 0;
+    int turnAngle = 0;
 
     unsigned long lastCrossTime, nowCrossTime;
 
@@ -45,7 +46,7 @@ public:
     bool restart = false;
     bool addNew = false;
     bool stop = false;
-    
+
     std::deque<Position> outsideTarget;
     std::deque<int> insideTarget;
 

@@ -11,7 +11,7 @@
 #include "information.h"
 #include "LED.h"
 
-#define SPEED 40
+#define SPEED 60
 
 // 获取状态机的实例（在其他源文件要用到状态机时调用这个函数就能获得状态机实例引用） 
 StateMachine &StateMachine::getInstance()
@@ -52,7 +52,7 @@ void StateMachine::init()
     nextMazeIndex = 32;
     lastCrossTime = nowCrossTime = 0;
     lastScore = nowScore = 0;
-    nowHalf = SECOND_HALF;
+    nowHalf = FIRST_HALF;
     nowMission = SEARCH_MAZE;
 
     // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
@@ -81,6 +81,8 @@ void StateMachine::init()
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
         insideTarget.push_back(10);
+        insideTarget.push_back(9);
+        insideTarget.push_back(11);
         backTime = 100;
     }
     else
@@ -236,20 +238,25 @@ void StateMachine::updateAction(Information &info)
     else if (nowMission == SEARCH_MAZE || nowMission == GO_OUT_MAZE)
     {   
         // 如果是上半场，那就隔一段时间加一个目标点
-        if (nowHalf == FIRST_HALF && counter % 1000 == 0)
-        {   
-            if (counter == 1000) insideTarget.push_back(32);
-            if (counter == 2000) insideTarget.push_back(10);
-            if (!insideTarget.empty())
-                crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
-        }
+        // if (nowHalf == FIRST_HALF && counter % 1000 == 0)
+        // {   
+        //     if (counter == 1000) insideTarget.push_back(32);
+        //     if (counter == 2000) insideTarget.push_back(10);
+        //     if (!insideTarget.empty())
+        //         crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+        // }
 
         // 如果目标集合为空，点亮灯并且停下（显然只有新的目标出现才会继续启动）
-        if (millis() - lastCrossTime < 500 || insideTarget.empty() && stop)
+        if (turnAngle != 0 || stop)
         {
             Motor::targetSpeed = 0;
             LED::ledOn();
             if (stop) restart = true;
+            else if (abs(encoder::counter.left) <= 2 && abs(encoder::counter.right) <= 2)
+            {
+                AngleControl::target += turnAngle;
+                turnAngle = 0;
+            }
         }
         // 目标集合不为空，那就做的事多了
         else
@@ -311,7 +318,7 @@ void StateMachine::updateAction(Information &info)
                     else 
                     {
                         motorDirection = 1;
-                        AngleControl::target += crossroadAction.rotateAngle;
+                        turnAngle = crossroadAction.rotateAngle;
                     }
                         
                     if (nextMazeIndex == insideTarget.front())
@@ -363,7 +370,7 @@ void StateMachine::updateMission(Information &info)
     // 如果当前任务是搜寻迷宫且预定的返回时间到了，就把任务切换为退出迷宫，并清空迷宫内目标，只留下一个出口
     else if (nowMission == SEARCH_MAZE && info.getGameTime() > backTime)
     {
-        Serial.println("End Game" + String(info.getGameTime()));
+        Serial.println("[End Game at " + String(info.getGameTime()) + "]");
         nowMission = END_GAME;
         // insideTarget.clear();
         // insideTarget.push_back(0);

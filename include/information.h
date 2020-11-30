@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "util.h"
 #define MAZE_SIZE 6
-#define OBSTACLE 8
+#define OBSTACLE 1
 #define INVALID_ARG -1
 #define ZIGBEE_MESSAGE_LENTH 70
 

@@ -87,10 +87,11 @@ bool IRReceiver::atCrossroad(int angle)
     // 转弯结束
     if (turn)
     {
-        if (AngleControl::getAngleDist() < 10 && millis() - sm.lastCrossTime > 800)
+        if (AngleControl::getAngleDist() < 10 && sm.turnAngle == 0)
         {
             turn = false;
-            Serial.println("END TURN at time " + String(millis()));
+            Serial.println("[END TURN at time " + String(millis()) + "]");
+            Serial.println();
         }
     } 
     // 直走结束
@@ -99,7 +100,8 @@ bool IRReceiver::atCrossroad(int angle)
         if ((leftValue == IR_DETECT || rightValue == IR_DETECT) && millis() - restartTime > 300)
         {
             ahead = false;
-            Serial.println("END AHEAD at time " + String(millis()));
+            Serial.println("[END AHEAD at time " + String(millis()) + "]");
+            Serial.println();
         }
     }
     // 过交叉线
@@ -107,10 +109,10 @@ bool IRReceiver::atCrossroad(int angle)
     {   
         if (midCount >= 14 || sm.restart)
         {
-            Serial.println("CROSS at time " + String(millis()));
+            Serial.println("[CROSS at time " + String(millis()) + "]");
             if (sm.restart)
             {
-                Serial.println("Restart! ");
+                Serial.println("Restart!!! ");
                 sm.restart = false;
                 restartTime = millis();
             }

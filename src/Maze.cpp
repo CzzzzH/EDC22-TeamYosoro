@@ -83,9 +83,9 @@ void Maze::initialize(Information &info)
         }
     }
     */
-   block.push_back(22);
-   block.push_back(2);
-   block.push_back(33);
+//    block.push_back(22);
+//    block.push_back(2);
+//    block.push_back(33);
 
 }
 
