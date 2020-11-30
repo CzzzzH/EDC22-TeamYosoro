@@ -5,7 +5,7 @@
 #include "Maze.h"
 #include "AngleControl.h"
 
-#define ZIGBEE_OFFSET 0.5
+#define ZIGBEE_OFFSET 0.3
 
 void IRReceiver::initialize()
 {
@@ -149,18 +149,13 @@ double IRReceiver::angleOffset()
     else if (sm.nowMission == GO_TO_MAZE)
     {
         if (sm.outsideTarget.size() == 2)
-        {
-            if (sm.nowPosition.X > sm.midLine + 1) offset = ZIGBEE_OFFSET;
-            else if (sm.nowPosition.X < sm.midLine - 1) offset = -ZIGBEE_OFFSET;
-        }
+            offset = (sm.nowPosition.X - sm.midLine) * ZIGBEE_OFFSET;
+
     }
     else if (sm.nowMission == RETURN)
     {   
         if (sm.outsideTarget.size() == 1)
-        {
-            if (sm.nowPosition.Y > sm.midLine + 1) offset = ZIGBEE_OFFSET;
-            else if (sm.nowPosition.Y < sm.midLine -1) offset = -ZIGBEE_OFFSET;
-        }
+            offset = (sm.nowPosition.X - sm.midLine) * ZIGBEE_OFFSET;
     }
     return offset;
 }
