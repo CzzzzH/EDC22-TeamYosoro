@@ -2,7 +2,7 @@
 #include "Maze.h"
 #include "statemachine.h"
 
-//#define MAZE_DEBUG
+// #define MAZE_DEBUG
 
 void Maze::addEdge(int u, int v, bool dir = 1)
 {
@@ -45,7 +45,7 @@ void Maze::initialize(Information &info)
         Serial.println(String(it.A) + "-->" + String(it.B));
     }
     #endif
-    
+
     std::sort(barrier.begin(), barrier.end());
     // adding the edges in the Maze
     for (int i = 0;i < MAZE_SIZE;i++)
@@ -68,24 +68,30 @@ void Maze::initialize(Information &info)
             }
         }
     }
+
     Maze::addEdge(0, 5);
     Maze::addEdge(32, 38);
-    
+    /*
     if(StateMachine::getInstance().nowHalf == SECOND_HALF)
     {
         uint8_t blockCount = info.Game.stop;
+        Serial.println("Stop Count: " + String(info.Game.stop));
         for (int i = 0;i < blockCount;i++)
         {
             int blockNum = info.positonTransform(info.Flood[blockCount].pos);
             block.push_back(blockNum);
         }
     }
+    */
+   block.push_back(22);
+   block.push_back(2);
+   block.push_back(33);
+
 }
 
 int Maze::getWay(int now, std::deque<int> &target)
 {
-    int Stack[MAZE_SIZE * MAZE_SIZE + 10];
-    memset(Stack, 0, sizeof(Stack));
+    std::vector<int> Stack(MAZE_SIZE * MAZE_SIZE + 10);
     bool Break = false;
     std::deque<sortNode> q;
     std::map<int, bool> visited;
@@ -94,13 +100,16 @@ int Maze::getWay(int now, std::deque<int> &target)
     q.push_front({now, 0});
     visited[now] = true;
     int layer = 0;
-    
+
     std::deque<int>::iterator it = std::find(target.begin(), target.end(), now);
     if(it != target.end())
     {
         std::swap(target[std::distance(target.begin(), it)], target.back());
         target.pop_back();
     }
+
+    if (target.empty())
+        return -1;
 
     while (!q.empty())
     {
@@ -111,6 +120,7 @@ int Maze::getWay(int now, std::deque<int> &target)
         {
             if (!visited[neighbours])
             {
+
                 std::vector<int>::iterator blockFind = std::find(block.begin(), block.end(), neighbours);
                 if(blockFind != block.end())
                     q.push_back({neighbours, layer});
@@ -126,10 +136,13 @@ int Maze::getWay(int now, std::deque<int> &target)
                 }
             }
         }
+
         std::sort(q.begin(), q.end());
         if(Break)
             break;
+    
     }
+
     //回溯
     int t = Stack[target.front()];
     history.push_back(target.front());

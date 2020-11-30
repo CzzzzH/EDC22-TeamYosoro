@@ -11,7 +11,7 @@
 #include "information.h"
 #include "LED.h"
 
-#define SPEED 60
+#define SPEED 40
 
 // 获取状态机的实例（在其他源文件要用到状态机时调用这个函数就能获得状态机实例引用） 
 StateMachine &StateMachine::getInstance()
@@ -47,19 +47,27 @@ void StateMachine::init()
     IRReceiver::initialize();
     LED::initialize();
 
-    // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
+    // 先初始化一些固定信息
+    nowMazeIndex = 38;
+    nextMazeIndex = 32;
+    lastCrossTime = nowCrossTime = 0;
+    lastScore = nowScore = 0;
+    nowHalf = SECOND_HALF;
+    nowMission = SEARCH_MAZE;
 
+    // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
     #ifdef USE_ZIGBEE
         info.updateInfo();
         while (info.getGameState() != GameGoing)
             info.updateInfo();
     #endif
-    
+
+    updateInfo();
+
+    Serial.println("Get Start Signal!");
+
     // 设置第一步直线走的中轴线，就是小车初始的X坐标
     midLine = info.getCarposX();
-
-    // 设置上下半场
-    nowHalf = FIRST_HALF;
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
@@ -78,13 +86,10 @@ void StateMachine::init()
     else
     {
         // 下半场不需要在这加目标点，updateInfo里会自己加的
-        backTime = 60;
+        backTime = 120;
     }
 
-    // 初始化进迷宫前的坐标（小车会先走到{16, 244}，然后转弯然后再走到{87, 236}
-    // outsideTarget.push_back({16, 244});
-    // outsideTarget.push_back({87, 236});
-
+    // 初始化进迷宫前的坐标
     outsideTarget.push_back({172, 17});
     outsideTarget.push_back({16, 18});
 
@@ -96,13 +101,6 @@ void StateMachine::init()
         2. SEARCH_MAZE: 该任务状态下小车会直接开始在迷宫进行搜寻工作
         3. RETURN: 该任务状态可以测试小车走出迷宫到返回起点的一段路
     */
-    nowMission = SEARCH_MAZE;
-    
-    // 小车在迷宫中的初始序号
-    nowMazeIndex = 38;
-    nextMazeIndex = 32;
-    lastCrossTime = nowCrossTime = 0;
-    lastScore = nowScore = 0;
 
     // 求第一次转弯的路径
     crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
@@ -113,6 +111,8 @@ void StateMachine::init()
 
     // 最后再初始化中断
     TimerInterrupt::initialize(interrupt_period);
+
+    Serial.println("Init Complete!");
 }
 
 /*
@@ -161,13 +161,14 @@ void StateMachine::updateInfo()
         靠info.getCartransport()这个函数就可以知道车上是否载有病人了
     */
     if (nowHalf == SECOND_HALF && (nowMission == GO_TO_MAZE || nowMission == SEARCH_MAZE))
-    {
+    {   
         // 添加物资包到target中
         for (int i = 0; i < 6; ++i)
         {
             PackageInfo package = info.Package[i];
             if (package.whetherpicked) continue;
             int packageIndex = info.positonTransform(package.pos);
+
             if (info.indexNotExist(packageIndex) && packageIndex != nextMazeIndex && packageIndex != nowMazeIndex)
             {
                 insideTarget.push_back(packageIndex);
@@ -181,6 +182,7 @@ void StateMachine::updateInfo()
             if (info.indexNotExist(targetIndex) && targetIndex != nextMazeIndex)
             {
                 insideTarget.push_back(targetIndex);
+                Serial.println("Add Patient at " + String(targetIndex));
                 addNew = true;
             }
         }
@@ -190,6 +192,7 @@ void StateMachine::updateInfo()
             if (info.indexNotExist(targetIndex) && targetIndex != nextMazeIndex)
             {
                 insideTarget.push_back(targetIndex);
+                Serial.println("Add Hospital at " + String(targetIndex));
                 addNew = true;
             }
         }
@@ -242,11 +245,11 @@ void StateMachine::updateAction(Information &info)
         }
 
         // 如果目标集合为空，点亮灯并且停下（显然只有新的目标出现才会继续启动）
-        if (insideTarget.empty() && stop)
+        if (millis() - lastCrossTime < 500 || insideTarget.empty() && stop)
         {
             Motor::targetSpeed = 0;
             LED::ledOn();
-            restart = true;
+            if (stop) restart = true;
         }
         // 目标集合不为空，那就做的事多了
         else
@@ -270,15 +273,37 @@ void StateMachine::updateAction(Information &info)
             */
             if (IRReceiver::atCrossroad(crossroadAction.rotateAngle))
             {
-                Serial.println("Cross!!!");
-                lastCrossTime = nowCrossTime;
-                nowCrossTime = millis();
-                
+                Serial.println("==============================Begin Cross==============================");
+
+                #ifdef DEBUG_MAZE_POS
+                    Serial.println("===============BEFORE CROSS===============");
+                    Serial.println("NowMazeIndex: " + String(nowMazeIndex));
+                    Serial.println("NextMazeIndex: " + String(nextMazeIndex));
+                    if (insideTarget.empty())
+                        Serial.println("Target Empty !");
+                    else
+                    {
+                        Serial.println("Inside Target: ");
+                        for (auto x: insideTarget)
+                            Serial.print(String(x) + " ");
+                        Serial.println();
+                    }
+                    
+                #endif
+
+                #ifdef DEBUG_CROSS_ACTION
+                    Serial.println("CrossActionAngle: " + String(crossroadAction.rotateAngle));
+                    Serial.println("NextPosition: " + String(crossroadAction.nextPosition));
+                    Serial.println("===============BEFORE CROSS===============");
+                    Serial.println();
+                #endif
+
                 if (insideTarget.empty())
                 {
                     stop = true;
+                    Serial.println("Stop!");
                     IRReceiver::ahead = false;
-                    IRReceiver::turn = false;
+                    IRReceiver::turn = true;
                 }
                 else
                 {   
@@ -300,19 +325,29 @@ void StateMachine::updateAction(Information &info)
                 }
 
                 #ifdef DEBUG_MAZE_POS
+                    Serial.println("===============AFTER CROSS===============");
                     Serial.println("NowMazeIndex: " + String(nowMazeIndex));
                     Serial.println("NextMazeIndex: " + String(nextMazeIndex));
-                    if (stop) Serial.println("Stop!!!");
                     if (insideTarget.empty())
                         Serial.println("Target Empty !");
-                    else Serial.println("NowTarget: " + String(insideTarget.front()));
+                    else
+                    {
+                        Serial.println("Inside Target: ");
+                        for (auto x: insideTarget)
+                            Serial.print(String(x) + " ");
+                        Serial.println();
+                    }
+                    
                 #endif
 
                 #ifdef DEBUG_CROSS_ACTION
                     Serial.println("CrossActionAngle: " + String(crossroadAction.rotateAngle));
                     Serial.println("NextPosition: " + String(crossroadAction.nextPosition));
+                    Serial.println("===============AFTER CROSS===============");
                     Serial.println();
                 #endif
+
+                Serial.println("==============================End Cross==============================");
             }
         }
         
@@ -328,6 +363,7 @@ void StateMachine::updateMission(Information &info)
     // 如果当前任务是搜寻迷宫且预定的返回时间到了，就把任务切换为退出迷宫，并清空迷宫内目标，只留下一个出口
     else if (nowMission == SEARCH_MAZE && info.getGameTime() > backTime)
     {
+        Serial.println("End Game" + String(info.getGameTime()));
         nowMission = END_GAME;
         // insideTarget.clear();
         // insideTarget.push_back(0);
@@ -357,11 +393,11 @@ void StateMachine::updateMission(Information &info)
     lastScore = nowScore;
     nowScore = info.getCarscore();
 
-    if (lastScore - nowScore >= 50)
-    {
-        nowMission = END_GAME;
-        return;
-    }
+    // if (lastScore - nowScore >= 50)
+    // {
+    //     nowMission = END_GAME;
+    //     return;
+    // }
 }
 
 // 更新电机
