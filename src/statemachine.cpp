@@ -58,9 +58,9 @@ void StateMachine::init()
         info.updateInfo();
         while (info.getGameState() != GameGoing)
             info.updateInfo();
-    #endif
 
-    updateInfo();
+        updateInfo();
+    #endif
 
     Serial.println("Get Start Signal!");
 
@@ -69,27 +69,30 @@ void StateMachine::init()
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
+    // Maze::putBlock();
 
     // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
     if (nowHalf == FIRST_HALF)
     {
-        Maze::putBlock();
         /*
             如果是上半场，那只点灯就行了
             添加我们算法生成的障碍物位置
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        for(auto it : Maze::ourTrick)
-        {
-            insideTarget.push_back(it);
-        }
-        backTime = 100;
+        // for(auto it : Maze::ourTrick)
+        // {
+        //     insideTarget.push_back(it);
+        // }
+        insideTarget.push_back(19);
+        insideTarget.push_back(3);
+        insideTarget.push_back(12);
+        insideTarget.push_back(30);
     }
     else
     {
         // 下半场不需要在这加目标点，updateInfo里会自己加的
-        backTime = 120;
     }
+
     // 初始化进迷宫前的坐标
     outsideTarget.push_back({172, 17});
     outsideTarget.push_back({16, 18});
@@ -355,9 +358,9 @@ void StateMachine::updateMission(Information &info)
     if (nowMission == GO_TO_MAZE && outsideTarget.empty())
         nowMission = SEARCH_MAZE;
     // 如果当前任务是搜寻迷宫且预定的返回时间到了，就把任务切换为退出迷宫，并清空迷宫内目标，只留下一个出口
-    else if (nowMission == SEARCH_MAZE && info.getGameTime() > backTime)
+    else if (nowMission == SEARCH_MAZE && millis() > 120000)
     {
-        Serial.println("[End Game at " + String(info.getGameTime()) + "]");
+        Serial.println("[End Game at " + String(millis()) + "]");
         nowMission = END_GAME;
         // insideTarget.clear();
         // insideTarget.push_back(0);
@@ -408,20 +411,11 @@ void StateMachine::printDebugInfo(Information &info)
 {
     if (counter % 20 == 0)
     {
-        #ifdef DEBUG_MOTOR
-            Serial.println("Target Speed: " + String(Motor::targetSpeed));
-            Serial.println("Left Motor Counter: " + String(encoder::counter.left));
-            Serial.println("Right Motor Counter: " + String(encoder::counter.right));
-        #endif
-
         #ifdef DEBUG_ANGLECONTROLER
             Serial.println("Now Angle: " + String(JY61::Angle[2]));
             Serial.println("Target Angle: " + String(AngleControl::target));
             Serial.println("Angle Dist: " + String(AngleControl::getAngleDist()));
             Serial.println();
-        #endif
-
-        #ifdef DEBUG_IRRECEIVER
         #endif
 
         #ifdef DEBUG_ZIGBEE

@@ -87,13 +87,13 @@ void Motor::PID_compute()
     encoder::Read();
     // Serial.println("Left encoder : " + String(encoder::counter.left));
     // Serial.println("right encoder : " + String(encoder::counter.right));
-    // Serial.println("mills : "+String(millis()));
+    Serial.println("mills : " + String(millis()));
     leftPID.Compute();
     rightPID.Compute();
     // Serial.print("Left Motor Counter: " + String(encoder::counter.left) + ";\t");
     // Serial.print("Right Motor Counter: " + String(encoder::counter.right) + ";\t");
-    // Serial.print("motor left output: " + String(leftOutput) + ";\t");
-    // Serial.print("motor right output: " + String(rightOutput) + ";\t");
+    Serial.println("motor left output: " + String(leftOutput));
+    Serial.println("motor right output: " + String(rightOutput));
     encoder::Reset();
 }
 
@@ -108,7 +108,7 @@ double diffVelocity(const double angle)
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 0.3;
+    double IRcoff = 10;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
     double IR_in = (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::angleOffset();
@@ -118,13 +118,15 @@ void Motor::updatePWM()
     // Serial.println(targetSpeed);
     // Serial.println("Diff velocity in : "+ String(diff_velocity_in));
     // Serial.println("left output : "+ String(leftOutput));
-    setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
-    setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
+    // setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
+    // setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
+    setPWM(244, true);
+    setPWM(255, false);
 }
 
 double Motor::estimatePWM(double targeteSpeed)
 {
-    return 4 * targeteSpeed;
+    return 1.5 * targeteSpeed;
 }
 
 const pin_2 Motor::left_pin = {12, 13};

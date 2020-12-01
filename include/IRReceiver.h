@@ -2,8 +2,8 @@
 
 // From left to right
 #define AHEAD_SPEED 60
-#define TURN_SPEED 30
-#define SLOW_SPEED 30
+#define TURN_SPEED 20
+#define SLOW_SPEED 20
 
 #define RIGHT_FRONT 49
 #define LEFT_FRONT 48
@@ -26,6 +26,7 @@ public:
     static int totalMidBackValue[MID_BACK_IR_COUNT], midBackValue[MID_BACK_IR_COUNT];
     static double midWeight[MID_IR_COUNT];
     static double midBackWeight[MID_BACK_IR_COUNT];
+    static bool slowLeft, slowRight;
     static bool turn, ahead;
     static void initialize();
     static void updateValue();

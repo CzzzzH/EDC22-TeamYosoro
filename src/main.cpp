@@ -13,15 +13,21 @@ std::list<TimerInterrupt *>
 	TimerInterrupt::timer_list = std::list<TimerInterrupt *>();
 
 TimerInterrupt motorTimer(INTERRUPT_INTERVAL, [] {
+    #ifdef DEBUG_MOTOR
+        Serial.println("Target Speed: " + String(Motor::targetSpeed));
+        Serial.println("Left Motor Counter: " + String(encoder::counter.left));
+        Serial.println("Right Motor Counter: " + String(encoder::counter.right));
+    #endif
 	Motor::PID_compute();
+    Motor::targetSpeed = 350;
 });
 
 TimerInterrupt angleTimer(10, [] {
 	IRReceiver::updateValue();
 	JY61::read();
 	AngleControl::Compute();
+    // StateMachine::getInstance().process();
 	Motor::updatePWM();
-    StateMachine::getInstance().process();
 });
 
 StateMachine &sm = StateMachine::getInstance();
