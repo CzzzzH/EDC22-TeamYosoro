@@ -71,31 +71,25 @@ void StateMachine::init()
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
-    int lock = 0;
-    Maze::putBlock();
-    lock = 1;
-    while(lock == 1)
-    {
         // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
-        if (nowHalf == FIRST_HALF)
+    if (nowHalf == FIRST_HALF)
+    {
+        Maze::putBlock();
+        /*
+            如果是上半场，那只点灯就行了
+            添加我们算法生成的障碍物位置
+            按我的算法它到那就会自动停下了（因为目标集合变空）
+        */
+        for(auto it : Maze::ourTrick)
         {
-            /*
-                如果是上半场，那只点灯就行了
-                添加我们算法生成的障碍物位置
-                按我的算法它到那就会自动停下了（因为目标集合变空）
-            */
-            for(auto it : Maze::ourTrick)
-            {
-                insideTarget.push_back(it);
-            }
-            backTime = 100;
+            insideTarget.push_back(it);
         }
-        else
-        {
-            // 下半场不需要在这加目标点，updateInfo里会自己加的
-            backTime = 120;
-        }
-        lock = 0;
+        backTime = 100;
+    }
+    else
+    {
+        // 下半场不需要在这加目标点，updateInfo里会自己加的
+        backTime = 120;
     }
     // 初始化进迷宫前的坐标
     outsideTarget.push_back({172, 17});
