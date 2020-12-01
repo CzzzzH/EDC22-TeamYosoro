@@ -108,17 +108,18 @@ double diffVelocity(const double angle)
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 0.1;
+    double IRcoff = 0.3;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
-    double diff_velocity_in = -AngleControl::getOutput() + (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::angleOffset();
+    double IR_in = (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::angleOffset();
+    double diff_velocity_in = -AngleControl::getOutput();
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
     // Serial.println(targetSpeed);
     // Serial.println("Diff velocity in : "+ String(diff_velocity_in));
     // Serial.println("left output : "+ String(leftOutput));
-    setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in), true);
-    setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in), false);
+    setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
+    setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
 }
 
 double Motor::estimatePWM(double targeteSpeed)
@@ -136,5 +137,5 @@ double Motor::rightOutput = 0;
 double Motor::leftOutput = 0;
 double Motor::targetSpeed = 0;
 
-PID Motor::rightPID = PID(&encoder::counter.right, &rightOutput, &targetSpeed, 10, 0.001, 0.01, DIRECT);
-PID Motor::leftPID = PID(&encoder::counter.left, &leftOutput, &targetSpeed, 10, 0.001, 0.01, DIRECT);
+PID Motor::rightPID = PID(&encoder::counter.right, &rightOutput, &targetSpeed, 1, 0.001, 0.01, DIRECT);
+PID Motor::leftPID = PID(&encoder::counter.left, &leftOutput, &targetSpeed, 1, 0.001, 0.01, DIRECT);

@@ -11,8 +11,6 @@
 #include "information.h"
 #include "LED.h"
 
-#define SPEED 60
-
 // 获取状态机的实例（在其他源文件要用到状态机时调用这个函数就能获得状态机实例引用） 
 StateMachine &StateMachine::getInstance()
 {
@@ -71,7 +69,8 @@ void StateMachine::init()
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
-        // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
+
+    // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
     if (nowHalf == FIRST_HALF)
     {
         Maze::putBlock();
@@ -109,7 +108,7 @@ void StateMachine::init()
     
     // 小车的初始方向和速度
     motorDirection = 1;
-    Motor::targetSpeed = SPEED;
+    Motor::targetSpeed = AHEAD_SPEED;
 
     // 最后再初始化中断
     TimerInterrupt::initialize(interrupt_period);
@@ -247,22 +246,16 @@ void StateMachine::updateAction(Information &info)
         // }
 
         // 如果目标集合为空，点亮灯并且停下（显然只有新的目标出现才会继续启动）
-        if (turnAngle != 0 || stop)
+        if (stop)
         {
             Motor::targetSpeed = 0;
             LED::ledOn();
             if (stop) restart = true;
-            else if (abs(encoder::counter.left) <= 2 && abs(encoder::counter.right) <= 2)
-            {
-                AngleControl::target += turnAngle;
-                turnAngle = 0;
-            }
         }
         // 目标集合不为空，那就做的事多了
         else
         {   
             // 设置LED和车速
-            Motor::targetSpeed = SPEED;
             LED::ledOff();
             stop = false;
 
@@ -270,7 +263,6 @@ void StateMachine::updateAction(Information &info)
             if (addNew)
             {
                 addNew = false;
-                if (motorDirection == -1) nowMazeIndex = 2 * nextMazeIndex - nowMazeIndex;
                 crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
             }
 
@@ -314,12 +306,8 @@ void StateMachine::updateAction(Information &info)
                 }
                 else
                 {   
-                    if (crossroadAction.rotateAngle == 180) motorDirection = -1;
-                    else 
-                    {
-                        motorDirection = 1;
-                        turnAngle = crossroadAction.rotateAngle;
-                    }
+                    if (crossroadAction.rotateAngle == 180) motorDirection = -motorDirection;
+                    else AngleControl::target += crossroadAction.rotateAngle;
                         
                     if (nextMazeIndex == insideTarget.front())
                         insideTarget.pop_front();
@@ -327,7 +315,6 @@ void StateMachine::updateAction(Information &info)
                     // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果），再进行一次寻路
                     nowMazeIndex = nextMazeIndex;
                     nextMazeIndex = crossroadAction.nextPosition;
-                    if (motorDirection == -1) nowMazeIndex = 2 * nextMazeIndex - nowMazeIndex;
                     crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
                 }
 
