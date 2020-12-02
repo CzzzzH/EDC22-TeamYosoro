@@ -17,7 +17,7 @@ void encoder::initialize()
 }
 
 void encoder::Read()
-{   
+{
     counter.right = rightEnc.read();
     counter.left = leftEnc.read();
 }
@@ -99,8 +99,8 @@ void Motor::PID_compute()
 
 double diffVelocity(const double angle)
 {
-    if(AngleControl::target == 0)
-        return 0 ;
+    if (AngleControl::target == 0)
+        return 0;
     double result_angle = 2.4 * angle + pow(angle / 49, 3);
     return result_angle;
 }
@@ -118,10 +118,10 @@ void Motor::updatePWM()
     // Serial.println(targetSpeed);
     // Serial.println("Diff velocity in : "+ String(diff_velocity_in));
     // Serial.println("left output : "+ String(leftOutput));
-    // setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
-    // setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
-    setPWM(244, true);
-    setPWM(255, false);
+    setPWM(245 + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
+    setPWM(255 + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
+    // setPWM(245, true);
+    // setPWM(255, false);
 }
 
 double Motor::estimatePWM(double targeteSpeed)
