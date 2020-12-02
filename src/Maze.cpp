@@ -285,12 +285,12 @@ void Maze::putBlock()
         {
             nodeList.push_back(it.A);
             nodeList.push_back(it.B);
-            if(it.A - 1 > (it.A / MAZE_SIZE) * MAZE_SIZE)
+            if(it.A - 1 > ((it.A - 1) / MAZE_SIZE) * MAZE_SIZE)
             {
                 nodeList.push_back(it.A - 1);
                 nodeList.push_back(it.B - 1);
             }
-            if(it.B + 1 < ((it.A / MAZE_SIZE) + 1) * MAZE_SIZE)
+            if(it.B + 1 <= ((1 + ((it.B - 1) / MAZE_SIZE)) * MAZE_SIZE))
             {
                 nodeList.push_back(it.A + 1);
                 nodeList.push_back(it.B + 1);
@@ -314,9 +314,9 @@ void Maze::putBlock()
                 Add1 = true;
             if(existEdge(it, it - 1))
                 Minus1 = true;
-            if(existEdge(it, it + 6))
+            if(existEdge(it, it + MAZE_SIZE))
                 Add6 = true;
-            if(existEdge(it, it - 6))
+            if(existEdge(it, it - MAZE_SIZE))
                 Minus6 = true;
             deleteNode(it);
             int distTmp = 0;
@@ -325,13 +325,18 @@ void Maze::putBlock()
                 int dist1 = getDist(it - 1, it + 1);
                 if(dist1 > 4)
                     distTmp += dist1;
+                else
+                    distTmp += 1;
             }
             if(Add6 && Minus6)
             {
-                int dist2 = getDist(it - 6, it + 6);
+                int dist2 = getDist(it - MAZE_SIZE, it + MAZE_SIZE);
                 if(dist2 > 4)
                     distTmp += dist2;
+                else
+                    distTmp += 1;
             }
+            distTmp += 1;   //bias, exclude 0
             if(maxDist < distTmp)
             {
                 maxDist = distTmp;
@@ -342,14 +347,15 @@ void Maze::putBlock()
             if(Minus1)
                 addEdge(it, it - 1);
             if(Add6)
-                addEdge(it, it + 6);
+                addEdge(it, it + MAZE_SIZE);
             if(Minus6)
-                addEdge(it, it - 6);
+                addEdge(it, it - MAZE_SIZE);
         }
         ourTrick.push_back(nodeNow);
         deleteNode(nodeNow);
         std::vector<int>::iterator it = std::find(nodeList.begin(), nodeList.end(), nodeNow);
-        nodeList.erase(it);
+        if(it != nodeList.end())
+            nodeList.erase(it);
     }
     adjList = blockAdj;
 }
