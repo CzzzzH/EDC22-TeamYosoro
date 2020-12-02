@@ -8,6 +8,10 @@
 #include "IRReceiver.h"
 #include "statemachine.h"
 
+const double right_left_coeff = 1.066;
+const int LEFT_MAX_PWM = 255;
+const int RIGHT_MAX_PWM = 255 / right_left_coeff;
+
 void encoder::initialize()
 {
     pinMode(left_pin.A, INPUT);
@@ -17,7 +21,7 @@ void encoder::initialize()
 }
 
 void encoder::Read()
-{   
+{
     counter.right = rightEnc.read();
     counter.left = leftEnc.read();
 }
@@ -59,8 +63,10 @@ void Motor::initialize()
 
 void Motor::setPWM(int pwm, bool isRight)
 {
-    pwm = min(pwm, 255);
-    pwm = max(pwm, -255);
+    pwm = min(pwm, LEFT_MAX_PWM);
+    pwm = max(pwm, -LEFT_MAX_PWM);
+    if (isRight)
+        pwm /= right_left_coeff;
     if (isDebug)
     {
         Serial.print(String("setting ") + (isRight ? "right" : "left") + String(" pwm : "));
@@ -85,23 +91,23 @@ void Motor::PID_compute()
     // i = i + 1;
     // Serial.println(i);
     encoder::Read();
-    // Serial.println("Left encoder : " + String(encoder::counter.left));
-    // Serial.println("right encoder : " + String(encoder::counter.right));
-    Serial.println("mills : " + String(millis()));
+    Serial.println("Left encoder : " + String(encoder::counter.left));
+    Serial.println("right encoder : " + String(encoder::counter.right));
+    // Serial.println("mills : " + String(millis()));
     leftPID.Compute();
     rightPID.Compute();
     // Serial.print("Left Motor Counter: " + String(encoder::counter.left) + ";\t");
     // Serial.print("Right Motor Counter: " + String(encoder::counter.right) + ";\t");
-    Serial.println("motor left output: " + String(leftOutput));
-    Serial.println("motor right output: " + String(rightOutput));
+    // Serial.println("motor left output: " + String(leftOutput));
+    // Serial.println("motor right output: " + String(rightOutput));
     encoder::Reset();
 }
 
 double diffVelocity(const double angle)
 {
-    if(AngleControl::target == 0)
-        return 0 ;
-    double result_angle = 2.4 * angle + pow(angle / 49, 3);
+    if (AngleControl::target == 0)
+        return 0;
+    double result_angle = 4 * angle + pow(angle / 30, 3);
     return result_angle;
 }
 
@@ -118,10 +124,10 @@ void Motor::updatePWM()
     // Serial.println(targetSpeed);
     // Serial.println("Diff velocity in : "+ String(diff_velocity_in));
     // Serial.println("left output : "+ String(leftOutput));
-    // setPWM(estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
-    // setPWM(estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
-    setPWM(244, true);
-    setPWM(255, false);
+    setPWM(220 + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
+    setPWM(220 + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
+    // setPWM(255, true);
+    // setPWM(255, false);
 }
 
 double Motor::estimatePWM(double targeteSpeed)
@@ -139,5 +145,5 @@ double Motor::rightOutput = 0;
 double Motor::leftOutput = 0;
 double Motor::targetSpeed = 0;
 
-PID Motor::rightPID = PID(&encoder::counter.right, &rightOutput, &targetSpeed, 1, 0.001, 0.01, DIRECT);
-PID Motor::leftPID = PID(&encoder::counter.left, &leftOutput, &targetSpeed, 1, 0.001, 0.01, DIRECT);
+PID Motor::rightPID = PID(&encoder::counter.right, &rightOutput, &targetSpeed, 2, 0.001, 0.01, DIRECT);
+PID Motor::leftPID = PID(&encoder::counter.left, &leftOutput, &targetSpeed, 2, 0.001, 0.01, DIRECT);
