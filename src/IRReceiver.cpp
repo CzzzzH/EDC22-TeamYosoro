@@ -102,7 +102,7 @@ bool IRReceiver::atCrossroad(int angle)
     // 转弯结束
     if (turn)
     {
-        if (AngleControl::getAngleDist() < 10)
+        if ((leftBackValue || rightBackValue) && AngleControl::getAngleDist() < 10 && millis() - sm.lastCrossTime > 500)
         {
             turn = false;
             slowRight = false;
@@ -121,7 +121,8 @@ bool IRReceiver::atCrossroad(int angle)
             {
                 ahead = false;
                 slowRight = false;
-                slowLeft = false;
+                if(leftBackValue || rightBackValue)
+                    slowLeft = false;
                 Motor::targetSpeed = AHEAD_SPEED;
                 Serial.println("[END AHEAD at time " + String(millis()) + "]");
                 Serial.println();
@@ -161,7 +162,7 @@ bool IRReceiver::atCrossroad(int angle)
                 }
             }
 
-            if (midCount >= 12 || sm.restart)
+            if (midCount >= 14 || sm.restart)
             {
                 Serial.println("[CROSS at time " + String(millis()) + "]");
                 if (sm.restart)

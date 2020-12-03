@@ -26,7 +26,7 @@ void StateMachine::init()
 
     // 设置Debug模式
     JY61::isDebug = false;
-    Motor::isDebug = false;
+    Motor::isDebug = true;
 
     // 初始化串口
     Serial.begin(115200);
@@ -83,11 +83,11 @@ void StateMachine::init()
         // {
         //     insideTarget.push_back(it);
         // }
-        insideTarget.push_back(10);
-        // insideTarget.push_back(19);
-        // insideTarget.push_back(3);
-        // insideTarget.push_back(12);
-        // insideTarget.push_back(30);
+        // insideTarget.push_back(10);
+        insideTarget.push_back(19);
+        insideTarget.push_back(3);
+        insideTarget.push_back(12);
+        insideTarget.push_back(30);
     }
     else
     {
