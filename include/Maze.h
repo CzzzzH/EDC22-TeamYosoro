@@ -39,6 +39,7 @@ public:
     static void addEdge(int u, int v, bool dir);
     static void deleteEdge(int u, int v, bool dir);
     static void deleteNode(int node);
+    static void printAdjList();
     static bool existEdge(int u, int v);
     static void putBlock();
     static int getDist(int now, int target);
