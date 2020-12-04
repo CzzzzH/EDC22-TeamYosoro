@@ -12,7 +12,7 @@
 
 #define MID_BEGIN 23
 #define MID_BACK_BEGIN 38
-#define MID_IR_COUNT 14
+#define MID_IR_COUNT 16
 #define MID_BACK_IR_COUNT 8
 
 #define IR_DETECT 1

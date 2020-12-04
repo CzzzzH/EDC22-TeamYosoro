@@ -238,6 +238,13 @@ bool IRReceiver::atCrossroad(int angle)
     return false;
 }
 
+double compute_weight(int index, int total_count, double slope)
+{
+    int mid_index = total_count / 2;
+    index += (index >= mid_index) ? 1 : 0;
+    return slope * (mid_index - index);
+}
+
 /*
     1.在迷宫内的两个状态，根据中轴线输出offset较正位置（StateMachine::outsideTarget用于判断当前正在走第几条路径）
     2.在迷宫外的两个状态，根据红外巡线输出offset较正位置
@@ -252,42 +259,26 @@ double IRReceiver::angleOffset()
     double offset = 0;
     if (StateMachine::nowMission == SEARCH_MAZE || StateMachine::nowMission == GO_OUT_MAZE)
     {
-        if (StateMachine::motorDirection == 1)
+        int mid_count = (StateMachine::motorDirection == 1) ? MID_IR_COUNT : MID_BACK_IR_COUNT;
+        int *mid_value = (StateMachine::motorDirection == 1) ? midValue : midBackValue;
+
+        int i = mid_count / 2 - 1;
+        int j = mid_count / 2;
+        int count = 0;
+        while (i >= 0)
         {
-            int i = MID_IR_COUNT / 2 - 1;
-            int j = MID_IR_COUNT / 2;
-            int count = 0;
-            while (i >= 0)
-            {
-                offset += midValue[i] + midValue[j];
-                count += midValue[i];
-                count += midValue[j];
-                if (midValue[i] == 0 && midValue[i + 1] == 1)
-                    break;
-                if (midValue[j] == 0 && midValue[j - 1] == 1)
-                    break;
-                i--;
-                j++;
-            }
-            if (count > 5)
-                offset = 0;
+            offset += mid_value[i] * compute_weight(i, mid_count, 0.25) + mid_value[j] * compute_weight(j, mid_count, 0.25);
+            count += mid_value[i];
+            count += mid_value[j];
+            if (mid_value[i] == 0 && mid_value[i + 1] == 1)
+                break;
+            if (mid_value[j] == 0 && mid_value[j - 1] == 1)
+                break;
+            i--;
+            j++;
         }
-        else
-        {
-            int i = MID_BACK_IR_COUNT / 2 - 1;
-            int j = MID_BACK_IR_COUNT / 2;
-            while (i >= 0)
-            {
-                // offset += midBackValue[i] * midBackWeight[i] + midBackValue[j] * midBackWeight[j];
-                offset += - (midBackValue[i] + midBackValue[i]);
-                if (midBackValue[i] == 0 && midBackValue[i + 1] == 1)
-                    break;
-                if (midBackValue[j] == 0 && midBackValue[j - 1] == 1)
-                    break;
-                i--;
-                j++;
-            }
-        }
+        if (count > 5)
+            offset = 0;
     }
     else if (StateMachine::nowMission == GO_TO_MAZE)
     {
