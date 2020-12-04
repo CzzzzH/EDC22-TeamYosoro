@@ -257,6 +257,7 @@ int Maze::getDist(std::map <int, std::list<int>> &graph, int now, int target)
     while (!q.empty())
     {
         int node = q.front().node;
+        Serial.println("node : " + String(node));
         layer = q.front().layer;
         q.pop_front();
         layer++;

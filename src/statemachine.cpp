@@ -12,13 +12,14 @@
 #include <MsTimer2.h>
 
 // 中断异常
-static void interruptionFunction()
+void StateMachine::interruptionFunction()
 {
     IRReceiver::updateValue();
     JY61::read();
     AngleControl::Compute();
     Motor::PID_compute();
-    StateMachine::process();
+    // process();
+    Motor::targetSpeed = 23;
     Motor::updatePWM();
 }
 
@@ -69,7 +70,7 @@ void StateMachine::init()
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize();
-    Maze::putBlock();
+    // Maze::putBlock();
 
     // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
     if (nowHalf == FIRST_HALF)
@@ -85,11 +86,11 @@ void StateMachine::init()
         //     Serial.println(String(it));
         // }
 
-        // insideTarget.push_back(10);
-        // insideTarget.push_back(19);
-        // insideTarget.push_back(3);
-        // insideTarget.push_back(12);
-        // insideTarget.push_back(30);
+        insideTarget.push_back(10);
+        insideTarget.push_back(19);
+        insideTarget.push_back(3);
+        insideTarget.push_back(12);
+        insideTarget.push_back(30);
     }
     else
     {
@@ -118,8 +119,9 @@ void StateMachine::init()
 
     // 最后再初始化中断
     MsTimer2::set(10, interruptionFunction);
-	MsTimer2::start();
-
+    MsTimer2::start();
+    // interruptionFunction();
+    //
     Serial.println("Init Complete!");
 }
 

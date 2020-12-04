@@ -24,8 +24,8 @@ public:
     static int midCount, restartTime;
     static int totalMidValue[MID_IR_COUNT], midValue[MID_IR_COUNT];
     static int totalMidBackValue[MID_BACK_IR_COUNT], midBackValue[MID_BACK_IR_COUNT];
-    static double midWeight[MID_IR_COUNT];
-    static double midBackWeight[MID_BACK_IR_COUNT];
+    // static double midWeight[MID_IR_COUNT];
+    // static double midBackWeight[MID_BACK_IR_COUNT];
     static bool slowLeft, slowRight;
     static bool turn, ahead;
     static void initialize();

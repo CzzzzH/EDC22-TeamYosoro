@@ -6,20 +6,19 @@
 #include <deque>
 
 // 各种Define，用于debug
-#define USE_ZIGBEE
+// #define USE_ZIGBEE
 // #define DEBUG_MOTOR
 // #define DEBUG_ANGLECONTROLER
-// #define DEBUG_IRRECEIVER
+#define DEBUG_IRRECEIVER
 // #define DEBUG_ZIGBEE
 // #define DEBUG_TIMER
 // #define DEBUG_POSITION
-#define DEBUG_MAZE_POS
-#define DEBUG_CROSS_ACTION
+// #define DEBUG_MAZE_POS
+// #define DEBUG_CROSS_ACTION
 
 class StateMachine // The statemachine of th2e car (Singleton)
 {
 public:
-
     static Match nowHalf;
     static Mission nowMission;
     static Position lastPosition;
@@ -55,6 +54,7 @@ public:
     static void updateAction();
     static void updateMotor();
     static void printDebugInfo();
+    static void interruptionFunction();
 };
 
 #endif
