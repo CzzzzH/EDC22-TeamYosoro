@@ -16,16 +16,16 @@ void Maze::printAdjList()
     Serial.println("Print adjlist end;");
 }
 
-void Maze::initialize(Information &info)
+void Maze::initialize()
 {
     std::vector<barrierEdge> barrier;
 
     for(int i = 0;i < OBSTACLE;i++)
     {
-        int xoffsetA = (info.getObstacleApos(i).X + 12)/30;
-        int xoffsetB = (info.getObstacleBpos(i).X + 12)/30;
-        int yoffsetA = (info.getObstacleApos(i).Y - 22)/30 - 1;
-        int yoffsetB = (info.getObstacleBpos(i).Y - 22)/30 - 1;
+        int xoffsetA = (Information::getObstacleApos(i).X + 12)/30;
+        int xoffsetB = (Information::getObstacleBpos(i).X + 12)/30;
+        int yoffsetA = (Information::getObstacleApos(i).Y - 22)/30 - 1;
+        int yoffsetB = (Information::getObstacleBpos(i).Y - 22)/30 - 1;
         if(xoffsetA == xoffsetB)
         {
             xoffsetA -= 1;
@@ -63,28 +63,28 @@ void Maze::initialize(Information &info)
                 if(barrier.back().A == i * MAZE_SIZE + j && barrier.back().B - barrier.back().A == 1)
                     barrier.pop_back();
                 else
-                    Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + 1);
+                    addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + 1, 1);
             }
             if(i < MAZE_SIZE - 1)
             {
                 if(barrier.back().A == i * MAZE_SIZE + j && barrier.back().B - barrier.back().A == MAZE_SIZE)
                     barrier.pop_back();
                 else
-                    Maze::addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + MAZE_SIZE);
+                    addEdge(i * MAZE_SIZE + j, i * MAZE_SIZE + j + MAZE_SIZE, 1);
             }
         }
     }
 
-    Maze::addEdge(0, 5);
-    Maze::addEdge(32, 38);
+    addEdge(0, 5, 1);
+    addEdge(32, 38, 1);
     /*
     if(StateMachine::getInstance().nowHalf == SECOND_HALF)
     {
-        uint8_t blockCount = info.Game.stop;
-        Serial.println("Stop Count: " + String(info.Game.stop));
+        uint8_t blockCount = Information::Game.stop;
+        Serial.println("Stop Count: " + String(Information::Game.stop));
         for (int i = 0;i < blockCount;i++)
         {
-            int blockNum = info.positonTransform(info.Flood[blockCount].pos);
+            int blockNum = Information::positonTransform(Information::Flood[blockCount].pos);
             block.push_back(blockNum);
         }
     }
@@ -199,7 +199,6 @@ void Maze::addEdge(int u, int v, bool dir = 1)
     if(dir)
         adjList[v].push_back(u);
 }
-
 
 void Maze::addEdgeBlock(std::map <int, std::list<int>> &graph, int u, int v, bool dir = 1)
 {

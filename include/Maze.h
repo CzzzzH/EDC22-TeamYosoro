@@ -39,12 +39,11 @@ private:
     static std::deque<sortNode> q;
     static std::map<int, bool> visited;
     static std::vector<int> history;
-    static int getWay(int now, std::deque<int> &target);
+    
 public:
-    static bool ifInit;
-
     static std::vector<int> ourTrick;
     static void initialize();
+    static int getWay(int now, std::deque<int> &target);
     static void addEdge(int u, int v, bool dir);
     static void addEdgeBlock(std::map <int, std::list<int>> &graph, int u, int v, bool dir);
     static void deleteEdge(std::map <int, std::list<int>> &graph, int u, int v, bool dir);
