@@ -32,17 +32,19 @@ private:
     static std::map <int, std::list<int>> adjList;
     static std::vector<int> block;
     static std::vector<barrierEdge> barrierMaze;
+    static std::map <int, std::list<int>> blockAdj;
     static int getWay(int now, std::deque<int> &target);
 public:
     static std::vector<int> ourTrick;
     static void initialize(Information &info);
     static void addEdge(int u, int v, bool dir);
-    static void deleteEdge(int u, int v, bool dir);
-    static void deleteNode(int node);
+    static void addEdgeBlock(std::map <int, std::list<int>> &graph, int u, int v, bool dir);
+    static void deleteEdge(std::map <int, std::list<int>> &graph, int u, int v, bool dir);
+    static void deleteNode(std::map <int, std::list<int>> &graph, int node);
+    static bool existEdge(std::map <int, std::list<int>> &graph, int u, int v);
+    static int getDist(std::map <int, std::list<int>> &graph, int u, int v);
     static void printAdjList();
-    static bool existEdge(int u, int v);
     static void putBlock();
-    static int getDist(int now, int target);
     static CrossroadAction getDirection(int last, int now, std::deque<int> &target);
 };
 

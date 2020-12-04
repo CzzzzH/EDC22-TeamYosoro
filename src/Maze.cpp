@@ -4,46 +4,6 @@
 
 #define MAZE_DEBUG
 
-void Maze::addEdge(int u, int v, bool dir = 1)
-{
-    adjList[u].push_back(v);
-    if(dir)
-        adjList[v].push_back(u);
-}
-
-void Maze::deleteEdge(int u, int v, bool dir = 1)
-{
-    std::list<int>::iterator it = std::find(adjList[u].begin(), adjList[u].end(), v);
-    if(it != adjList[u].end())
-        adjList[u].erase(it);
-    if(dir)
-    {
-        std::list<int>::iterator it_ = std::find(adjList[v].begin(), adjList[v].end(), u);
-        if(it_ != adjList[v].end())
-            adjList[v].erase(it_);
-    }
-}
-
-void Maze::deleteNode(int node)
-{
-    if(node + MAZE_SIZE < MAZE_SIZE * MAZE_SIZE + 1)
-        deleteEdge(node + MAZE_SIZE, node);
-    if(node + 1 <= ((1 + ((node - 1) / MAZE_SIZE)) * MAZE_SIZE))
-        deleteEdge(node + 1, node);
-    if(node - 1 > ((node - 1) / MAZE_SIZE) * MAZE_SIZE)
-        deleteEdge(node - 1, node);
-    if(node - MAZE_SIZE > 0)
-        deleteEdge(node - MAZE_SIZE, node);
-}
-
-bool Maze::existEdge(int u, int v)
-{
-    if(std::find(adjList[u].begin(), adjList[u].end(), v) == adjList[u].end())
-        return false;
-    else
-        return true;
-}
-
 void Maze::printAdjList()
 {
     for (auto key : adjList)
@@ -53,6 +13,7 @@ void Maze::printAdjList()
             Serial.print(String(neighbours) + ",");
         Serial.println();
     }
+    Serial.println("Print adjlist end;");
 }
 
 void Maze::initialize(Information &info)
@@ -128,49 +89,6 @@ void Maze::initialize(Information &info)
         }
     }
     */
-}
-
-int Maze::getDist(int now, int target)
-{
-    if(adjList[now].empty() || adjList[target].empty())
-    {
-        return 0;
-    }
-    bool Break = false;
-    std::deque<sortNode> q;
-    std::map<int, bool> visited;
-    std::vector<int> history;
-    int layer = 0;
-    q.push_front({now, layer});
-    visited[now] = true;
-    Serial.println("Now" + String(now));
-    Serial.println("Target" + String(target));
-    while (!q.empty())
-    {
-        int node = q.front().node;
-        layer = q.front().layer;
-        q.pop_front();
-        layer++;
-        Serial.println("node" + String(node));
-        if(now == 6)
-            printAdjList();
-        for (auto neighbours : adjList[node])
-        {
-            Serial.println("neighbors: " + String(neighbours));
-            if (!visited[neighbours])
-            {
-                q.push_back({neighbours, layer});
-                visited[neighbours] = true;
-                if(neighbours == target)
-                    Break = true;
-            }
-        }
-        if(Break)
-            break;
-    }
-    if(Break == false)
-        layer = INF;
-    return layer;
 }
 
 
@@ -275,6 +193,92 @@ CrossroadAction Maze::getDirection(int last, int now, std::deque<int> &target)
     return {rotate * 90, index1};
 }
 
+
+void Maze::addEdge(int u, int v, bool dir = 1)
+{
+    adjList[u].push_back(v);
+    if(dir)
+        adjList[v].push_back(u);
+}
+
+
+void Maze::addEdgeBlock(std::map <int, std::list<int>> &graph, int u, int v, bool dir = 1)
+{
+    graph[u].push_back(v);
+    if(dir)
+        graph[v].push_back(u);
+}
+
+void Maze::deleteEdge(std::map <int, std::list<int>> &graph, int u, int v, bool dir = 1)
+{
+    std::list<int>::iterator it = std::find(graph[u].begin(), graph[u].end(), v);
+    if(it != graph[u].end())
+        graph[u].erase(it);
+    if(dir)
+    {
+        std::list<int>::iterator it_ = std::find(graph[v].begin(), graph[v].end(), u);
+        if(it_ != graph[v].end())
+            graph[v].erase(it_);
+    }
+}
+
+void Maze::deleteNode(std::map <int, std::list<int>> &graph, int node)
+{
+    if(node + MAZE_SIZE < MAZE_SIZE * MAZE_SIZE + 1)
+        deleteEdge(graph, node + MAZE_SIZE, node);
+    if(node + 1 <= ((1 + ((node - 1) / MAZE_SIZE)) * MAZE_SIZE))
+        deleteEdge(graph, node + 1, node);
+    if(node - 1 > ((node - 1) / MAZE_SIZE) * MAZE_SIZE)
+        deleteEdge(graph, node - 1, node);
+    if(node - MAZE_SIZE > 0)
+        deleteEdge(graph, node - MAZE_SIZE, node);
+}
+
+bool Maze::existEdge(std::map <int, std::list<int>> &graph, int u, int v)
+{
+    if(std::find(graph[u].begin(), graph[u].end(), v) == graph[u].end())
+        return false;
+    else
+        return true;
+}
+
+int Maze::getDist(std::map <int, std::list<int>> &graph, int now, int target)
+{
+    if(graph[now].empty() || graph[target].empty())
+    {
+        return 0;
+    }
+    bool Break = false;
+    std::deque<sortNode> q;
+    std::map<int, bool> visited;
+    std::vector<int> history;
+    int layer = 0;
+    q.push_front({now, layer});
+    visited[now] = true;
+    
+    while (!q.empty())
+    {
+        int node = q.front().node;
+        layer = q.front().layer;
+        q.pop_front();
+        layer++;
+        for (auto neighbours : graph[node])
+        {
+            if (!visited[neighbours])
+            {
+                q.push_back({neighbours, layer});
+                visited[neighbours] = true;
+                if(neighbours == target)
+                    Break = true;
+            }
+        }
+        if(Break)
+            break;
+    }
+    if(Break == false)
+        layer = INF;
+    return layer;
+}
 void Maze::putBlock()
 {
     std::vector<int> nodeList;
@@ -322,42 +326,32 @@ void Maze::putBlock()
     for(int i = 0;i < 5;i++)
     {
         // bfs
-        Serial.println("fuck");
         int maxDist = 0;
         int nodeNow = 0;
         for(auto it : nodeList)
         {
             bool Add1 = false, Minus1 = false, Add6 = false, Minus6 = false;
-            if(existEdge(it, it + 1))
+            if(existEdge(blockAdj, it, it + 1))
                 Add1 = true;
-            if(existEdge(it, it - 1))
+            if(existEdge(blockAdj, it, it - 1))
                 Minus1 = true;
-            if(existEdge(it, it + MAZE_SIZE))
+            if(existEdge(blockAdj, it, it + MAZE_SIZE))
                 Add6 = true;
-            if(existEdge(it, it - MAZE_SIZE))
+            if(existEdge(blockAdj, it, it - MAZE_SIZE))
                 Minus6 = true;
-            deleteNode(it);
-            printAdjList();
+            deleteNode(blockAdj, it);
             int distTmp = 0;
-            Serial.println("distTmp: " + String(distTmp));
-            Serial.println("Add1 : " + String(Add1));
-            Serial.println("Minus1 : " + String(Minus1));
             if(Add1 && Minus1)
             {
-                int dist1 = getDist(it - 1, it + 1);
-                Serial.println("dist1 : " + String(dist1));
+                int dist1 = getDist(blockAdj, it - 1, it + 1);
                 if(dist1 > 4)
                     distTmp += dist1;
                 else
                     distTmp += 1;
             }
-            Serial.println("Add6 : " + String(Add6));
-            Serial.println("Minus6 : " + String(Minus6));
             if(Add6 && Minus6)
             {
-                Serial.println("it : " + String(it));
-                int dist2 = getDist(it - MAZE_SIZE, it + MAZE_SIZE);
-                Serial.println("dist2 : " + String(dist2));
+                int dist2 = getDist(blockAdj, it - MAZE_SIZE, it + MAZE_SIZE);
                 if(dist2 > 4)
                     distTmp += dist2;
                 else
@@ -369,32 +363,25 @@ void Maze::putBlock()
                 maxDist = distTmp;
                 nodeNow = it;
             }
-            Serial.println("maxDist: " + String(maxDist));
             if(Add1)
-                addEdge(it, it + 1);
+                addEdgeBlock(blockAdj, it, it + 1);
             if(Minus1)
-                addEdge(it, it - 1);
+                addEdgeBlock(blockAdj, it, it - 1);
             if(Add6)
-                addEdge(it, it + MAZE_SIZE);
+                addEdgeBlock(blockAdj, it, it + MAZE_SIZE);
             if(Minus6)
-                addEdge(it, it - MAZE_SIZE);
-            Serial.println(String(it));
+                addEdgeBlock(blockAdj, it, it - MAZE_SIZE);
         }
         ourTrick.push_back(nodeNow);
-        deleteNode(nodeNow);
+        deleteNode(blockAdj, nodeNow);
         std::vector<int>::iterator it = std::find(nodeList.begin(), nodeList.end(), nodeNow);
         if(it != nodeList.end())
             nodeList.erase(it);
     }
-    adjList = blockAdj;
-    
-    for(auto it : ourTrick)
-    {
-        Serial.println(String(it));
-    }
 }
 
 std::map <int, std::list<int>>Maze::adjList;
+static std::map <int, std::list<int>> blockAdj;
 std::vector<barrierEdge> Maze::barrierMaze;
 std::vector<int> Maze::block;
 std::vector<int> Maze::ourTrick;
