@@ -391,10 +391,9 @@ void Maze::putBlock()
         dq.pop_back();
     }
 
-    std::cout << "ourTrick" << std::endl;
     for(auto it : ourTrick)
     {
-        std::cout << it << std::endl;
+        Serial.println(it);
     }
 }
 
