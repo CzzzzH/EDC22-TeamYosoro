@@ -32,10 +32,18 @@ private:
     static std::map <int, std::list<int>> adjList;
     static std::vector<int> block;
     static std::vector<barrierEdge> barrierMaze;
+    
+    // Get Way & Get Dist
+    static std::vector<int> Stack;
+    static std::deque<sortNode> q;
+    static std::map<int, bool> visited;
+    static std::vector<int> history;
     static int getWay(int now, std::deque<int> &target);
 public:
+    static bool ifInit;
+
     static std::vector<int> ourTrick;
-    static void initialize(Information &info);
+    static void initialize();
     static void addEdge(int u, int v, bool dir);
     static void deleteEdge(int u, int v, bool dir);
     static void deleteNode(int node);

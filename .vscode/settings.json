@@ -51,6 +51,7 @@
         "typeinfo": "cpp",
         "utility": "cpp",
         "valarray": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "ctime": "cpp"
     }
 }

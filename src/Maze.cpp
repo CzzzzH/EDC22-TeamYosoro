@@ -1,6 +1,6 @@
-#include <Arduino.h>
 #include "Maze.h"
 #include "statemachine.h"
+#include <Arduino.h>
 
 // #define MAZE_DEBUG
 
@@ -55,16 +55,16 @@ void Maze::printAdjList()
     }
 }
 
-void Maze::initialize(Information &info)
+void Maze::initialize()
 {
     std::vector<barrierEdge> barrier;
 
     for (int i = 0; i < OBSTACLE; i++)
     {
-        int xoffsetA = (info.getObstacleApos(i).X + 12) / 30;
-        int xoffsetB = (info.getObstacleBpos(i).X + 12) / 30;
-        int yoffsetA = (info.getObstacleApos(i).Y - 22) / 30 - 1;
-        int yoffsetB = (info.getObstacleBpos(i).Y - 22) / 30 - 1;
+        int xoffsetA = (Information::getObstacleApos(i).X + 12) / 30;
+        int xoffsetB = (Information::getObstacleBpos(i).X + 12) / 30;
+        int yoffsetA = (Information::getObstacleApos(i).Y - 22) / 30 - 1;
+        int yoffsetB = (Information::getObstacleBpos(i).Y - 22) / 30 - 1;
         if (xoffsetA == xoffsetB)
         {
             xoffsetA -= 1;
@@ -119,11 +119,11 @@ void Maze::initialize(Information &info)
     /*
     if(StateMachine::getInstance().nowHalf == SECOND_HALF)
     {
-        uint8_t blockCount = info.Game.stop;
-        Serial.println("Stop Count: " + String(info.Game.stop));
+        uint8_t blockCount = Information::Game.stop;
+        Serial.println("Stop Count: " + String(Information::Game.stop));
         for (int i = 0;i < blockCount;i++)
         {
-            int blockNum = info.positonTransform(info.Flood[blockCount].pos);
+            int blockNum = Information::positonTransform(Information::Flood[blockCount].pos);
             block.push_back(blockNum);
         }
     }
@@ -136,10 +136,12 @@ int Maze::getDist(int now, int target)
     {
         return 0;
     }
+
     bool Break = false;
-    std::deque<sortNode> q;
-    std::map<int, bool> visited;
-    std::vector<int> history;
+    q.clear();
+    visited.clear();
+    history.clear();
+
     int layer = 0;
     q.push_front({now, layer});
     visited[now] = true;
@@ -152,7 +154,7 @@ int Maze::getDist(int now, int target)
         q.pop_front();
         layer++;
         // Serial.println("node" + String(node));
-        // if(now == 6)
+        // if (now == 6)
         //     printAdjList();
         for (auto neighbours : adjList[node])
         {
@@ -175,11 +177,12 @@ int Maze::getDist(int now, int target)
 
 int Maze::getWay(int now, std::deque<int> &target)
 {
-    std::vector<int> Stack(MAZE_SIZE * MAZE_SIZE + 10);
     bool Break = false;
-    std::deque<sortNode> q;
-    std::map<int, bool> visited;
-    std::vector<int> history;
+    Stack.resize(MAZE_SIZE * MAZE_SIZE + 10);
+    Stack.clear();
+    q.clear();
+    visited.clear();
+    history.clear();
 
     q.push_front({now, 0});
     visited[now] = true;
@@ -320,6 +323,7 @@ void Maze::putBlock()
     for (int i = 0; i < 5; i++)
     {
         // bfs
+        // Serial.println("fuck");
         int maxDist = 0;
         int nodeNow = 0;
         for (auto it : nodeList)
@@ -396,3 +400,8 @@ std::map<int, std::list<int>> Maze::adjList;
 std::vector<barrierEdge> Maze::barrierMaze;
 std::vector<int> Maze::block;
 std::vector<int> Maze::ourTrick;
+
+std::vector<int> Maze::Stack;
+std::deque<sortNode> Maze::q;
+std::map<int, bool> Maze::visited;
+std::vector<int> Maze::history;

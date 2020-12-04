@@ -6,62 +6,54 @@
 #include <deque>
 
 // 各种Define，用于debug
-#define USE_ZIGBEE
+// #define USE_ZIGBEE
 // #define DEBUG_MOTOR
 // #define DEBUG_ANGLECONTROLER
-// #define DEBUG_IRRECEIVER
+#define DEBUG_IRRECEIVER
 // #define DEBUG_ZIGBEE
 // #define DEBUG_TIMER
-#define DEBUG_POSITION
-#define DEBUG_MAZE_POS
-#define DEBUG_CROSS_ACTION
+// #define DEBUG_POSITION
+// #define DEBUG_MAZE_POS
+// #define DEBUG_CROSS_ACTION
 
 class StateMachine // The statemachine of th2e car (Singleton)
 {
-private:
-    StateMachine() {}
-    StateMachine &operator=(const StateMachine &) = delete;
-
 public:
-    // Attributes
-    Match nowHalf;
-    Mission nowMission;
-    Position lastPosition = {0, 0};
-    Position nowPosition = {0, 0};
-    CrossroadAction crossroadAction;
-    unsigned int midLine = 0;
-    int nowMazeIndex, nextMazeIndex;
-    int targetTransportCount = 0;
-    int offset = 0;
-    int motorDirection = 1;
-    uint16_t backTime = 0;
-    int lastScore, nowScore;
-    int counter = 0;
-    int turnAngle = 0;
+    static Match nowHalf;
+    static Mission nowMission;
+    static Position lastPosition;
+    static Position nowPosition;
+    static CrossroadAction crossroadAction;
+    static unsigned int midLine;
+    static int nowMazeIndex, nextMazeIndex;
+    static int targetTransportCount;
+    static int offset;
+    static int motorDirection;
+    static uint16_t backTime;
+    static int lastScore, nowScore;
+    static int counter;
+    static int turnAngle;
 
-    unsigned long lastCrossTime, nowCrossTime;
+    static unsigned long lastCrossTime, nowCrossTime;
 
-    bool havePatient = false;
-    bool getItems = false;
-    bool restart = false;
-    bool addNew = false;
-    bool stop = false;
+    static bool havePatient;
+    static bool getItems;
+    static bool restart;
+    static bool addNew;
+    static bool stop;
 
-    std::deque<Position> outsideTarget;
-    std::deque<int> insideTarget;
+    static std::deque<Position> outsideTarget;
+    static std::deque<int> insideTarget;
 
     // Methods
-    ~StateMachine() {}
-    static StateMachine &getInstance();
-
-    void init();
-    void process();
-    void exceptionHandle();
-    void updateInfo();
-    void updateMission(Information &info);
-    void updateAction(Information &info);
-    void updateMotor(Information &info);
-    void printDebugInfo(Information &info);
+    static void init();
+    static void process();
+    static void exceptionHandle();
+    static void updateInfo();
+    static void updateMission();
+    static void updateAction();
+    static void updateMotor();
+    static void printDebugInfo();
 };
 
 #endif

@@ -1,29 +1,31 @@
-#include <Arduino.h>
-#include <string.h>
-#include <SoftwareSerial.h>
 #include "statemachine.h"
 #include "AngleControl.h"
-#include "MotorControl.h"
-#include "TimerInterrupt.h"
-#include "JY61.h"
 #include "IRReceiver.h"
-#include "Maze.h"
-#include "information.h"
+#include "JY61.h"
 #include "LED.h"
+#include "Maze.h"
+#include "MotorControl.h"
+#include "information.h"
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+#include <string.h>
+#include <MsTimer2.h>
 
-// 获取状态机的实例（在其他源文件要用到状态机时调用这个函数就能获得状态机实例引用）
-StateMachine &StateMachine::getInstance()
+// 中断异常
+static void interruptionFunction()
 {
-    static StateMachine instance;
-    return instance;
+    IRReceiver::updateValue();
+    JY61::read();
+    AngleControl::Compute();
+    Motor::PID_compute();
+    // StateMachine::process();
+    Motor::targetSpeed = 23;
+    Motor::updatePWM();
 }
 
 // 状态机初始化（也是整个程序的初始化）
 void StateMachine::init()
 {
-    // 获取状态机的实例
-    Information &info = Information::getInstance();
-
     // 设置Debug模式
     JY61::isDebug = false;
     Motor::isDebug = false;
@@ -55,20 +57,19 @@ void StateMachine::init()
 
 // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
 #ifdef USE_ZIGBEE
-    info.updateInfo();
-    while (info.getGameState() != GameGoing)
-        info.updateInfo();
-
+    Information::updateInfo();
+    while (Information::getGameState() != GameGoing)
+        Information::updateInfo();
     updateInfo();
 #endif
 
     Serial.println("Get Start Signal!");
 
     // 设置第一步直线走的中轴线，就是小车初始的X坐标
-    midLine = info.getCarposX();
+    midLine = Information::getCarposX();
 
     // 初始化迷宫（现在有障碍物信息了）
-    Maze::initialize(Information::getInstance());
+    Maze::initialize();
     Maze::putBlock();
 
     // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
@@ -79,17 +80,17 @@ void StateMachine::init()
             添加我们算法生成的障碍物位置
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        for(auto it : Maze::ourTrick)
-        {
-            insideTarget.push_back(it);
-            Serial.println(String(it));
-        }
+        // for(auto it : Maze::ourTrick)
+        // {
+        //     insideTarget.push_back(it);
+        //     Serial.println(String(it));
+        // }
 
-        // insideTarget.push_back(10);
-        // insideTarget.push_back(19);
-        // insideTarget.push_back(3);
-        // insideTarget.push_back(12);
-        // insideTarget.push_back(30);
+        insideTarget.push_back(10);
+        insideTarget.push_back(19);
+        insideTarget.push_back(3);
+        insideTarget.push_back(12);
+        insideTarget.push_back(30);
     }
     else
     {
@@ -117,7 +118,8 @@ void StateMachine::init()
     Motor::targetSpeed = AHEAD_SPEED;
 
     // 最后再初始化中断
-    TimerInterrupt::initialize(interrupt_period);
+    MsTimer2::set(10, interruptionFunction);
+    MsTimer2::start();
 
     Serial.println("Init Complete!");
 }
@@ -134,12 +136,11 @@ void StateMachine::init()
 */
 void StateMachine::process()
 {
-    Information &info = Information::getInstance();
     // exceptionHandle();
-    updateAction(info);
-    updateMission(info);
-    updateMotor(info);
-    printDebugInfo(info);
+    updateAction();
+    updateMission();
+    updateMotor();
+    printDebugInfo();
     counter++;
 }
 
@@ -154,50 +155,47 @@ void StateMachine::exceptionHandle()
 // 上位机信息更新（注意必须在Loop中执行而不是中断，避免阻塞超过中断时间)
 void StateMachine::updateInfo()
 {
-    // 获取info的实例
-    Information &info = Information::getInstance();
-
     // 直接调用zigbee的接收函数，更新一系列信息
-    info.updateInfo();
+    Information::updateInfo();
 
     /*
         如果当前是在下半场且现在还在进入迷宫或者搜寻迷宫的过程
         那我们就需要更新物资、病人的信息了（其实就是要去的目标节点）
         这里的具体实现不用太关心，大概思路就是遍历info的所有信息，如果还没有加入到target里，就加进去
         注意运输病人先要经过起点再经过目标点，至于判断当前应该是去起点还是目标
-        靠info.getCartransport()这个函数就可以知道车上是否载有病人了
+        靠Information::getCartransport()这个函数就可以知道车上是否载有病人了
     */
     if (nowHalf == SECOND_HALF && (nowMission == GO_TO_MAZE || nowMission == SEARCH_MAZE))
     {
         // 添加物资包到target中
         for (int i = 0; i < 6; ++i)
         {
-            PackageInfo package = info.Package[i];
+            PackageInfo package = Information::Package[i];
             if (package.whetherpicked)
                 continue;
-            int packageIndex = info.positonTransform(package.pos);
+            int packageIndex = Information::positonTransform(package.pos);
 
-            if (info.indexNotExist(packageIndex) && packageIndex != nextMazeIndex && packageIndex != nowMazeIndex)
+            if (Information::indexNotExist(packageIndex) && packageIndex != nextMazeIndex && packageIndex != nowMazeIndex)
             {
                 insideTarget.push_back(packageIndex);
                 addNew = true;
             }
         }
         // 添加患者和目的地到target中
-        if (!info.getCartransport())
+        if (!Information::getCartransport())
         {
-            int targetIndex = info.positonTransform(info.Passenger.startpos);
-            if (info.indexNotExist(targetIndex) && targetIndex != nextMazeIndex)
+            int targetIndex = Information::positonTransform(Information::Passenger.startpos);
+            if (Information::indexNotExist(targetIndex) && targetIndex != nextMazeIndex)
             {
                 insideTarget.push_back(targetIndex);
                 Serial.println("Add Patient at " + String(targetIndex));
                 addNew = true;
             }
         }
-        else if (info.getCartransport())
+        else if (Information::getCartransport())
         {
-            int targetIndex = info.positonTransform(info.Passenger.finalpos);
-            if (info.indexNotExist(targetIndex) && targetIndex != nextMazeIndex)
+            int targetIndex = Information::positonTransform(Information::Passenger.finalpos);
+            if (Information::indexNotExist(targetIndex) && targetIndex != nextMazeIndex)
             {
                 insideTarget.push_back(targetIndex);
                 Serial.println("Add Hospital at " + String(targetIndex));
@@ -208,7 +206,7 @@ void StateMachine::updateInfo()
 }
 
 // 动作更新
-void StateMachine::updateAction(Information &info)
+void StateMachine::updateAction()
 {
     /*
         这里是迷宫外的两个任务状态的动作执行
@@ -358,7 +356,7 @@ void StateMachine::updateAction(Information &info)
 }
 
 // 更新任务放在最后做
-void StateMachine::updateMission(Information &info)
+void StateMachine::updateMission()
 {
     // 如果当前任务是进入迷宫而且已经走完所有迷宫外目标点了，就把任务切换为搜寻迷宫
     if (nowMission == GO_TO_MAZE && outsideTarget.empty())
@@ -394,7 +392,7 @@ void StateMachine::updateMission(Information &info)
         nowMission = END_GAME;
 
     lastScore = nowScore;
-    nowScore = info.getCarscore();
+    nowScore = Information::getCarscore();
 
     // if (lastScore - nowScore >= 50)
     // {
@@ -404,7 +402,7 @@ void StateMachine::updateMission(Information &info)
 }
 
 // 更新电机
-void StateMachine::updateMotor(Information &info)
+void StateMachine::updateMotor()
 {
     // 如果当前游戏还没开始（实际不可能出现该情况）或者游戏已经结束，就直接停车
     if (nowMission == WAIT_FOR_START || nowMission == END_GAME)
@@ -414,7 +412,7 @@ void StateMachine::updateMotor(Information &info)
 }
 
 // Debug信息输出
-void StateMachine::printDebugInfo(Information &info)
+void StateMachine::printDebugInfo()
 {
     if (counter % 20 == 0)
     {
@@ -426,7 +424,7 @@ void StateMachine::printDebugInfo(Information &info)
 #endif
 
 #ifdef DEBUG_ZIGBEE
-        Serial.println("Car Position:  " + String(info.getCarposX()) + "  " + String(info.getCarposY()));
+        Serial.println("Car Position:  " + String(Information::getCarposX()) + "  " + String(Information::getCarposY()));
 #endif
 
 #ifdef DEBUG_TIMER
@@ -437,10 +435,39 @@ void StateMachine::printDebugInfo(Information &info)
 #ifdef DEBUG_POSITION
         if (nowMission == GO_TO_MAZE || nowMission == RETURN)
         {
-            Serial.println("NowPos: " + String(info.getCarposX()) + String(info.getCarposY()));
+            Serial.println("NowPos: " + String(Information::getCarposX()) + String(Information::getCarposY()));
             Serial.println("NowMidline: " + String(midLine));
             Serial.println("Target Distance: " + String(nowPosition.getDist(outsideTarget.front())));
         }
 #endif
     }
 }
+
+Match StateMachine::nowHalf;
+Mission StateMachine::nowMission;
+Position StateMachine::lastPosition = {0, 0};
+Position StateMachine::nowPosition = {0, 0};
+CrossroadAction StateMachine::crossroadAction;
+unsigned int StateMachine::midLine = 0;
+int StateMachine::nowMazeIndex;
+int StateMachine::nextMazeIndex;
+int StateMachine::targetTransportCount = 0;
+int StateMachine::offset = 0;
+int StateMachine::motorDirection = 1;
+uint16_t StateMachine::backTime = 0;
+int StateMachine::lastScore;
+int StateMachine::nowScore;
+int StateMachine::counter = 0;
+int StateMachine::turnAngle = 0;
+
+unsigned long StateMachine::lastCrossTime;
+unsigned long StateMachine::nowCrossTime;
+
+bool StateMachine::havePatient = false;
+bool StateMachine::getItems = false;
+bool StateMachine::restart = false;
+bool StateMachine::addNew = false;
+bool StateMachine::stop = false;
+
+std::deque<Position> StateMachine::outsideTarget;
+std::deque<int> StateMachine::insideTarget;

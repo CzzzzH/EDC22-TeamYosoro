@@ -118,7 +118,7 @@ double diffVelocity(const double angle)
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 0;
+    double IRcoff = 7;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
     double IR_in = (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::angleOffset();
