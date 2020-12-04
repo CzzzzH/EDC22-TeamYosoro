@@ -321,64 +321,69 @@ void Maze::putBlock()
     std::vector<int>::iterator pos = std::unique(nodeList.begin(), nodeList.end());
     nodeList.erase(pos, nodeList.end());
     
-    // choose the node with the best score
-    for(int i = 0;i < 5;i++)
+    std::priority_queue<sortNode> pq;
+    // bfs
+    for(auto it : nodeList)
     {
-        // bfs
-        int maxDist = 0;
-        int nodeNow = 0;
-        for(auto it : nodeList)
+        bool Add1 = false, Minus1 = false, Add6 = false, Minus6 = false;
+        if(existEdge(blockAdj, it, it + 1))
+            Add1 = true;
+        if(existEdge(blockAdj, it, it - 1))
+            Minus1 = true;
+        if(existEdge(blockAdj, it, it + MAZE_SIZE))
+            Add6 = true;
+        if(existEdge(blockAdj, it, it - MAZE_SIZE))
+            Minus6 = true;
+        deleteNode(blockAdj, it);
+        int distTmp = 0;
+        if(Add1 && Minus1)
         {
-            bool Add1 = false, Minus1 = false, Add6 = false, Minus6 = false;
-            if(existEdge(blockAdj, it, it + 1))
-                Add1 = true;
-            if(existEdge(blockAdj, it, it - 1))
-                Minus1 = true;
-            if(existEdge(blockAdj, it, it + MAZE_SIZE))
-                Add6 = true;
-            if(existEdge(blockAdj, it, it - MAZE_SIZE))
-                Minus6 = true;
-            deleteNode(blockAdj, it);
-            int distTmp = 0;
-            if(Add1 && Minus1)
-            {
-                int dist1 = getDist(blockAdj, it - 1, it + 1);
-                if(dist1 > 4)
-                    distTmp += dist1;
-                else
-                    distTmp += 1;
-            }
-            if(Add6 && Minus6)
-            {
-                int dist2 = getDist(blockAdj, it - MAZE_SIZE, it + MAZE_SIZE);
-                if(dist2 > 4)
-                    distTmp += dist2;
-                else
-                    distTmp += 1;
-            }
-            distTmp += 1;   //bias, exclude 0
-            if(maxDist < distTmp)
-            {
-                maxDist = distTmp;
-                nodeNow = it;
-            }
-            if(Add1)
-                addEdgeBlock(blockAdj, it, it + 1);
-            if(Minus1)
-                addEdgeBlock(blockAdj, it, it - 1);
-            if(Add6)
-                addEdgeBlock(blockAdj, it, it + MAZE_SIZE);
-            if(Minus6)
-                addEdgeBlock(blockAdj, it, it - MAZE_SIZE);
+            int dist1 = getDist(blockAdj, it - 1, it + 1);
+            if(dist1 > 4)
+                distTmp += dist1;
+            else
+                distTmp += 1;
         }
-        ourTrick.push_back(nodeNow);
-        deleteNode(blockAdj, nodeNow);
-        std::vector<int>::iterator it = std::find(nodeList.begin(), nodeList.end(), nodeNow);
-        if(it != nodeList.end())
-            nodeList.erase(it);
+        if(Add6 && Minus6)
+        {
+            int dist2 = getDist(blockAdj, it - MAZE_SIZE, it + MAZE_SIZE);
+            if(dist2 > 4)
+                distTmp += dist2;
+            else
+                distTmp += 1;
+        }
+        distTmp += 1;   //bias, exclude 0
+        pq.push({it, distTmp});
+        if(Add1)
+            addEdgeBlock(blockAdj, it, it + 1);
+        if(Minus1)
+            addEdgeBlock(blockAdj, it, it - 1);
+        if(Add6)
+            addEdgeBlock(blockAdj, it, it + MAZE_SIZE);
+        if(Minus6)
+            addEdgeBlock(blockAdj, it, it - MAZE_SIZE);
+    }
+    int number = 0;
+    while(number < 5)
+    {
+        int nodeNow = pq.top().node;
+        std::vector<int>::iterator it1 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow + 6);
+        std::vector<int>::iterator it2 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow - 6);
+        std::vector<int>::iterator it3 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow - 1);
+        std::vector<int>::iterator it4 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow + 1);
+        bool save = it1 == ourTrick.end() && it2 == ourTrick.end() && it3 == ourTrick.end() && it4 == ourTrick.end();
+        if(save)
+        {
+            ourTrick.push_back(nodeNow);
+            number++;
+        }
+        pq.pop();
+    }
+    for(auto it : ourTrick)
+    {
+        Serial.println(String(it));
     }
 }
-
 std::map<int, std::list<int>> Maze::adjList;
 std::map <int, std::list<int>> Maze::blockAdj;
 
