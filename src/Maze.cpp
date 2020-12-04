@@ -281,69 +281,64 @@ int Maze::getDist(std::map <int, std::list<int>> &graph, int now, int target)
 
 void Maze::putBlock()
 {
-    std::vector<int> nodeList;
+    
+    std::priority_queue<sortNode> pq;
     // copy map
-    std::map <int, std::list<int>> blockAdj = adjList;
     // choose barrier
-    for(auto it : barrierMaze)
+    for(auto bar : barrierMaze)
     {
-        if(abs(it.A - it.B) == 1) // vertical
+        std::vector<int> nodeList;
+        if(abs(bar.A - bar.B) == 1) // vertical
         {
-            nodeList.push_back(it.A);
-            nodeList.push_back(it.B);
-            if(it.A - MAZE_SIZE > 0)
+            nodeList.push_back(bar.A);
+            nodeList.push_back(bar.B);
+            if(bar.A - MAZE_SIZE > 0)
             {
-                nodeList.push_back(it.A - MAZE_SIZE);
-                nodeList.push_back(it.B - MAZE_SIZE);
+                nodeList.push_back(bar.A - MAZE_SIZE);
+                nodeList.push_back(bar.B - MAZE_SIZE);
             }
-            if(it.A + MAZE_SIZE < MAZE_SIZE * MAZE_SIZE + 1)
+            if(bar.A + MAZE_SIZE < MAZE_SIZE * MAZE_SIZE + 1)
             {
-                nodeList.push_back(it.A + MAZE_SIZE);
-                nodeList.push_back(it.B + MAZE_SIZE);
+                nodeList.push_back(bar.A + MAZE_SIZE);
+                nodeList.push_back(bar.B + MAZE_SIZE);
             }
         }
         else // horizontal
         {
-            nodeList.push_back(it.A);
-            nodeList.push_back(it.B);
-            if(it.A - 1 > ((it.A - 1) / MAZE_SIZE) * MAZE_SIZE)
+            nodeList.push_back(bar.A);
+            nodeList.push_back(bar.B);
+            if(bar.A - 1 > ((bar.A - 1) / MAZE_SIZE) * MAZE_SIZE)
             {
-                nodeList.push_back(it.A - 1);
-                nodeList.push_back(it.B - 1);
+                nodeList.push_back(bar.A - 1);
+                nodeList.push_back(bar.B - 1);
             }
-            if(it.B + 1 <= ((1 + ((it.B - 1) / MAZE_SIZE)) * MAZE_SIZE))
+            if(bar.B + 1 <= ((1 + ((bar.B - 1) / MAZE_SIZE)) * MAZE_SIZE))
             {
-                nodeList.push_back(it.A + 1);
-                nodeList.push_back(it.B + 1);
+                nodeList.push_back(bar.A + 1);
+                nodeList.push_back(bar.B + 1);
             }
         }
-    }
-    std::sort(nodeList.begin(), nodeList.end());
-    std::vector<int>::iterator pos = std::unique(nodeList.begin(), nodeList.end());
-    nodeList.erase(pos, nodeList.end());
-    
-    // choose the node with the best score
-    for(int i = 0;i < 5;i++)
-    {
+        std::sort(nodeList.begin(), nodeList.end());
+        std::vector<int>::iterator pos = std::unique(nodeList.begin(), nodeList.end());
+        nodeList.erase(pos, nodeList.end());
+
         // bfs
-        int maxDist = 0;
-        int nodeNow = 0;
         for(auto it : nodeList)
         {
             bool Add1 = false, Minus1 = false, Add6 = false, Minus6 = false;
-            if(existEdge(blockAdj, it, it + 1))
+            if(existEdge(adjList, it, it + 1))
                 Add1 = true;
-            if(existEdge(blockAdj, it, it - 1))
+            if(existEdge(adjList, it, it - 1))
                 Minus1 = true;
-            if(existEdge(blockAdj, it, it + MAZE_SIZE))
+            if(existEdge(adjList, it, it + MAZE_SIZE))
                 Add6 = true;
-            if(existEdge(blockAdj, it, it - MAZE_SIZE))
+            if(existEdge(adjList, it, it - MAZE_SIZE))
                 Minus6 = true;
-            deleteNode(blockAdj, it);
+            deleteNode(adjList, it);
             int distTmp = 0;
             if(Add1 && Minus1)
             {
-                int dist1 = getDist(blockAdj, it - 1, it + 1);
+                int dist1 = getDist(adjList, it - 1, it + 1);
                 if(dist1 > 4)
                     distTmp += dist1;
                 else
@@ -351,32 +346,44 @@ void Maze::putBlock()
             }
             if(Add6 && Minus6)
             {
-                int dist2 = getDist(blockAdj, it - MAZE_SIZE, it + MAZE_SIZE);
+                int dist2 = getDist(adjList, it - MAZE_SIZE, it + MAZE_SIZE);
                 if(dist2 > 4)
                     distTmp += dist2;
                 else
                     distTmp += 1;
             }
             distTmp += 1;   //bias, exclude 0
-            if(maxDist < distTmp)
-            {
-                maxDist = distTmp;
-                nodeNow = it;
-            }
+            pq.push({it, distTmp});
             if(Add1)
-                addEdgeBlock(blockAdj, it, it + 1);
+                addEdgeBlock(adjList, it, it + 1);
             if(Minus1)
-                addEdgeBlock(blockAdj, it, it - 1);
+                addEdgeBlock(adjList, it, it - 1);
             if(Add6)
-                addEdgeBlock(blockAdj, it, it + MAZE_SIZE);
+                addEdgeBlock(adjList, it, it + MAZE_SIZE);
             if(Minus6)
-                addEdgeBlock(blockAdj, it, it - MAZE_SIZE);
+                addEdgeBlock(adjList, it, it - MAZE_SIZE);
         }
-        ourTrick.push_back(nodeNow);
-        deleteNode(blockAdj, nodeNow);
-        std::vector<int>::iterator it = std::find(nodeList.begin(), nodeList.end(), nodeNow);
-        if(it != nodeList.end())
-            nodeList.erase(it);
+    }
+    int number = 0;
+    while(number < 5)
+    {
+        int nodeNow = pq.top().node;
+        std::vector<int>::iterator it_ = std::find(ourTrick.begin(), ourTrick.end(), nodeNow);
+        std::vector<int>::iterator it1 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow + 6);
+        std::vector<int>::iterator it2 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow - 6);
+        std::vector<int>::iterator it3 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow - 1);
+        std::vector<int>::iterator it4 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow + 1);
+        bool save = it1 == ourTrick.end() && it2 == ourTrick.end() && it3 == ourTrick.end() && it4 == ourTrick.end() && it_ == ourTrick.end();
+        if(save)
+        {
+            ourTrick.push_back(nodeNow);
+            number++;
+        }
+        pq.pop();
+    }
+    for(auto it : ourTrick)
+    {
+        Serial.println(it);
     }
 }
 
