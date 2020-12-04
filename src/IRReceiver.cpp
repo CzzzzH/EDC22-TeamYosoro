@@ -18,34 +18,6 @@ void IRReceiver::initialize()
     pinMode(LEFT_FRONT, INPUT);
     pinMode(RIGHT_BACK, INPUT);
     pinMode(LEFT_BACK, INPUT);
-
-    // // Right
-    // midWeight[0] = 0;
-    // midWeight[1] = 1.6;
-    // midWeight[2] = 1.5;
-    // midWeight[3] = 1.25;
-    // midWeight[4] = 1;
-    // midWeight[5] = 0.75;
-    // midWeight[6] = 0.5;
-    // midWeight[7] = 0.25;
-    // midBackWeight[0] = 2;
-    // midBackWeight[1] = 1;
-    // midBackWeight[2] = 0.5;
-    // midBackWeight[3] = 0.5;
-
-    // // Left
-    // midBackWeight[4] = -0.5;
-    // midBackWeight[5] = -0.5;
-    // midBackWeight[6] = -1;
-    // midBackWeight[7] = -2;
-    // midWeight[8] = -0.25;
-    // midWeight[9] = -0.5;
-    // midWeight[10] = -1;
-    // midWeight[11] = -0.75;
-    // midWeight[12] = -1.25;
-    // midWeight[13] = -1.5;
-    // midWeight[14] = -1.6;
-    // midWeight[15] = 0;
 }
 
 void IRReceiver::updateValue()

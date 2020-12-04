@@ -10,7 +10,7 @@
 #define RIGHT_BACK 46
 #define LEFT_BACK 47
 
-#define MID_BEGIN 23
+#define MID_BEGIN 22
 #define MID_BACK_BEGIN 38
 #define MID_IR_COUNT 16
 #define MID_BACK_IR_COUNT 8

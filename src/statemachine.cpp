@@ -18,8 +18,8 @@ void StateMachine::interruptionFunction()
     JY61::read();
     AngleControl::Compute();
     Motor::PID_compute();
-    process();
-    // Motor::targetSpeed = 23;
+    // process();
+    Motor::targetSpeed = 23;
     Motor::updatePWM();
 }
 
@@ -70,7 +70,7 @@ void StateMachine::init()
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize();
-    Maze::putBlock();
+    // Maze::putBlock();
 
     // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
     if (nowHalf == FIRST_HALF)
@@ -118,10 +118,10 @@ void StateMachine::init()
     Motor::targetSpeed = AHEAD_SPEED;
 
     // 最后再初始化中断
-    // MsTimer2::set(10, interruptionFunction);
-    // MsTimer2::start();
-    interruptionFunction();
-
+    MsTimer2::set(10, interruptionFunction);
+    MsTimer2::start();
+    // interruptionFunction();
+    //
     Serial.println("Init Complete!");
 }
 
