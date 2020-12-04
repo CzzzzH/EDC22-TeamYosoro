@@ -152,7 +152,7 @@ bool IRReceiver::atCrossroad(int angle)
             {
                 if (slowRight && slowLeft)
                 {
-                    Motor::targetSpeed = SLOW_SPEED * (encoder::counter.left + encoder::counter.right);
+                    Motor::targetSpeed = SLOW_SPEED;
                     Serial.println("[SLOW at time " + String(millis()) + "]");
                 }
                 else 

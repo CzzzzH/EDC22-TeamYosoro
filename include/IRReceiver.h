@@ -3,7 +3,7 @@
 // From left to right
 #define AHEAD_SPEED 23
 #define TURN_SPEED 17
-#define SLOW_SPEED -5
+#define SLOW_SPEED 3
 
 #define RIGHT_FRONT 49
 #define LEFT_FRONT 48
