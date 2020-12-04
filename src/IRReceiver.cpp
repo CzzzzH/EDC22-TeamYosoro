@@ -152,7 +152,7 @@ bool IRReceiver::atCrossroad(int angle)
             {
                 if (slowRight && slowLeft)
                 {
-                    Motor::targetSpeed = SLOW_SPEED;
+                    Motor::targetSpeed = SLOW_SPEED * (encoder::counter.left + encoder::counter.right);
                     Serial.println("[SLOW at time " + String(millis()) + "]");
                 }
                 else 
@@ -252,14 +252,18 @@ double IRReceiver::angleOffset()
         {
             int i = MID_IR_COUNT / 2 - 1;
             int j = MID_IR_COUNT / 2;
+            int count = 0;
             while (i >= 0)
             {
                 offset += midValue[i] * midWeight[i] + midValue[j] * midWeight[j];
+                count += midValue[i];
+                count += midValue[j];
                 if (midValue[i] == 0 && midValue[i + 1] == 1) break;
                 if (midValue[j] == 0 && midValue[j - 1] == 1) break;
                 i--;
                 j++;
             }
+            if (count > 5) offset = 0;
         }
         else
         {   

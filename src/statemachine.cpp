@@ -26,7 +26,7 @@ void StateMachine::init()
 
     // 设置Debug模式
     JY61::isDebug = false;
-    Motor::isDebug = true;
+    Motor::isDebug = false;
 
     // 初始化串口
     Serial.begin(115200);
@@ -69,7 +69,7 @@ void StateMachine::init()
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize(Information::getInstance());
-    // Maze::putBlock();
+    Maze::putBlock();
 
     // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
     if (nowHalf == FIRST_HALF)
@@ -79,15 +79,17 @@ void StateMachine::init()
             添加我们算法生成的障碍物位置
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        // for(auto it : Maze::ourTrick)
-        // {
-        //     insideTarget.push_back(it);
-        // }
+        for(auto it : Maze::ourTrick)
+        {
+            insideTarget.push_back(it);
+            Serial.println(String(it));
+        }
+
         // insideTarget.push_back(10);
-        insideTarget.push_back(19);
-        insideTarget.push_back(3);
-        insideTarget.push_back(12);
-        insideTarget.push_back(30);
+        // insideTarget.push_back(19);
+        // insideTarget.push_back(3);
+        // insideTarget.push_back(12);
+        // insideTarget.push_back(30);
     }
     else
     {

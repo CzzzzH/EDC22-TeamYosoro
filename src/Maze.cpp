@@ -2,7 +2,7 @@
 #include "Maze.h"
 #include "statemachine.h"
 
-// #define MAZE_DEBUG
+#define MAZE_DEBUG
 
 void Maze::addEdge(int u, int v, bool dir = 1)
 {
