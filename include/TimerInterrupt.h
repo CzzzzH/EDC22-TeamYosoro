@@ -5,13 +5,14 @@
 #include <list>
 #include <MsTimer2.h>
 
+#define INTERRUPT_INTERVAL 50
 class TimerInterrupt
 {
 public:
 	typedef void (*Func)(void);
+    static std::list<TimerInterrupt *> timer_list;
 
 private:
-	static std::list<TimerInterrupt *> timer_list;
 	static void unit_interrupt();
 	unsigned int count = 0;
 	unsigned int times = 1;
@@ -19,7 +20,7 @@ private:
 
 public:
 	static void initialize(unsigned long interval);
-	TimerInterrupt(unsigned int, Func);
+	TimerInterrupt(unsigned int period , Func func);
 
 	void execute();
 };

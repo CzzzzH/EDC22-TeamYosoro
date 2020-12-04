@@ -1,8 +1,8 @@
-#include <Arduino.h>
 #include "Maze.h"
 #include "statemachine.h"
+#include <Arduino.h>
 
-#define MAZE_DEBUG
+// #define MAZE_DEBUG
 
 void Maze::printAdjList()
 {
@@ -90,7 +90,6 @@ void Maze::initialize(Information &info)
     }
     */
 }
-
 
 int Maze::getWay(int now, std::deque<int> &target)
 {
@@ -279,6 +278,7 @@ int Maze::getDist(std::map <int, std::list<int>> &graph, int now, int target)
         layer = INF;
     return layer;
 }
+
 void Maze::putBlock()
 {
     std::vector<int> nodeList;
@@ -380,8 +380,14 @@ void Maze::putBlock()
     }
 }
 
-std::map <int, std::list<int>>Maze::adjList;
-static std::map <int, std::list<int>> blockAdj;
+std::map<int, std::list<int>> Maze::adjList;
+std::map <int, std::list<int>> Maze::blockAdj;
+
 std::vector<barrierEdge> Maze::barrierMaze;
 std::vector<int> Maze::block;
 std::vector<int> Maze::ourTrick;
+
+std::vector<int> Maze::Stack;
+std::deque<sortNode> Maze::q;
+std::map<int, bool> Maze::visited;
+std::vector<int> Maze::history;

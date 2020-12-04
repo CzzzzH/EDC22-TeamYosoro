@@ -10,75 +10,69 @@
 
 class Information
 {
-private:
-    Information() {}
-    Information &operator=(const Information &) = delete;
-
 public:
-    BasicInfo Game;           
-    CarInfo Car;              
-    PassengerInfo Passenger;  
-    PackageInfo Package[6];   
-    FloodInfo Flood[5];       
-    ObstacleInfo Obstacle[8]; 
+    static BasicInfo Game;           
+    static CarInfo Car;              
+    static PassengerInfo Passenger;  
+    static PackageInfo Package[6];   
+    static FloodInfo Flood[5];       
+    static ObstacleInfo Obstacle[8]; 
 
-    uint8_t zigbeeReceive[ZIGBEE_MESSAGE_LENTH]; 
-    uint8_t zigbeeMessage[ZIGBEE_MESSAGE_LENTH]; 
-    int message_index = 0;
-    int message_head = -1;
+    static uint8_t zigbeeReceive[ZIGBEE_MESSAGE_LENTH]; 
+    static uint8_t zigbeeMessage[ZIGBEE_MESSAGE_LENTH]; 
+    static int message_index;
+    static int message_head;
     
-    void Decode();
-    void DecodeBasicInfo();
-    void DecodeCarInfo();
-    void DecodePassengerInfo();
-    void DecodePackageAInfo();
-    void DecodePackageBInfo();
-    void DecodePackageCInfo();
-    void DecodePackageDInfo();
-    void DecodePackageEInfo();
-    void DecodePackageFInfo();
-    void DecodeFloodInfo();
-    void DecodeObstacle();
+    static void Decode();
+    static void DecodeBasicInfo();
+    static void DecodeCarInfo();
+    static void DecodePassengerInfo();
+    static void DecodePackageAInfo();
+    static void DecodePackageBInfo();
+    static void DecodePackageCInfo();
+    static void DecodePackageDInfo();
+    static void DecodePackageEInfo();
+    static void DecodePackageFInfo();
+    static void DecodeFloodInfo();
+    static void DecodeObstacle();
 
-    int receiveIndexMinus(int index_h, int num);
-    int receiveIndexAdd(int index_h, int num);
+    static int receiveIndexMinus(int index_h, int num);
+    static int receiveIndexAdd(int index_h, int num);
 
-    enum GameStateEnum getGameState(void);			
-    void updateInfo();                    
-    uint16_t getGameTime(void);           
-    uint16_t getPassengerstartposX(void); 
-    uint16_t getPassengerstartposY(void);
-    struct Position getPassengerstartpos(void);
-    uint16_t getPassengerfinalposX(void); 
-    uint16_t getPassengerfinalposY(void);
-    struct Position getPassengerfinalpos(void);
-    uint16_t getGameFlood(void);              
-    uint16_t getFloodposX(int FloodNo);       
-    uint16_t getFloodposY(int FloodNo);       
-    struct Position getFloodpos(int FloodNo); 
-    uint16_t getCarposX();            
-    uint16_t getCarposY();                
-    struct Position getCarpos();          
-    uint16_t getPackageposX(int PackNo);          
-    uint16_t getPackageposY(int PackNo);             
-    uint16_t getPackagewhetherpicked(int PackNo);    
-    struct Position getPackagepos(int PackNo);       
-    uint16_t getCarpicknum();                     
-    uint16_t getCartransportnum();            
-    uint16_t getCartransport();                 
-    uint16_t getCarscore();                      
-    uint16_t getCartask();          
-    uint16_t getCararea();                        
-    uint16_t getObstacleAposX(int ObstacleNo);      
-    uint16_t getObstacleAposY(int ObstacleNo);       
-    uint16_t getObstacleBposX(int ObstacleNo);       
-    uint16_t getObstacleBposY(int ObstacleNo);       
-    struct Position getObstacleApos(int ObstacleNo); 
-    struct Position getObstacleBpos(int ObstacleNo); 
-    int positonTransform(Position &pos);
-    bool indexNotExist(int index);
-    ~Information() {}
-    static Information &getInstance();
+    static enum GameStateEnum getGameState(void);			
+    static void updateInfo();                    
+    static uint16_t getGameTime(void);           
+    static uint16_t getPassengerstartposX(void); 
+    static uint16_t getPassengerstartposY(void);
+    static Position getPassengerstartpos(void);
+    static uint16_t getPassengerfinalposX(void); 
+    static uint16_t getPassengerfinalposY(void);
+    static Position getPassengerfinalpos(void);
+    static uint16_t getGameFlood(void);              
+    static uint16_t getFloodposX(int FloodNo);       
+    static uint16_t getFloodposY(int FloodNo);       
+    static Position getFloodpos(int FloodNo); 
+    static uint16_t getCarposX();            
+    static uint16_t getCarposY();                
+    static Position getCarpos();          
+    static uint16_t getPackageposX(int PackNo);          
+    static uint16_t getPackageposY(int PackNo);             
+    static uint16_t getPackagewhetherpicked(int PackNo);    
+    static Position getPackagepos(int PackNo);       
+    static uint16_t getCarpicknum();                     
+    static uint16_t getCartransportnum();            
+    static uint16_t getCartransport();                 
+    static uint16_t getCarscore();                      
+    static uint16_t getCartask();          
+    static uint16_t getCararea();                        
+    static uint16_t getObstacleAposX(int ObstacleNo);      
+    static uint16_t getObstacleAposY(int ObstacleNo);       
+    static uint16_t getObstacleBposX(int ObstacleNo);       
+    static uint16_t getObstacleBposY(int ObstacleNo);       
+    static Position getObstacleApos(int ObstacleNo); 
+    static Position getObstacleBpos(int ObstacleNo); 
+    static int positonTransform(Position &pos);
+    static bool indexNotExist(int index);
 };
 
 #endif

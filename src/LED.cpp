@@ -10,7 +10,6 @@ void LED::ledOn()
 {
     ledReg = HIGH;
     digitalWrite(portLED, ledReg);
-    //Serial.println(portLED);
 }
 
 uint8_t LED::ledStatus()

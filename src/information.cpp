@@ -3,12 +3,6 @@
 #include <deque>
 #include <string>
 
-Information &Information::getInstance()
-{
-    static Information instance;
-    return instance;
-}
-
 void Information::updateInfo()
 {
     std::string zigbeeMessage;
@@ -96,7 +90,7 @@ uint16_t Information::getPassengerstartposY()
     return Passenger.startpos.Y;
 }
 
-struct Position Information::getPassengerstartpos()
+Position Information::getPassengerstartpos()
 {
     return Passenger.startpos;
 }
@@ -110,7 +104,7 @@ uint16_t Information::getPassengerfinalposY()
     return Passenger.finalpos.Y;
 }
 
-struct Position Information::getPassengerfinalpos()
+Position Information::getPassengerfinalpos()
 {
     return Passenger.finalpos;
 }
@@ -125,7 +119,7 @@ uint16_t Information::getFloodposY(int FloodNo)
     return Flood[FloodNo].pos.Y;
 }
 
-struct Position Information::getFloodpos(int FloodNo)
+Position Information::getFloodpos(int FloodNo)
 {
     return Flood[FloodNo].pos;
 }
@@ -140,7 +134,7 @@ uint16_t Information::getCarposY()
     return (uint16_t)Car.pos.Y;
 }
 
-struct Position Information::getCarpos()
+Position Information::getCarpos()
 {
     return Car.pos;
 }
@@ -169,7 +163,7 @@ uint16_t Information::getPackagewhetherpicked(int PackNo)
         return (uint16_t)Package[PackNo].whetherpicked;
 }
 
-struct Position Information::getPackagepos(int PackNo)
+Position Information::getPackagepos(int PackNo)
 {
     return Package[PackNo].pos;
 }
@@ -224,12 +218,12 @@ uint16_t Information::getObstacleBposY(int ObstacleNo)
     return (uint16_t)Obstacle[ObstacleNo].posB.Y;
 }
 
-struct Position Information::getObstacleApos(int ObstacleNo)
+Position Information::getObstacleApos(int ObstacleNo)
 {
     return Obstacle[ObstacleNo].posA;
 }
 
-struct Position Information::getObstacleBpos(int ObstacleNo)
+Position Information::getObstacleBpos(int ObstacleNo)
 {
     return Obstacle[ObstacleNo].posB;
 }
@@ -377,6 +371,18 @@ int Information::positonTransform(Position &pos)
 
 bool Information::indexNotExist(int index)
 {
-    std::deque<int> &insideTarget = StateMachine::getInstance().insideTarget;
+    std::deque<int> &insideTarget = StateMachine::insideTarget;
     return std::find(insideTarget.begin(), insideTarget.end(), index) == insideTarget.end();
 }
+
+BasicInfo Information::Game;           
+CarInfo Information::Car;              
+PassengerInfo Information::Passenger;  
+PackageInfo Information::Package[6];   
+FloodInfo Information::Flood[5];       
+ObstacleInfo Information::Obstacle[8]; 
+
+uint8_t Information::zigbeeReceive[ZIGBEE_MESSAGE_LENTH]; 
+uint8_t Information::zigbeeMessage[ZIGBEE_MESSAGE_LENTH]; 
+int Information::message_index = 0;
+int Information::message_head = -1;

@@ -30,13 +30,21 @@
 class Maze {
 private:
     static std::map <int, std::list<int>> adjList;
+    static std::map <int, std::list<int>> blockAdj;
     static std::vector<int> block;
     static std::vector<barrierEdge> barrierMaze;
-    static std::map <int, std::list<int>> blockAdj;
+       
+    // Get Way & Get Dist
+    static std::vector<int> Stack;
+    static std::deque<sortNode> q;
+    static std::map<int, bool> visited;
+    static std::vector<int> history;
     static int getWay(int now, std::deque<int> &target);
 public:
+    static bool ifInit;
+
     static std::vector<int> ourTrick;
-    static void initialize(Information &info);
+    static void initialize();
     static void addEdge(int u, int v, bool dir);
     static void addEdgeBlock(std::map <int, std::list<int>> &graph, int u, int v, bool dir);
     static void deleteEdge(std::map <int, std::list<int>> &graph, int u, int v, bool dir);
