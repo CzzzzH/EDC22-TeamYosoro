@@ -281,8 +281,7 @@ int Maze::getDist(std::map <int, std::list<int>> &graph, int now, int target)
 
 void Maze::putBlock()
 {
-    
-    std::priority_queue<sortNode> pq;
+    std::deque<sortNode> dq;
     // copy map
     // choose barrier
     for(auto bar : barrierMaze)
@@ -325,6 +324,17 @@ void Maze::putBlock()
         // bfs
         for(auto it : nodeList)
         {
+            bool continu = false;
+            for(auto find : dq)
+            {
+                if(it == find.node)
+                {
+                    continu = true;
+                    break;
+                }
+            }
+            if(continu)
+                continue;
             bool Add1 = false, Minus1 = false, Add6 = false, Minus6 = false;
             if(existEdge(adjList, it, it + 1))
                 Add1 = true;
@@ -353,7 +363,7 @@ void Maze::putBlock()
                     distTmp += 1;
             }
             distTmp += 1;   //bias, exclude 0
-            pq.push({it, distTmp});
+            dq.push_back({it, distTmp});
             if(Add1)
                 addEdgeBlock(adjList, it, it + 1);
             if(Minus1)
@@ -365,22 +375,23 @@ void Maze::putBlock()
         }
     }
     int number = 0;
+    std::sort(dq.begin(), dq.end());
     while(number < 5)
     {
-        int nodeNow = pq.top().node;
-        std::vector<int>::iterator it_ = std::find(ourTrick.begin(), ourTrick.end(), nodeNow);
+        int nodeNow = dq.back().node;
         std::vector<int>::iterator it1 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow + 6);
         std::vector<int>::iterator it2 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow - 6);
         std::vector<int>::iterator it3 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow - 1);
         std::vector<int>::iterator it4 = std::find(ourTrick.begin(), ourTrick.end(), nodeNow + 1);
-        bool save = it1 == ourTrick.end() && it2 == ourTrick.end() && it3 == ourTrick.end() && it4 == ourTrick.end() && it_ == ourTrick.end();
+        bool save = it1 == ourTrick.end() && it2 == ourTrick.end() && it3 == ourTrick.end() && it4 == ourTrick.end();
         if(save)
         {
             ourTrick.push_back(nodeNow);
             number++;
         }
-        pq.pop();
+        dq.pop_back();
     }
+
     for(auto it : ourTrick)
     {
         Serial.println(it);
