@@ -8,7 +8,7 @@
 #include "IRReceiver.h"
 #include "statemachine.h"
 
-const double right_left_coeff = 1.08;
+const double right_left_coeff = 1.095;
 
 const int RIGHT_MAX_PWM = 255;
 // const int LEFT_MAX_PWM = 255 / right_left_coeff;
@@ -111,14 +111,14 @@ double diffVelocity(const double angle)
 {
     if (AngleControl::target == 0)
         return 0;
-    double result_angle = 1.2 * angle + pow(angle / 25, 3);
+    double result_angle = 1.0 * angle + pow(angle / 20, 3);
     return result_angle;
 }
 
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 0;
+    double IRcoff = 12;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
     double IR_in = (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::angleOffset();
@@ -139,7 +139,7 @@ void Motor::updatePWM()
 
 double Motor::estimatePWM(double targeteSpeed)
 {
-    return 5.4 * targeteSpeed;
+    return 5.2 * targeteSpeed;
 }
 
 const pin_2 Motor::left_pin = {12, 13};

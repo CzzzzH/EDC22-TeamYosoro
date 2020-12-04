@@ -18,7 +18,7 @@ TimerInterrupt motorTimer(INTERRUPT_INTERVAL, [] {
     Serial.println("Left Motor Counter: " + String(encoder::counter.left));
     Serial.println("Right Motor Counter: " + String(encoder::counter.right));
 #endif
-    Motor::targetSpeed = 23;
+    // Motor::targetSpeed = 23;
 });
 
 TimerInterrupt angleTimer(10, [] {
@@ -27,7 +27,7 @@ TimerInterrupt angleTimer(10, [] {
     JY61::read();
     AngleControl::Compute();
     Motor::PID_compute();
-    // StateMachine::getInstance().process();
+    StateMachine::getInstance().process();
     Motor::updatePWM();
 });
 
