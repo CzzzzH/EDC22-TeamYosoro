@@ -12,14 +12,14 @@
 #include <MsTimer2.h>
 
 // 中断异常
-static void interruptionFunction()
+void StateMachine::interruptionFunction()
 {
     IRReceiver::updateValue();
     JY61::read();
     AngleControl::Compute();
     Motor::PID_compute();
-    // StateMachine::process();
-    Motor::targetSpeed = 23;
+    process();
+    // Motor::targetSpeed = 23;
     Motor::updatePWM();
 }
 
@@ -118,8 +118,9 @@ void StateMachine::init()
     Motor::targetSpeed = AHEAD_SPEED;
 
     // 最后再初始化中断
-    MsTimer2::set(10, interruptionFunction);
-    MsTimer2::start();
+    // MsTimer2::set(10, interruptionFunction);
+    // MsTimer2::start();
+    interruptionFunction();
 
     Serial.println("Init Complete!");
 }

@@ -9,10 +9,6 @@
 
 void IRReceiver::initialize()
 {
-    memset(midValue, 0, sizeof(midValue));
-    memset(totalMidValue, 0, sizeof(totalMidValue));
-    memset(midBackValue, 0, sizeof(midValue));
-    memset(totalMidBackValue, 0, sizeof(totalMidBackValue));
     for (int i = 0; i < MID_IR_COUNT; ++i)
         pinMode(MID_BEGIN + i, INPUT);
     for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
@@ -23,33 +19,33 @@ void IRReceiver::initialize()
     pinMode(RIGHT_BACK, INPUT);
     pinMode(LEFT_BACK, INPUT);
 
-    // Right
-    midWeight[0] = 0;
-    midWeight[1] = 1.6;
-    midWeight[2] = 1.5;
-    midWeight[3] = 1.25;
-    midWeight[4] = 1;
-    midWeight[5] = 0.75;
-    midWeight[6] = 0.5;
-    midWeight[7] = 0.25;
-    midBackWeight[0] = 2;
-    midBackWeight[1] = 1;
-    midBackWeight[2] = 0.5;
-    midBackWeight[3] = 0.5;
+    // // Right
+    // midWeight[0] = 0;
+    // midWeight[1] = 1.6;
+    // midWeight[2] = 1.5;
+    // midWeight[3] = 1.25;
+    // midWeight[4] = 1;
+    // midWeight[5] = 0.75;
+    // midWeight[6] = 0.5;
+    // midWeight[7] = 0.25;
+    // midBackWeight[0] = 2;
+    // midBackWeight[1] = 1;
+    // midBackWeight[2] = 0.5;
+    // midBackWeight[3] = 0.5;
 
-    // Left
-    midBackWeight[4] = -0.5;
-    midBackWeight[5] = -0.5;
-    midBackWeight[6] = -1;
-    midBackWeight[7] = -2;
-    midWeight[8] = -0.25;
-    midWeight[9] = -0.5;
-    midWeight[10] = -1;
-    midWeight[11] = -0.75;
-    midWeight[12] = -1.25;
-    midWeight[13] = -1.5;
-    midWeight[14] = -1.6;
-    midWeight[15] = 0;
+    // // Left
+    // midBackWeight[4] = -0.5;
+    // midBackWeight[5] = -0.5;
+    // midBackWeight[6] = -1;
+    // midBackWeight[7] = -2;
+    // midWeight[8] = -0.25;
+    // midWeight[9] = -0.5;
+    // midWeight[10] = -1;
+    // midWeight[11] = -0.75;
+    // midWeight[12] = -1.25;
+    // midWeight[13] = -1.5;
+    // midWeight[14] = -1.6;
+    // midWeight[15] = 0;
 }
 
 void IRReceiver::updateValue()
@@ -263,7 +259,7 @@ double IRReceiver::angleOffset()
             int count = 0;
             while (i >= 0)
             {
-                offset += midValue[i] * midWeight[i] + midValue[j] * midWeight[j];
+                offset += midValue[i] + midValue[j];
                 count += midValue[i];
                 count += midValue[j];
                 if (midValue[i] == 0 && midValue[i + 1] == 1)
@@ -282,7 +278,8 @@ double IRReceiver::angleOffset()
             int j = MID_BACK_IR_COUNT / 2;
             while (i >= 0)
             {
-                offset += midBackValue[i] * midBackWeight[i] + midBackValue[j] * midBackWeight[j];
+                // offset += midBackValue[i] * midBackWeight[i] + midBackValue[j] * midBackWeight[j];
+                offset += - (midBackValue[i] + midBackValue[i]);
                 if (midBackValue[i] == 0 && midBackValue[i + 1] == 1)
                     break;
                 if (midBackValue[j] == 0 && midBackValue[j - 1] == 1)
@@ -317,8 +314,8 @@ int IRReceiver::midValue[MID_IR_COUNT];
 int IRReceiver::totalMidValue[MID_IR_COUNT];
 int IRReceiver::midBackValue[MID_BACK_IR_COUNT];
 int IRReceiver::totalMidBackValue[MID_BACK_IR_COUNT];
-double IRReceiver::midWeight[MID_IR_COUNT];
-double IRReceiver::midBackWeight[MID_BACK_IR_COUNT];
+// double IRReceiver::midWeight[MID_IR_COUNT];
+// double IRReceiver::midBackWeight[MID_BACK_IR_COUNT];
 bool IRReceiver::turn = false;
 bool IRReceiver::ahead = false;
 bool IRReceiver::slowLeft = false;
