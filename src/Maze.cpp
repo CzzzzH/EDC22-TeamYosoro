@@ -143,20 +143,20 @@ int Maze::getDist(int now, int target)
     int layer = 0;
     q.push_front({now, layer});
     visited[now] = true;
-    Serial.println("Now" + String(now));
-    Serial.println("Target" + String(target));
+    // Serial.println("Now" + String(now));
+    // Serial.println("Target" + String(target));
     while (!q.empty())
     {
         int node = q.front().node;
         layer = q.front().layer;
         q.pop_front();
         layer++;
-        Serial.println("node" + String(node));
-        if(now == 6)
-            printAdjList();
+        // Serial.println("node" + String(node));
+        // if(now == 6)
+        //     printAdjList();
         for (auto neighbours : adjList[node])
         {
-            Serial.println("neighbors: " + String(neighbours));
+            // Serial.println("neighbors: " + String(neighbours));
             if (!visited[neighbours])
             {
                 q.push_back({neighbours, layer});
@@ -322,7 +322,6 @@ void Maze::putBlock()
     for(int i = 0;i < 5;i++)
     {
         // bfs
-        Serial.println("fuck");
         int maxDist = 0;
         int nodeNow = 0;
         for(auto it : nodeList)
@@ -337,27 +336,27 @@ void Maze::putBlock()
             if(existEdge(it, it - MAZE_SIZE))
                 Minus6 = true;
             deleteNode(it);
-            printAdjList();
+            // printAdjList();
             int distTmp = 0;
-            Serial.println("distTmp: " + String(distTmp));
-            Serial.println("Add1 : " + String(Add1));
-            Serial.println("Minus1 : " + String(Minus1));
+            // Serial.println("distTmp: " + String(distTmp));
+            // Serial.println("Add1 : " + String(Add1));
+            // Serial.println("Minus1 : " + String(Minus1));
             if(Add1 && Minus1)
             {
                 int dist1 = getDist(it - 1, it + 1);
-                Serial.println("dist1 : " + String(dist1));
+                // Serial.println("dist1 : " + String(dist1));
                 if(dist1 > 4)
                     distTmp += dist1;
                 else
                     distTmp += 1;
             }
-            Serial.println("Add6 : " + String(Add6));
-            Serial.println("Minus6 : " + String(Minus6));
+            // Serial.println("Add6 : " + String(Add6));
+            // Serial.println("Minus6 : " + String(Minus6));
             if(Add6 && Minus6)
             {
-                Serial.println("it : " + String(it));
+                // Serial.println("it : " + String(it));
                 int dist2 = getDist(it - MAZE_SIZE, it + MAZE_SIZE);
-                Serial.println("dist2 : " + String(dist2));
+                // Serial.println("dist2 : " + String(dist2));
                 if(dist2 > 4)
                     distTmp += dist2;
                 else
@@ -369,7 +368,7 @@ void Maze::putBlock()
                 maxDist = distTmp;
                 nodeNow = it;
             }
-            Serial.println("maxDist: " + String(maxDist));
+            // Serial.println("maxDist: " + String(maxDist));
             if(Add1)
                 addEdge(it, it + 1);
             if(Minus1)
@@ -378,7 +377,7 @@ void Maze::putBlock()
                 addEdge(it, it + MAZE_SIZE);
             if(Minus6)
                 addEdge(it, it - MAZE_SIZE);
-            Serial.println(String(it));
+            // Serial.println(String(it));
         }
         ourTrick.push_back(nodeNow);
         deleteNode(nodeNow);
@@ -390,6 +389,7 @@ void Maze::putBlock()
     
     for(auto it : ourTrick)
     {
+        Serial.println("Our trick points");
         Serial.println(String(it));
     }
 }
