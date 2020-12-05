@@ -9,7 +9,7 @@
 // #define USE_ZIGBEE
 // #define DEBUG_MOTOR
 // #define DEBUG_ANGLECONTROLER
-#define DEBUG_IRRECEIVER
+// #define DEBUG_IRRECEIVER
 // #define DEBUG_ZIGBEE
 // #define DEBUG_TIMER
 // #define DEBUG_POSITION
