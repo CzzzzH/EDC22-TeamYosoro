@@ -55,7 +55,7 @@ PID::PID(double* Input, double* Output, double* Setpoint,
  *   pid Output needs to be computed.  returns true when the output is computed,
  *   false when nothing has been done.
  **********************************************************************************/
-bool PID::Compute()
+bool PID::Compute(bool is_disable_I)
 {
    if(!inAuto) return false;
    unsigned long now = millis();
@@ -66,7 +66,8 @@ bool PID::Compute()
       double input = *myInput;
       double error = *mySetpoint - input;
       double dInput = (input - lastInput);
-      outputSum+= (ki * error);
+      double tmp_ki = is_disable_I ? 0 : ki;
+      outputSum += (tmp_ki * error);
 
       /*Add Proportional on Measurement, if P_ON_M is specified*/
       if(!pOnE) outputSum-= kp * dInput;

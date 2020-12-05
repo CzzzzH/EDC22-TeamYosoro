@@ -8,9 +8,9 @@
 #include "IRReceiver.h"
 #include "statemachine.h"
 
-const double right_left_coeff = 1.00;
+const double right_left_coeff = 1.03;
 
-const int RIGHT_MAX_PWM = 255;
+const int RIGHT_MAX_PWM = 240;
 // const int LEFT_MAX_PWM = 255 / right_left_coeff;
 
 void encoder::initialize()
@@ -98,8 +98,8 @@ void Motor::PID_compute()
         Serial.println("right encoder : " + String(encoder::counter.right));
     }
     // Serial.println("mills : " + String(millis()));
-    leftPID.Compute();
-    rightPID.Compute();
+    leftPID.Compute(false);
+    rightPID.Compute(false);
     // Serial.print("Left Motor Counter: " + String(encoder::counter.left) + ";\t");
     // Serial.print("Right Motor Counter: " + String(encoder::counter.right) + ";\t");
     // Serial.println("motor left output: " + String(leftOutput));
@@ -118,28 +118,28 @@ double diffVelocity(const double angle)
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 0;
+    double IRcoff = 10;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
     double IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * IRReceiver::IROffset;
     double diff_velocity_in = -AngleControl::getOutput();
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
-    // Serial.println("Angle output : " + String(AngleControl::getOutput()));
+    Serial.println("Angle output : " + String(AngleControl::getOutput()));
     // Serial.println("Diff velocity in : "+ String(diff_velocity_in));
     // Serial.println("left output : "+ String(leftOutput));
     double angle_slow = abs(30.0 / AngleControl::getOutput());
     angle_slow = min(angle_slow, 1);
 
-    // setPWM(angle_slow * estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
-    // setPWM(angle_slow * estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
-    setPWM(140, true);
-    setPWM(140, false);
+    setPWM(angle_slow * estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
+    setPWM(angle_slow * estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
+    // setPWM(120, true);
+    // setPWM(120, false);
 }
 
 double Motor::estimatePWM(double targeteSpeed)
 {
-    return 5.2 * targeteSpeed;
+    return 2.2 * targeteSpeed;
 }
 
 const pin_2 Motor::left_pin = {6, 7};
@@ -152,5 +152,5 @@ double Motor::rightOutput = 0;
 double Motor::leftOutput = 0;
 double Motor::targetSpeed = 0;
 
-PID Motor::rightPID = PID(&encoder::counter.right, &rightOutput, &targetSpeed, 2, 0.00000000001, 0.01, DIRECT);
-PID Motor::leftPID = PID(&encoder::counter.left, &leftOutput, &targetSpeed, 2, 0.0000000001, 0.01, DIRECT);
+PID Motor::rightPID = PID(&encoder::counter.right, &rightOutput, &targetSpeed, 2, 0.2, 0.1, DIRECT);
+PID Motor::leftPID = PID(&encoder::counter.left, &leftOutput, &targetSpeed, 2, 0.2, 0.1, DIRECT);
