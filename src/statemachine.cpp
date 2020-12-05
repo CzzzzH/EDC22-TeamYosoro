@@ -7,7 +7,6 @@
 #include "MotorControl.h"
 #include "information.h"
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 #include <string.h>
 #include <MsTimer2.h>
 
@@ -80,11 +79,10 @@ void StateMachine::init()
             添加我们算法生成的障碍物位置
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        insideTarget.push_back(10);
-        insideTarget.push_back(19);
-        insideTarget.push_back(3);
-        insideTarget.push_back(12);
-        insideTarget.push_back(30);
+        // insideTarget.push_back(10);
+        insideTarget.push_back(15);
+        insideTarget.push_back(16);
+        // insideTarget.push_back(30);
     }
     else
     {
@@ -105,7 +103,7 @@ void StateMachine::init()
     */
 
     // 求第一次转弯的路径
-    crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+    crossroadAction = Maze::getDirection(int8_t(nowMazeIndex), int8_t(nextMazeIndex), insideTarget);
 
     // 小车的初始方向和速度
     motorDirection = 1;
@@ -132,10 +130,15 @@ void StateMachine::init()
 void StateMachine::process()
 {
     // exceptionHandle();
+    Serial.println("OK1");
     updateAction();
+    Serial.println("OK2");
     updateMission();
+    Serial.println("OK3");
     updateMotor();
+    Serial.println("OK4");
     printDebugInfo();
+    Serial.println("OK5");
     counter++;
 }
 
@@ -263,7 +266,7 @@ void StateMachine::updateAction()
             if (addNew)
             {
                 addNew = false;
-                crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+                crossroadAction = Maze::getDirection(int8_t(nowMazeIndex), int8_t(nextMazeIndex), insideTarget);
             }
 
             /*
@@ -272,9 +275,10 @@ void StateMachine::updateAction()
             */
             if (IRReceiver::atCrossroad(crossroadAction.rotateAngle))
             {
-                Serial.println("==============================Begin Cross==============================");
+                
 
 #ifdef DEBUG_MAZE_POS
+                Serial.println("==============================Begin Cross==============================");
                 Serial.println("===============BEFORE CROSS===============");
                 Serial.println("NowMazeIndex: " + String(nowMazeIndex));
                 Serial.println("NextMazeIndex: " + String(nextMazeIndex));
@@ -317,7 +321,7 @@ void StateMachine::updateAction()
                     // 更新上一个交叉点的序号和当前交叉点的序号（依赖Maze的返回结果），再进行一次寻路
                     nowMazeIndex = nextMazeIndex;
                     nextMazeIndex = crossroadAction.nextPosition;
-                    crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+                    crossroadAction = Maze::getDirection(int8_t(nowMazeIndex), int8_t(nextMazeIndex), insideTarget);
                 }
 
 #ifdef DEBUG_MAZE_POS
@@ -341,9 +345,8 @@ void StateMachine::updateAction()
                 Serial.println("NextPosition: " + String(crossroadAction.nextPosition));
                 Serial.println("===============AFTER CROSS===============");
                 Serial.println();
-#endif
-
                 Serial.println("==============================End Cross==============================");
+#endif      
             }
         }
     }
@@ -442,26 +445,21 @@ Mission StateMachine::nowMission;
 Position StateMachine::lastPosition = {0, 0};
 Position StateMachine::nowPosition = {0, 0};
 CrossroadAction StateMachine::crossroadAction;
-unsigned int StateMachine::midLine = 0;
-int StateMachine::nowMazeIndex;
-int StateMachine::nextMazeIndex;
-int StateMachine::targetTransportCount = 0;
-int StateMachine::offset = 0;
-int StateMachine::motorDirection = 1;
+int8_t StateMachine::midLine = 0;
+int8_t StateMachine::nowMazeIndex;
+int8_t StateMachine::nextMazeIndex;
+int8_t StateMachine::motorDirection = 1;
 uint16_t StateMachine::backTime = 0;
-int StateMachine::lastScore;
-int StateMachine::nowScore;
-int StateMachine::counter = 0;
-int StateMachine::turnAngle = 0;
+int16_t StateMachine::lastScore;
+int16_t StateMachine::nowScore;
+uint16_t StateMachine::counter = 0;
 
-unsigned long StateMachine::lastCrossTime;
-unsigned long StateMachine::nowCrossTime;
+uint32_t StateMachine::lastCrossTime;
+uint32_t StateMachine::nowCrossTime;
 
-bool StateMachine::havePatient = false;
-bool StateMachine::getItems = false;
 bool StateMachine::restart = false;
 bool StateMachine::addNew = false;
 bool StateMachine::stop = false;
 
 std::deque<Position> StateMachine::outsideTarget;
-std::deque<int> StateMachine::insideTarget;
+std::deque<int8_t> StateMachine::insideTarget;

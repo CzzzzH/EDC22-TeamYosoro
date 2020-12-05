@@ -5,7 +5,6 @@
 #include "JY61.h"
 #include "MotorControl.h"
 #include "IRReceiver.h"
-#include "SoftwareSerial.h"
 #include "Maze.h"
 
 std::list<TimerInterrupt *> TimerInterrupt::timer_list = std::list<TimerInterrupt *>();

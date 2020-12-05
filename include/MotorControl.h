@@ -52,7 +52,7 @@ public:
 
 	static void PID_initialize();
 	static void initialize();
-	static void setPWM(int pwm, bool isRight);
+	static void setPWM(int16_t pwm, bool isRight);
 	static void PID_compute();
 	static void updatePWM();
 	static double estimatePWM(double targeteSpeed);

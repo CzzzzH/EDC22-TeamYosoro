@@ -9,9 +9,9 @@
 
 void IRReceiver::initialize()
 {
-    for (int i = 0; i < MID_IR_COUNT; ++i)
+    for (uint8_t i = 0; i < MID_IR_COUNT; ++i)
         pinMode(MID_BEGIN + i, INPUT);
-    for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
+    for (uint8_t i = 0; i < MID_BACK_IR_COUNT; ++i)
         pinMode(MID_BACK_BEGIN + i, INPUT);
 
     pinMode(RIGHT_FRONT, INPUT);
@@ -27,7 +27,7 @@ void IRReceiver::initialize()
 
 void IRReceiver::updateValue()
 {
-    for (int i = 0; i < MID_IR_COUNT; ++i)
+    for (uint8_t i = 0; i < MID_IR_COUNT; ++i)
     {
         midValue[i] = digitalRead(MID_BEGIN + i);
         if (!turn && !ahead)
@@ -40,7 +40,7 @@ void IRReceiver::updateValue()
                 totalMidValue[i] = max(totalMidValue[i], midValue[i]);
         }
     }
-    for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
+    for (uint8_t i = 0; i < MID_BACK_IR_COUNT; ++i)
     {
         midBackValue[i] = digitalRead(MID_BACK_BEGIN + i);
         if (!turn && !ahead)
@@ -69,14 +69,14 @@ void IRReceiver::updateValue()
     1. 这个函数的重点在于atCross这个变量，当前置红外碰线时被置位true，标志着进入预备转弯状态
     2. 只有atCross等于true时，中间红外碰黑线线才会返回true
 */
-bool IRReceiver::atCrossroad(int angle)
+bool IRReceiver::atCrossroad(int16_t angle)
 {
     // 前置红外熄灭个数
-    int midCount = 0;
-    int midBackCount = 0;
-    for (int i = 0; i < MID_IR_COUNT; ++i)
+    uint8_t midCount = 0;
+    uint8_t midBackCount = 0;
+    for (uint8_t i = 0; i < MID_IR_COUNT; ++i)
         midCount += totalMidValue[i];
-    for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
+    for (uint8_t i = 0; i < MID_BACK_IR_COUNT; ++i)
         midBackCount += totalMidBackValue[i];
 
     // 转弯结束
@@ -92,8 +92,10 @@ bool IRReceiver::atCrossroad(int angle)
             slowRight = false;
             slowLeft = false;
             Motor::targetSpeed = AHEAD_SPEED;
-            Serial.println("[END TURN at time " + String(millis()) + "]");
-            Serial.println();
+            #ifdef DEBUG_CROSS_ACTION
+                Serial.println("[END TURN at time " + String(millis()) + "]");
+                Serial.println();
+            #endif
         }
     }
     // 直走结束
@@ -108,8 +110,10 @@ bool IRReceiver::atCrossroad(int angle)
                 if (leftBackValue || rightBackValue)
                     slowLeft = false;
                 Motor::targetSpeed = AHEAD_SPEED;
-                Serial.println("[END AHEAD at time " + String(millis()) + "]");
-                Serial.println();
+                #ifdef DEBUG_CROSS_ACTION
+                    Serial.println("[END AHEAD at time " + String(millis()) + "]");
+                    Serial.println();
+                #endif
             }
         }
         else
@@ -120,118 +124,77 @@ bool IRReceiver::atCrossroad(int angle)
                 slowRight = false;
                 slowLeft = false;
                 Motor::targetSpeed = AHEAD_SPEED;
-                Serial.println("[END AHEAD at time " + String(millis()) + "]");
-                Serial.println();
+                #ifdef DEBUG_CROSS_ACTION
+                    Serial.println("[END AHEAD at time " + String(millis()) + "]");
+                    Serial.println();
+                #endif
             }
         }
     }
     // 过交叉线
     else if (!turn && !ahead)
     {
+        uint8_t IRCount = (StateMachine::motorDirection == 1) ? midCount : midBackCount;
+        uint8_t threshold = (StateMachine::motorDirection == 1) ? 12 : 6;
+        uint8_t leftValue = (StateMachine::motorDirection == 1) ? leftFrontValue : leftBackValue;
+        uint8_t rightValue = (StateMachine::motorDirection == 1) ? rightFrontValue : rightBackValue;
 
-        if (StateMachine::motorDirection == 1)
+        if (!StateMachine::insideTarget.empty() && !slow && abs(StateMachine::crossroadAction.rotateAngle) == 90)
         {
-            if (!StateMachine::insideTarget.empty() && !slow && abs(StateMachine::crossroadAction.rotateAngle) == 90)
+            if (slowRight && slowLeft)
             {
-                if (slowRight && slowLeft)
-                {
-                    Motor::targetSpeed = SLOW_SPEED;
-                    slow = true;
+                Motor::targetSpeed = SLOW_SPEED;
+                slow = true;
+                #ifdef DEBUG_CROSS_ACTION
                     Serial.println("[SLOW at time " + String(millis()) + "]");
-                }
-                else
-                {
-                    if (leftFrontValue)
-                        slowLeft = true;
-                    if (rightFrontValue)
-                        slowRight = true;
-                }
+                #endif
             }
-
-            if (midCount >= 12 || StateMachine::restart)
+            else
             {
-                Serial.println("[CROSS at time " + String(millis()) + "]");
-                if (StateMachine::restart)
-                {
-                    Serial.println("Restart!!! ");
-                    StateMachine::restart = false;
-                    restartTime = millis();
-                }
-
-                if (angle == 90 || angle == -90)
-                {
-                    Motor::targetSpeed = TURN_SPEED;
-                    StateMachine::lastCrossTime = millis();
-                    turnCount = 0;
-                    slow = false;
-                    turn = true;
-                }
-                else
-                    ahead = true;
-
-                for (int i = 0; i < MID_IR_COUNT; ++i)
-                    totalMidValue[i] = 0;
-                for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
-                    totalMidBackValue[i] = 0;
-
-                return true;
+                if (leftValue)
+                    slowLeft = true;
+                if (rightValue)
+                    slowRight = true;
             }
         }
-        else
+
+        if (IRCount >= threshold || StateMachine::restart)
         {
-            if (!StateMachine::insideTarget.empty() && !slow && abs(StateMachine::crossroadAction.rotateAngle) == 90)
+            Serial.println("[CROSS at time " + String(millis()) + "]");
+            if (StateMachine::restart)
             {
-                if (slowRight && slowLeft)
-                {
-                    Motor::targetSpeed = SLOW_SPEED;
-                    slow = true;
-                    Serial.println("[SLOW at time " + String(millis()) + "]");
-                }
-                else
-                {
-                    if (leftBackValue)
-                        slowLeft = true;
-                    if (rightBackValue)
-                        slowRight = true;
-                }
-            }
-
-            if (midBackCount >= 6 || StateMachine::restart)
-            {
-                Serial.println("[CROSS at time " + String(millis()) + "]");
-                if (StateMachine::restart)
-                {
+                #ifdef DEBUG_CROSS_ACTION
                     Serial.println("Restart!!! ");
-                    StateMachine::restart = false;
-                    restartTime = millis();
-                }
-
-                if (angle == 90 || angle == -90)
-                {
-                    Motor::targetSpeed = TURN_SPEED;
-                    StateMachine::lastCrossTime = millis();
-                    turnCount = 0;
-                    slow = false;
-                    turn = true;
-                }
-                else
-                    ahead = true;
-
-                for (int i = 0; i < MID_IR_COUNT; ++i)
-                    totalMidValue[i] = 0;
-                for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
-                    totalMidBackValue[i] = 0;
-
-                return true;
+                #endif
+                StateMachine::restart = false;
+                restartTime = millis();
             }
+
+            if (angle == 90 || angle == -90)
+            {
+                Motor::targetSpeed = TURN_SPEED;
+                StateMachine::lastCrossTime = millis();
+                turnCount = 0;
+                slow = false;
+                turn = true;
+            }
+            else
+                ahead = true;
+
+            for (uint8_t i = 0; i < MID_IR_COUNT; ++i)
+                totalMidValue[i] = 0;
+            for (uint8_t i = 0; i < MID_BACK_IR_COUNT; ++i)
+                totalMidBackValue[i] = 0;
+
+            return true;
         }
     }
     return false;
 }
 
-double IRReceiver::compute_weight(int index, int total_count, double slope)
+float IRReceiver::compute_weight(uint8_t index, uint8_t total_count, float slope)
 {
-    int mid_index = total_count / 2;
+    uint8_t mid_index = total_count / 2;
     index += (index >= mid_index) ? 1 : 0;
     return slope * (mid_index - index);
 }
@@ -249,12 +212,12 @@ void IRReceiver::updateOffset()
     if (turn) return;
     if (StateMachine::nowMission == SEARCH_MAZE || StateMachine::nowMission == GO_OUT_MAZE)
     {
-        int mid_count = (StateMachine::motorDirection == 1) ? MID_IR_COUNT : MID_BACK_IR_COUNT;
-        int *mid_value = (StateMachine::motorDirection == 1) ? midValue : midBackValue;
+        uint8_t mid_count = (StateMachine::motorDirection == 1) ? MID_IR_COUNT : MID_BACK_IR_COUNT;
+        uint8_t *mid_value = (StateMachine::motorDirection == 1) ? midValue : midBackValue;
 
-        int i = mid_count / 2 - 1;
-        int j = mid_count / 2;
-        int count = 0;
+        uint8_t i = mid_count / 2 - 1;
+        uint8_t j = mid_count / 2;
+        uint8_t count = 0;
         while (i >= 0)
         {
             IROffset += mid_value[i] * compute_weight(i, mid_count, 0.25) + mid_value[j] * compute_weight(j, mid_count, 0.25);
@@ -287,16 +250,16 @@ void IRReceiver::updateOffset()
 #endif
 }
 
-int IRReceiver::turnCount = 0;
-int IRReceiver::rightFrontValue = 0;
-int IRReceiver::leftFrontValue = 0;
-int IRReceiver::rightBackValue = 0;
-int IRReceiver::leftBackValue = 0;
-int IRReceiver::restartTime = 0;
-int IRReceiver::midValue[MID_IR_COUNT];
-int IRReceiver::totalMidValue[MID_IR_COUNT];
-int IRReceiver::midBackValue[MID_BACK_IR_COUNT];
-int IRReceiver::totalMidBackValue[MID_BACK_IR_COUNT];
+uint8_t IRReceiver::turnCount = 0;
+uint8_t IRReceiver::rightFrontValue = 0;
+uint8_t IRReceiver::leftFrontValue = 0;
+uint8_t IRReceiver::rightBackValue = 0;
+uint8_t IRReceiver::leftBackValue = 0;
+uint8_t IRReceiver::restartTime = 0;
+uint8_t IRReceiver::midValue[MID_IR_COUNT];
+uint8_t IRReceiver::totalMidValue[MID_IR_COUNT];
+uint8_t IRReceiver::midBackValue[MID_BACK_IR_COUNT];
+uint8_t IRReceiver::totalMidBackValue[MID_BACK_IR_COUNT];
 bool IRReceiver::turn = false;
 bool IRReceiver::ahead = false;
 bool IRReceiver::slowLeft = false;

@@ -8,9 +8,9 @@
 #include "IRReceiver.h"
 #include "statemachine.h"
 
-const double right_left_coeff = 1.03;
+const float right_left_coeff = 1.03;
 
-const int RIGHT_MAX_PWM = 240;
+const uint8_t RIGHT_MAX_PWM = 240;
 // const int LEFT_MAX_PWM = 255 / right_left_coeff;
 
 void encoder::initialize()
@@ -62,7 +62,7 @@ void Motor::initialize()
     PID_initialize();
 }
 
-void Motor::setPWM(int pwm, bool isRight)
+void Motor::setPWM(int16_t pwm, bool isRight)
 {
     pwm = min(pwm, RIGHT_MAX_PWM);
     pwm = max(pwm, -RIGHT_MAX_PWM);
@@ -107,27 +107,27 @@ void Motor::PID_compute()
     encoder::Reset();
 }
 
-double diffVelocity(const double angle)
+float diffVelocity(const double angle)
 {
     if (AngleControl::target == 0)
         return 0;
-    double result_angle = 1.6 * angle + pow(angle / 15, 3);
+    float result_angle = 1.6 * angle + pow(angle / 15, 3);
     return result_angle;
 }
 
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 20;
+    float IRcoff = 20;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
-    double IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * IRReceiver::IRPidResult;
-    double diff_velocity_in = -AngleControl::getOutput();
+    float IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * IRReceiver::IRPidResult;
+    float diff_velocity_in = -AngleControl::getOutput();
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
     // Serial.println("Angle output : " + String(AngleControl::getOutput()));
     // Serial.println("IR_in : " + String(IR_in));
-    double angle_slow = abs(30.0 / AngleControl::getOutput());
+    float angle_slow = abs(30.0 / AngleControl::getOutput());
     angle_slow = min(angle_slow, 1);
 
     setPWM(angle_slow * estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) + IR_in, true);

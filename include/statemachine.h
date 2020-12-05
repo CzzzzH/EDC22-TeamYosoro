@@ -12,7 +12,7 @@
 // #define DEBUG_IRRECEIVER
 // #define DEBUG_ZIGBEE
 // #define DEBUG_TIMER
-#define DEBUG_POSITION
+// #define DEBUG_POSITION
 #define DEBUG_MAZE_POS
 #define DEBUG_CROSS_ACTION
 
@@ -24,17 +24,14 @@ public:
     static Position lastPosition;
     static Position nowPosition;
     static CrossroadAction crossroadAction;
-    static unsigned int midLine;
-    static int nowMazeIndex, nextMazeIndex;
-    static int targetTransportCount;
-    static int offset;
-    static int motorDirection;
+    static int8_t midLine;
+    static int8_t nowMazeIndex, nextMazeIndex;
+    static int8_t motorDirection;
     static uint16_t backTime;
-    static int lastScore, nowScore;
-    static int counter;
-    static int turnAngle;
+    static int16_t lastScore, nowScore;
+    static uint16_t counter;
 
-    static unsigned long lastCrossTime, nowCrossTime;
+    static uint32_t lastCrossTime, nowCrossTime;
 
     static bool havePatient;
     static bool getItems;
@@ -43,7 +40,7 @@ public:
     static bool stop;
 
     static std::deque<Position> outsideTarget;
-    static std::deque<int> insideTarget;
+    static std::deque<int8_t> insideTarget;
 
     // Methods
     static void init();
