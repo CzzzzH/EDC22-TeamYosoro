@@ -66,7 +66,7 @@ void JY61::read()
 
 		Angle[2] = lambda * Angle[2] + (1 - lambda) * last_Angle;
 	}
-	Serial.println("JY62 : " + String(Angle[2]));
+	// Serial.println("JY62 : " + String(Angle[2]));
 	last_Angle = Angle[2];
 	print();
 }
