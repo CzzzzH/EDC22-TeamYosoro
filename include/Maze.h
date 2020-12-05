@@ -7,7 +7,6 @@
 #include <stack>
 #include <algorithm>
 #include "information.h"
-#include <avr/pgmspace.h>
 
 #define INF 100
 
@@ -30,30 +29,24 @@
 
 class Maze {
 private:
-    static std::map <int, std::list<int>> adjList;
-    static std::map <int, std::list<int>> blockAdj;
-    static std::vector<int> block;
+    static std::map <int8_t, std::list<int8_t>> adjList;
+    static std::map <int8_t, std::list<int8_t>> blockAdj;
+    static std::vector<int8_t> block;
+    static std::vector<int8_t> ourTrick;
     static std::vector<barrierEdge> barrierMaze;
-       
-    // Get Way & Get Dist
-    static std::vector<int> Stack;
-    static std::deque<sortNode> q;
-    static std::map<int, bool> visited;
-    static std::vector<int> history;
-    
 public:
-    static std::vector<int> ourTrick;
     static void initialize();
-    static int getWay(int now, std::deque<int> &target);
-    static void addEdge(int u, int v, bool dir);
-    static void addEdgeBlock(std::map <int, std::list<int>> &graph, int u, int v, bool dir);
-    static void deleteEdge(std::map <int, std::list<int>> &graph, int u, int v, bool dir);
-    static void deleteNode(std::map <int, std::list<int>> &graph, int node);
-    static bool existEdge(std::map <int, std::list<int>> &graph, int u, int v);
-    static int getDist(std::map <int, std::list<int>> &graph, int u, int v);
     static void printAdjList();
+    static void addEdge(int8_t u, int8_t v, bool dir);
+    static void addEdgeBlock(std::map <int8_t, std::list<int8_t>> &graph, int8_t u, int8_t v, bool dir);
+    static void deleteEdge(std::map <int8_t, std::list<int8_t>> &graph, int8_t u, int8_t v, bool dir);
+    static void deleteNode(std::map <int8_t, std::list<int8_t>> &graph, int8_t node);
+    static bool existEdge(std::map <int8_t, std::list<int8_t>> &graph, int8_t u, int8_t v);
     static void putBlock();
-    static CrossroadAction getDirection(int last, int now, std::deque<int> &target);
+    static int8_t getDist(std::map <int8_t, std::list<int8_t>> &graph, int8_t u, int8_t v);
+    static int8_t getWay(int8_t now, std::deque<int8_t> &target);
+    //find connectivity between now and target
+    static CrossroadAction getDirection(int8_t last, int8_t now, std::deque<int8_t> &target);
 };
 
 #endif //maze_H

@@ -12,7 +12,7 @@
 // #define DEBUG_IRRECEIVER
 // #define DEBUG_ZIGBEE
 // #define DEBUG_TIMER
-#define DEBUG_POSITION
+// #define DEBUG_POSITION
 #define DEBUG_MAZE_POS
 #define DEBUG_CROSS_ACTION
 
@@ -40,7 +40,7 @@ public:
     static bool stop;
 
     static std::deque<Position> outsideTarget;
-    static std::deque<int> insideTarget;
+    static std::deque<int8_t> insideTarget;
 
     // Methods
     static void init();

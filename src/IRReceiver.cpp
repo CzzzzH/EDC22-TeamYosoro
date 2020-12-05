@@ -92,8 +92,10 @@ bool IRReceiver::atCrossroad(int16_t angle)
             slowRight = false;
             slowLeft = false;
             Motor::targetSpeed = AHEAD_SPEED;
-            Serial.println("[END TURN at time " + String(millis()) + "]");
-            Serial.println();
+            #ifdef DEBUG_CROSS_ACTION
+                Serial.println("[END TURN at time " + String(millis()) + "]");
+                Serial.println();
+            #endif
         }
     }
     // 直走结束
@@ -108,8 +110,10 @@ bool IRReceiver::atCrossroad(int16_t angle)
                 if (leftBackValue || rightBackValue)
                     slowLeft = false;
                 Motor::targetSpeed = AHEAD_SPEED;
-                Serial.println("[END AHEAD at time " + String(millis()) + "]");
-                Serial.println();
+                #ifdef DEBUG_CROSS_ACTION
+                    Serial.println("[END AHEAD at time " + String(millis()) + "]");
+                    Serial.println();
+                #endif
             }
         }
         else
@@ -120,8 +124,10 @@ bool IRReceiver::atCrossroad(int16_t angle)
                 slowRight = false;
                 slowLeft = false;
                 Motor::targetSpeed = AHEAD_SPEED;
-                Serial.println("[END AHEAD at time " + String(millis()) + "]");
-                Serial.println();
+                #ifdef DEBUG_CROSS_ACTION
+                    Serial.println("[END AHEAD at time " + String(millis()) + "]");
+                    Serial.println();
+                #endif
             }
         }
     }
@@ -139,7 +145,9 @@ bool IRReceiver::atCrossroad(int16_t angle)
             {
                 Motor::targetSpeed = SLOW_SPEED;
                 slow = true;
-                Serial.println("[SLOW at time " + String(millis()) + "]");
+                #ifdef DEBUG_CROSS_ACTION
+                    Serial.println("[SLOW at time " + String(millis()) + "]");
+                #endif
             }
             else
             {
@@ -155,7 +163,9 @@ bool IRReceiver::atCrossroad(int16_t angle)
             Serial.println("[CROSS at time " + String(millis()) + "]");
             if (StateMachine::restart)
             {
-                Serial.println("Restart!!! ");
+                #ifdef DEBUG_CROSS_ACTION
+                    Serial.println("Restart!!! ");
+                #endif
                 StateMachine::restart = false;
                 restartTime = millis();
             }

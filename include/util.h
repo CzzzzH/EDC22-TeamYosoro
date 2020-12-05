@@ -9,17 +9,10 @@
 
 enum Match {FIRST_HALF, SECOND_HALF};
 enum Mission {WAIT_FOR_START, GO_TO_MAZE, SEARCH_MAZE, GO_OUT_MAZE, RETURN, END_GAME};
-
-struct bfsInfo
-{
-    int nextNode;
-    int dist;
-};
-
 struct sortNode
 {
-    int node;
-    int layer;
+    int8_t node;
+    int8_t layer;
     friend bool operator < (sortNode u,sortNode v)
     {
         if(u.layer < v.layer)
@@ -30,14 +23,14 @@ struct sortNode
 };
 struct CrossroadAction
 {
-    int rotateAngle; // 0 90 -90 180
-    int nextPosition; //-1~36
+    int8_t rotateAngle; // 0 90 -90 120
+    int8_t nextPosition; //-1~36
 };
 
 struct barrierEdge
 {
-    int A;
-    int B;
+    int16_t A;
+    int16_t B;
     friend bool operator < (barrierEdge u,barrierEdge v)
     {
         if(u.A > v.A)
@@ -45,14 +38,14 @@ struct barrierEdge
         else if(u.A == v.A)
             return u.B > v.B;
         else
-            return false;  
-        //Delibrately sort from big to small
+            return false;
     }
 };
+
 struct Position
 {
-    unsigned int X;
-    unsigned int Y;
+    uint8_t X;
+    uint8_t Y;
     double getDist(const Position &t) 
     { 
         return sqrt((X - t.X) * (X - t.X) + (Y - t.Y) * (Y - t.Y));

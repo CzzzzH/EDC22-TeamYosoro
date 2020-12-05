@@ -371,7 +371,7 @@ int Information::positonTransform(Position &pos)
 
 bool Information::indexNotExist(int index)
 {
-    std::deque<int> &insideTarget = StateMachine::insideTarget;
+    std::deque<int8_t> &insideTarget = StateMachine::insideTarget;
     return std::find(insideTarget.begin(), insideTarget.end(), index) == insideTarget.end();
 }
 
