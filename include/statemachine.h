@@ -24,17 +24,14 @@ public:
     static Position lastPosition;
     static Position nowPosition;
     static CrossroadAction crossroadAction;
-    static unsigned int midLine;
-    static int nowMazeIndex, nextMazeIndex;
-    static int targetTransportCount;
-    static int offset;
-    static int motorDirection;
+    static uint8_t midLine;
+    static uint8_t nowMazeIndex, nextMazeIndex;
+    static int8_t motorDirection;
     static uint16_t backTime;
-    static int lastScore, nowScore;
-    static int counter;
-    static int turnAngle;
+    static int16_t lastScore, nowScore;
+    static uint16_t counter;
 
-    static unsigned long lastCrossTime, nowCrossTime;
+    static uint32_t lastCrossTime, nowCrossTime;
 
     static bool havePatient;
     static bool getItems;

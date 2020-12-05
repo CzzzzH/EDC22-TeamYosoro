@@ -41,4 +41,4 @@ double AngleControl::output;
 double AngleControl::target;
 double AngleControl::initAngle;
 double AngleControl::angleDist;
-PID AngleControl::pid = PID(&JY61::Angle[2], &output, &target, 1, 0.2, 0.08, DIRECT);
+PID AngleControl::pid = PID(&JY61::Angle[2], &output, &target, 1, 0.0000000, 0.00001, DIRECT);

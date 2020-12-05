@@ -7,6 +7,7 @@
 #include <stack>
 #include <algorithm>
 #include "information.h"
+#include <avr/pgmspace.h>
 
 #define INF 100
 

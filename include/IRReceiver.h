@@ -25,16 +25,16 @@ private:
     static PID offsetPid;
 
 public:
-    static int rightFrontValue, leftFrontValue, rightBackValue, leftBackValue;
-    static int midCount, turnCount, restartTime;
-    static int totalMidValue[MID_IR_COUNT], midValue[MID_IR_COUNT];
-    static int totalMidBackValue[MID_BACK_IR_COUNT], midBackValue[MID_BACK_IR_COUNT];
+    static uint8_t rightFrontValue, leftFrontValue, rightBackValue, leftBackValue;
+    static uint8_t midCount, turnCount, restartTime;
+    static uint8_t totalMidValue[MID_IR_COUNT], midValue[MID_IR_COUNT];
+    static uint8_t totalMidBackValue[MID_BACK_IR_COUNT], midBackValue[MID_BACK_IR_COUNT];
     static double IROffset, zero;
     static bool slowLeft, slowRight, slow;
     static bool turn, ahead;
     static void initialize();
     static void updateValue();
-    static double compute_weight(int index, int total_count, double slope);
-    static bool atCrossroad(int angle);
+    static float compute_weight(uint8_t index, uint8_t total_count, float slope);
+    static bool atCrossroad(int16_t angle);
     static double IRPidResult;
 };
