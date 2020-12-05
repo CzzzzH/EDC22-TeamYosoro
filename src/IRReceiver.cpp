@@ -18,6 +18,11 @@ void IRReceiver::initialize()
     pinMode(LEFT_FRONT, INPUT);
     pinMode(RIGHT_BACK, INPUT);
     pinMode(LEFT_BACK, INPUT);
+
+
+    IRReceiver::offsetPid.SetMode(AUTOMATIC);
+    IRReceiver::offsetPid.SetSampleTime(10);
+    IRReceiver::offsetPid.SetOutputLimits(-100, 100);
 }
 
 void IRReceiver::updateValue()
@@ -25,7 +30,7 @@ void IRReceiver::updateValue()
     for (int i = 0; i < MID_IR_COUNT; ++i)
     {
         midValue[i] = digitalRead(MID_BEGIN + i);
-        if (!turn && !ahead && (slow || StateMachine::crossroadAction.rotateAngle == 0))
+        if (!turn && !ahead)
             totalMidValue[i] = max(totalMidValue[i], midValue[i]);
         else
         {
@@ -38,7 +43,7 @@ void IRReceiver::updateValue()
     for (int i = 0; i < MID_BACK_IR_COUNT; ++i)
     {
         midBackValue[i] = digitalRead(MID_BACK_BEGIN + i);
-        if (!turn && !ahead && slow)
+        if (!turn && !ahead)
             totalMidBackValue[i] = max(totalMidBackValue[i], midBackValue[i]);
         else
         {
@@ -53,6 +58,9 @@ void IRReceiver::updateValue()
     rightBackValue = digitalRead(RIGHT_BACK);
     leftBackValue = digitalRead(LEFT_BACK);
     updateOffset();
+    // Serial.println("IR offset : " + String(IROffset));
+    offsetPid.Compute(false);
+    // Serial.println("IR pid result : " + String(IRPidResult));
 }
 
 /*
@@ -74,11 +82,10 @@ bool IRReceiver::atCrossroad(int angle)
     // 转弯结束
     if (turn)
     {   
-        if (AngleControl::getAngleDist() < 5)
+        if (AngleControl::getAngleDist() < 10)
             turnCount++;
-        else turnCount = 0;
 
-        if (turnCount >= 5)
+        if (turnCount >= 3)
         {
             turn = false;
             slow = false;
@@ -238,7 +245,8 @@ double IRReceiver::compute_weight(int index, int total_count, double slope)
 */
 void IRReceiver::updateOffset()
 {
-    if (turn) IROffset = 0;
+    IROffset = 0;
+    if (turn) return;
     if (StateMachine::nowMission == SEARCH_MAZE || StateMachine::nowMission == GO_OUT_MAZE)
     {
         int mid_count = (StateMachine::motorDirection == 1) ? MID_IR_COUNT : MID_BACK_IR_COUNT;
@@ -294,3 +302,7 @@ bool IRReceiver::ahead = false;
 bool IRReceiver::slowLeft = false;
 bool IRReceiver::slowRight = false;
 bool IRReceiver::slow = false;
+double IRReceiver::IROffset = 0;
+double IRReceiver::IRPidResult = 0;
+double IRReceiver::zero = 0;
+PID IRReceiver::offsetPid = PID(&IRReceiver::IROffset, &IRReceiver::IRPidResult, &IRReceiver::zero, 1, 0.2, 0.1, DIRECT);

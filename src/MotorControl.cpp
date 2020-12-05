@@ -111,28 +111,27 @@ double diffVelocity(const double angle)
 {
     if (AngleControl::target == 0)
         return 0;
-    double result_angle = 1.0 * angle + pow(angle / 24, 3);
+    double result_angle = 1.6 * angle + pow(angle / 15, 3);
     return result_angle;
 }
 
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 10;
+    double IRcoff = 20;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
-    double IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * IRReceiver::IROffset;
+    double IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * IRReceiver::IRPidResult;
     double diff_velocity_in = -AngleControl::getOutput();
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
-    Serial.println("Angle output : " + String(AngleControl::getOutput()));
-    // Serial.println("Diff velocity in : "+ String(diff_velocity_in));
-    // Serial.println("left output : "+ String(leftOutput));
+    // Serial.println("Angle output : " + String(AngleControl::getOutput()));
+    // Serial.println("IR_in : " + String(IR_in));
     double angle_slow = abs(30.0 / AngleControl::getOutput());
     angle_slow = min(angle_slow, 1);
 
-    setPWM(angle_slow * estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
-    setPWM(angle_slow * estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
+    setPWM(angle_slow * estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) + IR_in, true);
+    setPWM(angle_slow * estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) - IR_in, false);
     // setPWM(120, true);
     // setPWM(120, false);
 }
