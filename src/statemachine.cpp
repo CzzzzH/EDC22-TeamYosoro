@@ -130,10 +130,15 @@ void StateMachine::init()
 void StateMachine::process()
 {
     // exceptionHandle();
+    Serial.println("OK1");
     updateAction();
+    Serial.println("OK2");
     updateMission();
+    Serial.println("OK3");
     updateMotor();
+    Serial.println("OK4");
     printDebugInfo();
+    Serial.println("OK5");
     counter++;
 }
 
@@ -440,9 +445,9 @@ Mission StateMachine::nowMission;
 Position StateMachine::lastPosition = {0, 0};
 Position StateMachine::nowPosition = {0, 0};
 CrossroadAction StateMachine::crossroadAction;
-uint8_t StateMachine::midLine = 0;
-uint8_t StateMachine::nowMazeIndex;
-uint8_t StateMachine::nextMazeIndex;
+int8_t StateMachine::midLine = 0;
+int8_t StateMachine::nowMazeIndex;
+int8_t StateMachine::nextMazeIndex;
 int8_t StateMachine::motorDirection = 1;
 uint16_t StateMachine::backTime = 0;
 int16_t StateMachine::lastScore;

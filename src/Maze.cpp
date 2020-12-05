@@ -120,11 +120,11 @@ int8_t Maze::getWay(int8_t now, std::deque<int8_t> &target)
         {
             if (!visited[neighbours])
             {
-                std::vector<int8_t>::iterator blockFind = std::find(block.begin(), block.end(), neighbours);
-                if (blockFind != block.end())
-                    q.push_back({neighbours, layer});
-                else
-                    q.push_back({neighbours, 0});
+                // std::vector<int8_t>::iterator blockFind = std::find(block.begin(), block.end(), neighbours);
+                // if (blockFind != block.end())
+                //     q.push_back({neighbours, layer});
+                // else
+                q.push_back({neighbours, 0});
                 visited[neighbours] = true;
                 Stack[neighbours] = node;
                 std::deque<int8_t>::iterator it = std::find(target.begin(), target.end(), neighbours);
@@ -135,7 +135,7 @@ int8_t Maze::getWay(int8_t now, std::deque<int8_t> &target)
                 }
             }
         }
-        std::sort(q.begin(), q.end());
+        // std::sort(q.begin(), q.end());
         if (Break)
             break;
     }
@@ -166,7 +166,7 @@ CrossroadAction Maze::getDirection(int8_t last, int8_t now, std::deque<int8_t> &
             return {0, 0};
     }
     int8_t index1 = getWay(now, target);
-    int8_t rotate = 0;
+    int16_t rotate = 0;
     int8_t diff1 = now - last;
     int8_t diff2 = index1 - now;
     if (diff1 == diff2)
@@ -184,7 +184,7 @@ CrossroadAction Maze::getDirection(int8_t last, int8_t now, std::deque<int8_t> &
         else if (diff2 == -MAZE_SIZE)
             rotate = (diff1 == -1) ? -1 : 1;
     }
-    return {int8_t(rotate * 90), index1};
+    return {rotate * 90, index1};
 }
 
 void Maze::addEdge(int8_t u, int8_t v, bool dir = 1)
@@ -212,6 +212,14 @@ void Maze::deleteEdge(std::map<int8_t, std::list<int8_t>> &graph, int8_t u, int8
         if (it_ != graph[v].end())
             graph[v].erase(it_);
     }
+}
+
+bool Maze::existEdge(std::map <int8_t, std::list<int8_t>> &graph, int8_t u, int8_t v)
+{
+    if(std::find(graph[u].begin(), graph[u].end(), v) == graph[u].end())
+        return false;
+    else
+        return true;
 }
 
 void Maze::deleteNode(std::map<int8_t, std::list<int8_t>> &graph, int8_t node)

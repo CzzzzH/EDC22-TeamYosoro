@@ -23,7 +23,7 @@ struct sortNode
 };
 struct CrossroadAction
 {
-    int8_t rotateAngle; // 0 90 -90 120
+    int16_t rotateAngle; // 0 90 -90 180
     int8_t nextPosition; //-1~36
 };
 
