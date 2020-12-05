@@ -58,7 +58,7 @@ void JY61::read()
 		delta = delta - ((delta > 180) ? 360 : 0);
 		// Serial.println("delta3 : " + String(delta));
 		delta = fabs(delta);
-		double lambda = (delta < 15) ? 1 : exp(0.2 * (15 - delta));
+		double lambda = (delta < 20) ? 1 : exp(0.2 * (20 - delta));
 		// Serial.println("delta : " + String(delta));
 		// Serial.println("lambda : " + String(lambda));
 		// Serial.println("Angle[2] before : " + String(Angle[2]));

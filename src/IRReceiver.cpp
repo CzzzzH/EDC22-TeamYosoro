@@ -134,7 +134,7 @@ bool IRReceiver::atCrossroad(int angle)
                 }
             }
 
-            if (midCount >= 14 || StateMachine::restart)
+            if (midCount >= 12 || StateMachine::restart)
             {
                 Serial.println("[CROSS at time " + String(millis()) + "]");
                 if (StateMachine::restart)
@@ -179,7 +179,7 @@ bool IRReceiver::atCrossroad(int angle)
                 }
             }
 
-            if (midBackCount >= 7 || StateMachine::restart)
+            if (midBackCount >= 6 || StateMachine::restart)
             {
                 Serial.println("[CROSS at time " + String(millis()) + "]");
                 if (StateMachine::restart)
@@ -251,6 +251,8 @@ double IRReceiver::angleOffset()
         }
         if (count > 5)
             offset = 0;
+        else if (count > 0)
+            offset = offset / (double)count;
     }
     else if (StateMachine::nowMission == GO_TO_MAZE)
     {
