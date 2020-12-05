@@ -8,9 +8,9 @@
 #include "IRReceiver.h"
 #include "statemachine.h"
 
-const double right_left_coeff = 1.00;
+const double right_left_coeff = 0.99;
 
-const int RIGHT_MAX_PWM = 255;
+const int RIGHT_MAX_PWM = 240;
 // const int LEFT_MAX_PWM = 255 / right_left_coeff;
 
 void encoder::initialize()
@@ -118,7 +118,7 @@ double diffVelocity(const double angle)
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    double IRcoff = 0;
+    double IRcoff = 9;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
     double IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * IRReceiver::angleOffset();
@@ -131,15 +131,15 @@ void Motor::updatePWM()
     double angle_slow = abs(30.0 / AngleControl::getOutput());
     angle_slow = min(angle_slow, 1);
 
-    // setPWM(angle_slow * estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
-    // setPWM(angle_slow * estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
-    setPWM(140, true);
-    setPWM(140, false);
+    setPWM(angle_slow * estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) - IR_in, true);
+    setPWM(angle_slow * estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) + IR_in, false);
+    // setPWM(140, true);
+    // setPWM(140, false);
 }
 
 double Motor::estimatePWM(double targeteSpeed)
 {
-    return 5.2 * targeteSpeed;
+    return 2.2 * targeteSpeed;
 }
 
 const pin_2 Motor::left_pin = {6, 7};

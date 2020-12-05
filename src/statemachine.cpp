@@ -18,8 +18,8 @@ void StateMachine::interruptionFunction()
     JY61::read();
     AngleControl::Compute();
     Motor::PID_compute();
-    // process();
-    Motor::targetSpeed = 23;
+    process();
+    // Motor::targetSpeed = 50;
     Motor::updatePWM();
 }
 
