@@ -19,7 +19,7 @@ void StateMachine::interruptionFunction()
     AngleControl::Compute();
     Motor::PID_compute();
     // process();
-    Motor::targetSpeed = 23;
+    Motor::targetSpeed = 45;
     Motor::updatePWM();
 }
 
@@ -28,7 +28,7 @@ void StateMachine::init()
 {
     // 设置Debug模式
     JY61::isDebug = false;
-    Motor::isDebug = true;
+    Motor::isDebug = false;
 
     // 初始化串口
     Serial.begin(115200);

@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
 // From left to right
-#define AHEAD_SPEED 23
-#define TURN_SPEED 17
+#define AHEAD_SPEED 50
+#define TURN_SPEED 35
 #define SLOW_SPEED 10
 
 #define RIGHT_FRONT 49
