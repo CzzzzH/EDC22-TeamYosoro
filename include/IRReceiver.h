@@ -19,17 +19,18 @@
 
 class IRReceiver
 {
+private:
+    static void updateOffset();
 public:
     static int rightFrontValue, leftFrontValue, rightBackValue, leftBackValue;
-    static int midCount, restartTime;
+    static int midCount, turnCount, restartTime;
     static int totalMidValue[MID_IR_COUNT], midValue[MID_IR_COUNT];
     static int totalMidBackValue[MID_BACK_IR_COUNT], midBackValue[MID_BACK_IR_COUNT];
-    // static double midWeight[MID_IR_COUNT];
-    // static double midBackWeight[MID_BACK_IR_COUNT];
-    static bool slowLeft, slowRight;
+    static double IROffset;
+    static bool slowLeft, slowRight, slow;
     static bool turn, ahead;
     static void initialize();
     static void updateValue();
+    static double compute_weight(int index, int total_count, double slope);
     static bool atCrossroad(int angle);
-    static double angleOffset();
 };

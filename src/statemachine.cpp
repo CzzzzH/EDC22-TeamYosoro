@@ -80,12 +80,6 @@ void StateMachine::init()
             添加我们算法生成的障碍物位置
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        // for(auto it : Maze::ourTrick)
-        // {
-        //     insideTarget.push_back(it);
-        //     Serial.println(String(it));
-        // }
-
         insideTarget.push_back(10);
         insideTarget.push_back(19);
         insideTarget.push_back(3);
@@ -243,12 +237,11 @@ void StateMachine::updateAction()
     else if (nowMission == SEARCH_MAZE || nowMission == GO_OUT_MAZE)
     {
         // 如果是上半场，那就隔一段时间加一个目标点
-        // if (nowHalf == FIRST_HALF && counter % 1000 == 0)
+        // if (nowHalf == FIRST_HALF && counter % 1000 == 0 && counter > 1999 && !Maze::ourTrick.empty())
         // {
-        //     if (counter == 1000) insideTarget.push_back(32);
-        //     if (counter == 2000) insideTarget.push_back(10);
-        //     if (!insideTarget.empty())
-        //         crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+        //     insideTarget.push_back(Maze::ourTrick.front());
+        //     crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+        //     Maze::ourTrick.erase(Maze::ourTrick.begin());
         // }
 
         // 如果目标集合为空，点亮灯并且停下（显然只有新的目标出现才会继续启动）
