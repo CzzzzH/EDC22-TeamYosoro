@@ -13,7 +13,7 @@
 // 中断异常
 void StateMachine::interruptionFunction()
 {
-    Serial.println("Start int: " + String(millis()));
+    // Serial.println("Start int: " + String(millis()));
     IRReceiver::updateValue();
     // Serial.print("OK2");
     JY61::read();
@@ -26,7 +26,7 @@ void StateMachine::interruptionFunction()
     // Serial.print("OK6");
     // Motor::targetSpeed = 45;
     Motor::updatePWM();
-    Serial.println("End int: " + String(millis()));
+    // Serial.println("End int: " + String(millis()));
 }
 
 // 状态机初始化（也是整个程序的初始化）
@@ -54,8 +54,8 @@ void StateMachine::init()
     LED::initialize();
 
     // 先初始化一些固定信息
-    nowMazeIndex = 38;
-    nextMazeIndex = 32;
+    nowMazeIndex = 0;
+    nextMazeIndex = 5;
     lastCrossTime = nowCrossTime = 0;
     lastScore = nowScore = 0;
     nowHalf = FIRST_HALF;
@@ -87,7 +87,7 @@ void StateMachine::init()
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
         insideTarget.push_back(10);
-        insideTarget.push_back(15);
+        insideTarget.push_back(32);
         insideTarget.push_back(16);
         insideTarget.push_back(30);
         insideTarget.push_back(19);
@@ -162,7 +162,7 @@ void StateMachine::exceptionHandle()
 void StateMachine::updateInfo()
 {
     // 直接调用zigbee的接收函数，更新一系列信息
-    Serial.print("[US]");
+    // Serial.print("[US]");
     Information::updateInfo();
 
     /*
@@ -210,7 +210,7 @@ void StateMachine::updateInfo()
             }
         }
     }
-    Serial.print("[UE]");
+    // Serial.print("[UE]");
 }
 
 // 动作更新

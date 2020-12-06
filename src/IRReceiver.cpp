@@ -86,7 +86,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
     // 转弯结束
     if (turn)
     {   
-        if (AngleControl::getAngleDist() < 10)
+        if (AngleControl::getAngleDist() < 10 && millis() - StateMachine::lastCrossTime > 300)
             turnCount++;
 
         if (turnCount >= 3)
