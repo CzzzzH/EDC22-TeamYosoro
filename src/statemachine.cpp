@@ -76,8 +76,7 @@ void StateMachine::init()
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize();
-    // Maze::putBlock();
-
+    
     // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
     if (nowHalf == FIRST_HALF)
     {
@@ -86,6 +85,9 @@ void StateMachine::init()
             添加我们算法生成的障碍物位置
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
+        // Maze::putBlock();
+        // insideTarget.push_back(Maze::ourTrick.front());
+        // aze::ourTrick.erase(Maze::ourTrick.begin());
         insideTarget.push_back(10);
         insideTarget.push_back(32);
         insideTarget.push_back(16);
@@ -138,15 +140,10 @@ void StateMachine::init()
 void StateMachine::process()
 {
     // exceptionHandle();
-    // Serial.print("OK1");
     updateAction();
-    // Serial.print("OK2");
     updateMission();
-    // Serial.print("OK3");
     updateMotor();
-    // Serial.print("OK4");
     printDebugInfo();
-    // Serial.print("OK5");
     counter++;
 }
 
@@ -369,7 +366,7 @@ void StateMachine::updateMission()
     if (nowMission == GO_TO_MAZE && outsideTarget.empty())
         nowMission = SEARCH_MAZE;
     // 如果当前任务是搜寻迷宫且预定的返回时间到了，就把任务切换为退出迷宫，并清空迷宫内目标，只留下一个出口
-    else if (nowMission == SEARCH_MAZE && millis() > 120000)
+    else if (nowMission == SEARCH_MAZE && millis() > 130000)
     {
         Serial.println("[End Game at " + String(millis()) + "]");
         nowMission = END_GAME;
