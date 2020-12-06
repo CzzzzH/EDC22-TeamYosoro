@@ -89,7 +89,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
     // 转弯结束
     if (turn)
     {
-        if (AngleControl::getAngleDist() < 10 && millis() - StateMachine::lastCrossTime > 300)
+        if (AngleControl::getAngleDist() < 10 && millis() - StateMachine::lastCrossTime > 200)
             turnCount++;
 
         if (turnCount >= 1)
@@ -108,33 +108,21 @@ bool IRReceiver::atCrossroad(int16_t angle)
     // 直走结束
     else if (ahead)
     {
-        if (StateMachine::motorDirection == 1)
+        uint8_t IRCount = (StateMachine::motorDirection == 1) ? midBackCount : midCount;
+        uint8_t threshold = (StateMachine::motorDirection == 1) ? 9 : 5;
+        uint8_t IRAccum = (StateMachine::motorDirection == 1) ? IRBackAccum : IRMidAccum;
+        uint8_t IRHistory = (StateMachine::motorDirection == 1) ? IRBackHistory : IRMidHistory;
+
+        if ((IRCount >= threshold && IRAccum >= 1 && IRAccum >= IRHistory) && millis() - restartTime > 200 && millis() - StateMachine::lastCrossTime > 200)
         {
-            if ((leftBackValue || rightBackValue) && millis() - restartTime > 300 && millis() - StateMachine::lastCrossTime > 300)
-            {
-                ahead = false;
-                slowRight = false;
-                slowLeft = false;
-                Motor::targetSpeed = AHEAD_SPEED;
+            ahead = false;
+            slowRight = false;
+            slowLeft = false;
+            Motor::targetSpeed = AHEAD_SPEED;
 #ifdef DEBUG_CROSS_ACTION
-                Serial.println("[END AHEAD at time " + String(millis()) + "]");
-                Serial.println();
+            Serial.println("[END AHEAD at time " + String(millis()) + "]");
+            Serial.println();
 #endif
-            }
-        }
-        else
-        {
-            if ((leftFrontValue || rightFrontValue) && millis() - restartTime > 300 && millis() - StateMachine::lastCrossTime > 300)
-            {
-                ahead = false;
-                slowRight = false;
-                slowLeft = false;
-                Motor::targetSpeed = AHEAD_SPEED;
-#ifdef DEBUG_CROSS_ACTION
-                Serial.println("[END AHEAD at time " + String(millis()) + "]");
-                Serial.println();
-#endif
-            }
         }
     }
     // 过交叉线
@@ -144,6 +132,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
         uint8_t threshold = (StateMachine::motorDirection == 1) ? 9 : 5;
         uint8_t IRAccum = (StateMachine::motorDirection == 1) ? IRMidAccum : IRBackAccum;
         uint8_t IRHistory = (StateMachine::motorDirection == 1) ? IRMidHistory : IRBackHistory;
+
         uint8_t leftValue = (StateMachine::motorDirection == 1) ? leftFrontValue : leftBackValue;
         uint8_t rightValue = (StateMachine::motorDirection == 1) ? rightFrontValue : rightBackValue;
 
@@ -281,6 +270,8 @@ bool IRReceiver::slow = false;
 double IRReceiver::IROffset = 0;
 double IRReceiver::IRPidResult = 0;
 double IRReceiver::zero = 0;
-uint8_t IRReceiver::IRMidAccum;
-uint8_t IRReceiver::IRMidHistory;
+uint8_t IRReceiver::IRMidAccum = 0;
+uint8_t IRReceiver::IRMidHistory = 0;
+uint8_t IRReceiver::IRBackAccum = 0;
+uint8_t IRReceiver::IRBackHistory = 0;
 PID IRReceiver::offsetPid = PID(&IRReceiver::IROffset, &IRReceiver::IRPidResult, &IRReceiver::zero, 1, 0.2, 0.1, DIRECT);
