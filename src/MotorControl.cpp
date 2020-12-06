@@ -8,9 +8,9 @@
 #include "IRReceiver.h"
 #include "statemachine.h"
 
-const float right_left_coeff = 1.04;
+const float right_left_coeff = 1.0;
 
-const uint8_t RIGHT_MAX_PWM = 240;
+const uint8_t RIGHT_MAX_PWM = 255;
 // const int LEFT_MAX_PWM = 255 / right_left_coeff;
 
 void encoder::initialize()
@@ -111,7 +111,7 @@ float diffVelocity(const double angle)
 {
     if (AngleControl::target == 0)
         return 0;
-    float result_angle = 0.85 * angle + pow(angle / 19, 3);
+    float result_angle = 0.8 * angle + pow(angle / 24, 3);
     return result_angle;
 }
 

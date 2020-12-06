@@ -58,7 +58,7 @@ void StateMachine::init()
     nextMazeIndex = 5;
     lastCrossTime = nowCrossTime = 0;
     lastScore = nowScore = 0;
-    nowHalf = SECOND_HALF;
+    nowHalf = FIRST_HALF;
     nowMission = SEARCH_MAZE;
 
 // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
@@ -76,7 +76,7 @@ void StateMachine::init()
 
     // 初始化迷宫（现在有障碍物信息了）
     Maze::initialize();
-    
+
     // backTime指当前已经过的时间（单位为0.1s），过了这个时间小车就会强制返回起点
     if (nowHalf == FIRST_HALF)
     {
@@ -86,13 +86,22 @@ void StateMachine::init()
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
         // Maze::putBlock();
-        // insideTarget.push_back(Maze::ourTrick.front());
-        // aze::ourTrick.erase(Maze::ourTrick.begin());
-        insideTarget.push_back(10);
-        insideTarget.push_back(32);
-        insideTarget.push_back(16);
-        insideTarget.push_back(30);
-        insideTarget.push_back(19);
+        Maze::ourTrick.push_back(3);
+        Maze::ourTrick.push_back(15);
+        Maze::ourTrick.push_back(17);
+        Maze::ourTrick.push_back(5);
+        Maze::ourTrick.push_back(3);
+        Maze::ourTrick.push_back(15);
+        Maze::ourTrick.push_back(17);
+        Maze::ourTrick.push_back(5);
+        insideTarget.push_back(Maze::ourTrick.front());
+        Maze::ourTrick.erase(Maze::ourTrick.begin());
+        // insideTarget.push_back(30);
+        // insideTarget.push_back(27);
+        // insideTarget.push_back(6);
+        // insideTarget.push_back(12);
+        // insideTarget.push_back(15);
+        // insideTarget.push_back(20);
     }
     else
     {
@@ -182,6 +191,7 @@ void StateMachine::updateInfo()
             if (Information::indexNotExist(packageIndex) && packageIndex != nextMazeIndex && packageIndex != nowMazeIndex)
             {
                 insideTarget.push_back(packageIndex);
+                Serial.println("Add Package at " + String(packageIndex));
                 addNew = true;
             }
         }
@@ -247,15 +257,16 @@ void StateMachine::updateAction()
     else if (nowMission == SEARCH_MAZE || nowMission == GO_OUT_MAZE)
     {
         // 如果是上半场，那就隔一段时间加一个目标点
-        // if (nowHalf == FIRST_HALF && counter % 1000 == 0 && counter > 1999 && !Maze::ourTrick.empty())
-        // {
-        //     insideTarget.push_back(Maze::ourTrick.front());
-        //     crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
-        //     Maze::ourTrick.erase(Maze::ourTrick.begin());
-        // }
+        if (nowHalf == FIRST_HALF && counter % 500 == 0 && counter > 499 && !Maze::ourTrick.empty())
+        {
+            Serial.println(counter);
+            insideTarget.push_back(Maze::ourTrick.front());
+            crossroadAction = Maze::getDirection(nowMazeIndex, nextMazeIndex, insideTarget);
+            Maze::ourTrick.erase(Maze::ourTrick.begin());
+        }
 
         // 如果目标集合为空，点亮灯并且停下（显然只有新的目标出现才会继续启动）
-        if (stop)
+        if (stop && insideTarget.empty())
         {
             Motor::targetSpeed = 0;
             LED::ledOn();

@@ -109,7 +109,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
     else if (ahead)
     {
         uint8_t IRCount = (StateMachine::motorDirection == 1) ? midBackCount : midCount;
-        uint8_t threshold = (StateMachine::motorDirection == 1) ? 5 : 9;
+        uint8_t threshold = (StateMachine::motorDirection == 1) ? 6 : 12;
         uint8_t IRAccum = (StateMachine::motorDirection == 1) ? IRBackAccum : IRMidAccum;
         uint8_t IRHistory = (StateMachine::motorDirection == 1) ? IRBackHistory : IRMidHistory;
 
@@ -129,7 +129,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
     else if (!turn && !ahead)
     {
         uint8_t IRCount = (StateMachine::motorDirection == 1) ? midCount : midBackCount;
-        uint8_t threshold = (StateMachine::motorDirection == 1) ? 9 : 5;
+        uint8_t threshold = (StateMachine::motorDirection == 1) ? 12 : 6;
         uint8_t IRAccum = (StateMachine::motorDirection == 1) ? IRMidAccum : IRBackAccum;
         uint8_t IRHistory = (StateMachine::motorDirection == 1) ? IRMidHistory : IRBackHistory;
 
@@ -210,6 +210,7 @@ float IRReceiver::compute_weight(uint8_t index, uint8_t total_count, float slope
 void IRReceiver::updateOffset()
 {
     IROffset = 0;
+    // Serial.println("angle dist " + String(AngleControl::getAngleDist()));
     if (AngleControl::getAngleDist() > 15)
         return;
     double aidOffset = 0;

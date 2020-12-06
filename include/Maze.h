@@ -28,13 +28,13 @@
 //   START
 
 class Maze {
-private:
+public:
     static std::map <int8_t, std::list<int8_t>> adjList;
     static std::map <int8_t, std::list<int8_t>> blockAdj;
     static std::vector<int8_t> block;
     static std::vector<int8_t> ourTrick;
     static std::vector<barrierEdge> barrierMaze;
-public:
+
     static void initialize();
     static void printAdjList();
     static void addEdge(int8_t u, int8_t v, bool dir);

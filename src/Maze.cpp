@@ -172,6 +172,8 @@ CrossroadAction Maze::getDirection(int8_t last, int8_t now, std::deque<int8_t> &
             return {-90, index1};
         else if(index1 == 6)
             return {90, index1};
+        else if (index1 == 11)
+            return {0, index1};
     }
     int16_t rotate = 0;
     int8_t diff1 = now - last;
