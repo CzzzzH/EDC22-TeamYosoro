@@ -239,12 +239,12 @@ void IRReceiver::updateOffset()
         else if (count > 0)
             IROffset = IROffset / (double)count;
         
-        uint8_t mid_count = (StateMachine::motorDirection == 1) ? MID_BACK_IR_COUNT : MID_IR_COUNT;
-        uint8_t *mid_value = (StateMachine::motorDirection == 1) ? midBackValue : midValue;
+        mid_count = (StateMachine::motorDirection == 1) ? MID_BACK_IR_COUNT : MID_IR_COUNT;
+        mid_value = (StateMachine::motorDirection == 1) ? midBackValue : midValue;
 
-        int8_t i = mid_count / 2 - 1;
-        int8_t j = mid_count / 2;
-        uint8_t count = 0;
+        i = mid_count / 2 - 1;
+        j = mid_count / 2;
+        count = 0;
         while (i >= 0)
         {
             aidOffset += mid_value[i] * compute_weight(i, mid_count, 0.25) + mid_value[j] * compute_weight(j, mid_count, 0.25);

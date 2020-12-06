@@ -111,14 +111,14 @@ float diffVelocity(const double angle)
 {
     if (AngleControl::target == 0)
         return 0;
-    float result_angle = 0.85 * angle + pow(angle / 14, 3);
+    float result_angle = 0.85 * angle + pow(angle / 19, 3);
     return result_angle;
 }
 
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    float IRcoff = 28;
+    float IRcoff = 20;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
     float IR_in = (fabs(AngleControl::getOutput()) < 15 ? IRcoff : 0) * IRReceiver::IRPidResult;

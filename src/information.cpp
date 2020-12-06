@@ -17,7 +17,7 @@ void Information::updateInfo()
         {
             uint8_t zigbeeBuffer = Serial3.read();
             // Serial.print(zigbeeBuffer);
-            message_index = receiveIndexAdd(message_index, 1); 
+            message_index = receiveIndexAdd(message_index, 1);
             zigbeeMessage[message_index] = zigbeeBuffer;
 
             if (zigbeeMessage[receiveIndexMinus(message_index, 2)] == 0x0D && zigbeeMessage[receiveIndexMinus(message_index, 1)] == 0x0A) //һ����Ϣ�Ľ�β
@@ -129,7 +129,7 @@ uint16_t Information::getCarposX()
     return (uint16_t)Car.pos.X;
 }
 
-uint16_t Information::getCarposY()  
+uint16_t Information::getCarposY()
 {
     return (uint16_t)Car.pos.Y;
 }
@@ -364,8 +364,8 @@ int Information::receiveIndexAdd(int index_h, int num)
 
 int Information::positonTransform(Position &pos)
 {
-    int xOffset = (pos.X - 37)/30 + 1;
-    int yOffset = (pos.Y - 37)/30;
+    int xOffset = (pos.X - 37) / 30 + 1;
+    int yOffset = (pos.Y - 37) / 30;
     return (xOffset + yOffset * MAZE_SIZE);
 }
 
@@ -375,14 +375,14 @@ bool Information::indexNotExist(int index)
     return std::find(insideTarget.begin(), insideTarget.end(), index) == insideTarget.end();
 }
 
-BasicInfo Information::Game;           
-CarInfo Information::Car;              
-PassengerInfo Information::Passenger;  
-PackageInfo Information::Package[6];   
-FloodInfo Information::Flood[5];       
-ObstacleInfo Information::Obstacle[8]; 
+BasicInfo Information::Game;
+CarInfo Information::Car;
+PassengerInfo Information::Passenger;
+PackageInfo Information::Package[6];
+FloodInfo Information::Flood[5];
+ObstacleInfo Information::Obstacle[8];
 
-uint8_t Information::zigbeeReceive[ZIGBEE_MESSAGE_LENTH]; 
-uint8_t Information::zigbeeMessage[ZIGBEE_MESSAGE_LENTH]; 
+uint8_t Information::zigbeeReceive[ZIGBEE_MESSAGE_LENTH];
+uint8_t Information::zigbeeMessage[ZIGBEE_MESSAGE_LENTH];
 int Information::message_index = 0;
 int Information::message_head = -1;

@@ -58,7 +58,7 @@ void StateMachine::init()
     nextMazeIndex = 5;
     lastCrossTime = nowCrossTime = 0;
     lastScore = nowScore = 0;
-    nowHalf = FIRST_HALF;
+    nowHalf = SECOND_HALF;
     nowMission = SEARCH_MAZE;
 
 // 阻塞接收上位机的游戏开始信号，以得到必要的比赛信息进行后续初始化
@@ -274,6 +274,7 @@ void StateMachine::updateAction()
             {
                 addNew = false;
                 crossroadAction = Maze::getDirection(int8_t(nowMazeIndex), int8_t(nextMazeIndex), insideTarget);
+                Serial.println("Add New!");
             }
 
             /*
