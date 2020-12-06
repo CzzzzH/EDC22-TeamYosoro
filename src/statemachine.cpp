@@ -13,13 +13,20 @@
 // 中断异常
 void StateMachine::interruptionFunction()
 {
+    Serial.println("Start int: " + String(millis()));
     IRReceiver::updateValue();
+    // Serial.print("OK2");
     JY61::read();
+    // Serial.print("OK3");
     AngleControl::Compute();
+    // Serial.print("OK4");
     Motor::PID_compute();
+    // Serial.print("OK5");
     process();
+    // Serial.print("OK6");
     // Motor::targetSpeed = 45;
     Motor::updatePWM();
+    Serial.println("End int: " + String(millis()));
 }
 
 // 状态机初始化（也是整个程序的初始化）
@@ -43,7 +50,7 @@ void StateMachine::init()
     Motor::initialize();
     Motor::targetSpeed = 0;
     AngleControl::initialize();
-    IRReceiver::initialize();
+    // IRReceiver::initialize();
     LED::initialize();
 
     // 先初始化一些固定信息
@@ -79,10 +86,11 @@ void StateMachine::init()
             添加我们算法生成的障碍物位置
             按我的算法它到那就会自动停下了（因为目标集合变空）
         */
-        // insideTarget.push_back(10);
+        insideTarget.push_back(10);
         insideTarget.push_back(15);
         insideTarget.push_back(16);
-        // insideTarget.push_back(30);
+        insideTarget.push_back(30);
+        insideTarget.push_back(19);
     }
     else
     {
@@ -130,15 +138,15 @@ void StateMachine::init()
 void StateMachine::process()
 {
     // exceptionHandle();
-    Serial.println("OK1");
+    // Serial.print("OK1");
     updateAction();
-    Serial.println("OK2");
+    // Serial.print("OK2");
     updateMission();
-    Serial.println("OK3");
+    // Serial.print("OK3");
     updateMotor();
-    Serial.println("OK4");
+    // Serial.print("OK4");
     printDebugInfo();
-    Serial.println("OK5");
+    // Serial.print("OK5");
     counter++;
 }
 
@@ -154,6 +162,7 @@ void StateMachine::exceptionHandle()
 void StateMachine::updateInfo()
 {
     // 直接调用zigbee的接收函数，更新一系列信息
+    Serial.print("[US]");
     Information::updateInfo();
 
     /*
@@ -201,6 +210,7 @@ void StateMachine::updateInfo()
             }
         }
     }
+    Serial.print("[UE]");
 }
 
 // 动作更新
@@ -275,7 +285,6 @@ void StateMachine::updateAction()
             */
             if (IRReceiver::atCrossroad(crossroadAction.rotateAngle))
             {
-                
 
 #ifdef DEBUG_MAZE_POS
                 Serial.println("==============================Begin Cross==============================");
@@ -322,6 +331,7 @@ void StateMachine::updateAction()
                     nowMazeIndex = nextMazeIndex;
                     nextMazeIndex = crossroadAction.nextPosition;
                     crossroadAction = Maze::getDirection(int8_t(nowMazeIndex), int8_t(nextMazeIndex), insideTarget);
+                    // crossroadAction = {90, 25};
                 }
 
 #ifdef DEBUG_MAZE_POS
@@ -346,7 +356,7 @@ void StateMachine::updateAction()
                 Serial.println("===============AFTER CROSS===============");
                 Serial.println();
                 Serial.println("==============================End Cross==============================");
-#endif      
+#endif
             }
         }
     }

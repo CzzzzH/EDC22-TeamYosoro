@@ -75,7 +75,8 @@ bool IRReceiver::atCrossroad(int16_t angle)
     uint8_t midCount = 0;
     uint8_t midBackCount = 0;
     for (uint8_t i = 0; i < MID_IR_COUNT; ++i)
-        midCount += totalMidValue[i];
+        if(i<6 || i >9)
+            midCount += totalMidValue[i];
     for (uint8_t i = 0; i < MID_BACK_IR_COUNT; ++i)
         midBackCount += totalMidBackValue[i];
 
@@ -135,7 +136,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
     else if (!turn && !ahead)
     {
         uint8_t IRCount = (StateMachine::motorDirection == 1) ? midCount : midBackCount;
-        uint8_t threshold = (StateMachine::motorDirection == 1) ? 12 : 6;
+        uint8_t threshold = (StateMachine::motorDirection == 1) ? 8 : 6;
         uint8_t leftValue = (StateMachine::motorDirection == 1) ? leftFrontValue : leftBackValue;
         uint8_t rightValue = (StateMachine::motorDirection == 1) ? rightFrontValue : rightBackValue;
 

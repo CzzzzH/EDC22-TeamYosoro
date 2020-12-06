@@ -50,6 +50,7 @@ void JY61::read()
 		count++;
 	}
 	else if (!IRReceiver::turn)
+	// else
 	{
 		double delta = fabs(Angle[2] - last_Angle);
 		// Serial.println("delta1 : " + String(delta));

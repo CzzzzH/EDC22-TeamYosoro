@@ -13,8 +13,8 @@
 // #define DEBUG_ZIGBEE
 // #define DEBUG_TIMER
 // #define DEBUG_POSITION
-#define DEBUG_MAZE_POS
-#define DEBUG_CROSS_ACTION
+// #define DEBUG_MAZE_POS
+// #define DEBUG_CROSS_ACTION
 
 class StateMachine // The statemachine of th2e car (Singleton)
 {

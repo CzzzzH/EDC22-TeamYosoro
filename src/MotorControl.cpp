@@ -111,17 +111,18 @@ float diffVelocity(const double angle)
 {
     if (AngleControl::target == 0)
         return 0;
-    float result_angle = 1.6 * angle + pow(angle / 15, 3);
+    float result_angle = 1.1 * angle + pow(angle / 25, 3);
     return result_angle;
 }
 
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    float IRcoff = 20;
+    float IRcoff = 25;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
     float IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * IRReceiver::IRPidResult;
+    // float IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * 0;
     float diff_velocity_in = -AngleControl::getOutput();
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
@@ -129,9 +130,10 @@ void Motor::updatePWM()
     // Serial.println("IR_in : " + String(IR_in));
     float angle_slow = abs(30.0 / AngleControl::getOutput());
     angle_slow = min(angle_slow, 1);
-
+    Serial.print("Calc OK!");
     setPWM(angle_slow * estimatePWM(targetSpeed) + rightOutput + diffVelocity(-diff_velocity_in) + IR_in, true);
     setPWM(angle_slow * estimatePWM(targetSpeed) + leftOutput + diffVelocity(diff_velocity_in) - IR_in, false);
+    Serial.print("Set OK!");
     // setPWM(120, true);
     // setPWM(120, false);
 }
