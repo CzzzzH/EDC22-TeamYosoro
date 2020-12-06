@@ -89,7 +89,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
     // 转弯结束
     if (turn)
     {
-        if (AngleControl::getAngleDist() < 10 && millis() - StateMachine::lastCrossTime > 300)
+        if (AngleControl::getAngleDist() < 10 && millis() - StateMachine::lastCrossTime > 200)
             turnCount++;
 
         if (turnCount >= 1)
@@ -108,33 +108,20 @@ bool IRReceiver::atCrossroad(int16_t angle)
     // 直走结束
     else if (ahead)
     {
-        if (StateMachine::motorDirection == 1)
+        uint8_t IRCount = (StateMachine::motorDirection == 1) ? midCount : midBackCount;
+        uint8_t threshold = (StateMachine::motorDirection == 1) ? 9 : 5;
+        uint8_t IRAccum = (StateMachine::motorDirection == 1) ? IRMidAccum : IRBackAccum;
+        uint8_t IRHistory = (StateMachine::motorDirection == 1) ? IRMidHistory : IRBackHistory;
+        if ((IRCount >= threshold && IRAccum >= 1 && IRAccum >= IRHistory) && millis() - restartTime > 200 && millis() - StateMachine::lastCrossTime > 200)
         {
-            if ((leftBackValue || rightBackValue) && millis() - restartTime > 300 && millis() - StateMachine::lastCrossTime > 300)
-            {
-                ahead = false;
-                slowRight = false;
-                slowLeft = false;
-                Motor::targetSpeed = AHEAD_SPEED;
+            ahead = false;
+            slowRight = false;
+            slowLeft = false;
+            Motor::targetSpeed = AHEAD_SPEED;
 #ifdef DEBUG_CROSS_ACTION
-                Serial.println("[END AHEAD at time " + String(millis()) + "]");
-                Serial.println();
+            Serial.println("[END AHEAD at time " + String(millis()) + "]");
+            Serial.println();
 #endif
-            }
-        }
-        else
-        {
-            if ((leftFrontValue || rightFrontValue) && millis() - restartTime > 300 && millis() - StateMachine::lastCrossTime > 300)
-            {
-                ahead = false;
-                slowRight = false;
-                slowLeft = false;
-                Motor::targetSpeed = AHEAD_SPEED;
-#ifdef DEBUG_CROSS_ACTION
-                Serial.println("[END AHEAD at time " + String(millis()) + "]");
-                Serial.println();
-#endif
-            }
         }
     }
     // 过交叉线
