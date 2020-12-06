@@ -22,9 +22,9 @@ void StateMachine::interruptionFunction()
     // Serial.print("OK4");
     Motor::PID_compute();
     // Serial.print("OK5");
-    // process();
+    process();
     // Serial.print("OK6");
-    Motor::targetSpeed = 45;
+    // Motor::targetSpeed = 45;
     Motor::updatePWM();
     // Serial.println("End int: " + String(millis()));
 }
