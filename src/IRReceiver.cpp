@@ -66,9 +66,9 @@ void IRReceiver::updateValue()
     rightBackValue = digitalRead(RIGHT_BACK);
     leftBackValue = digitalRead(LEFT_BACK);
     updateOffset();
-    // Serial.println("IR offset : " + String(IROffset));
+    Serial.println("IR offset : " + String(IROffset));
     offsetPid.Compute(false);
-    // Serial.println("IR pid result : " + String(IRPidResult));
+    Serial.println("IR pid result : " + String(IRPidResult));
 }
 
 /*
@@ -93,7 +93,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
         if (AngleControl::getAngleDist() < 10 && millis() - StateMachine::lastCrossTime > 300)
             turnCount++;
 
-        if (turnCount >= 3)
+        if (turnCount >= 1)
         {
             turn = false;
             slow = false;

@@ -57,7 +57,9 @@ PID::PID(double* Input, double* Output, double* Setpoint,
  **********************************************************************************/
 bool PID::Compute(bool is_disable_I)
 {
+   // Serial.println("Enter PID Compute : " + String(inAuto));
    if(!inAuto) return false;
+   // Serial.println("Is return false ????");
    unsigned long now = millis();
    unsigned long timeChange = (now - lastTime);
    if(timeChange>=SampleTime)

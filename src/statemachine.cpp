@@ -22,9 +22,9 @@ void StateMachine::interruptionFunction()
     // Serial.print("OK4");
     Motor::PID_compute();
     // Serial.print("OK5");
-    process();
+    // process();
     // Serial.print("OK6");
-    // Motor::targetSpeed = 45;
+    Motor::targetSpeed = 45;
     Motor::updatePWM();
     // Serial.println("End int: " + String(millis()));
 }
@@ -50,7 +50,7 @@ void StateMachine::init()
     Motor::initialize();
     Motor::targetSpeed = 0;
     AngleControl::initialize();
-    // IRReceiver::initialize();
+    IRReceiver::initialize();
     LED::initialize();
 
     // 先初始化一些固定信息

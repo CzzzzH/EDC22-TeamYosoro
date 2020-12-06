@@ -6,7 +6,7 @@
 #include <deque>
 
 // 各种Define，用于debug
-#define USE_ZIGBEE
+// #define USE_ZIGBEE
 // #define DEBUG_MOTOR
 // #define DEBUG_ANGLECONTROLER
 // #define DEBUG_IRRECEIVER

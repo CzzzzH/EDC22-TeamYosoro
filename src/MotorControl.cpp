@@ -8,7 +8,7 @@
 #include "IRReceiver.h"
 #include "statemachine.h"
 
-const float right_left_coeff = 1.03;
+const float right_left_coeff = 1.04;
 
 const uint8_t RIGHT_MAX_PWM = 240;
 // const int LEFT_MAX_PWM = 255 / right_left_coeff;
@@ -111,23 +111,23 @@ float diffVelocity(const double angle)
 {
     if (AngleControl::target == 0)
         return 0;
-    float result_angle = 1.0 * angle + pow(angle / 20, 3);
+    float result_angle = 0.85 * angle + pow(angle / 17, 3);
     return result_angle;
 }
 
 void Motor::updatePWM()
 {
     // Serial.println("Getoutput: " + String(AngleControl::getOutput()));
-    float IRcoff = 25;
+    float IRcoff = 28;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
-    float IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * IRReceiver::IRPidResult;
+    float IR_in = (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::IRPidResult;
     // float IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * 0;
     float diff_velocity_in = -AngleControl::getOutput();
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
     // Serial.println("Angle output : " + String(AngleControl::getOutput()));
-    // Serial.println("IR_in : " + String(IR_in));
+    Serial.println("IR_in : " + String(IR_in));
     float angle_slow = abs(30.0 / AngleControl::getOutput());
     angle_slow = min(angle_slow, 1);
     // Serial.print("Calc OK!");
