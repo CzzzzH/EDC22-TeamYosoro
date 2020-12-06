@@ -144,6 +144,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
         uint8_t threshold = (StateMachine::motorDirection == 1) ? 9 : 5;
         uint8_t IRAccum = (StateMachine::motorDirection == 1) ? IRMidAccum : IRBackAccum;
         uint8_t IRHistory = (StateMachine::motorDirection == 1) ? IRMidHistory : IRBackHistory;
+
         uint8_t leftValue = (StateMachine::motorDirection == 1) ? leftFrontValue : leftBackValue;
         uint8_t rightValue = (StateMachine::motorDirection == 1) ? rightFrontValue : rightBackValue;
 
@@ -281,6 +282,8 @@ bool IRReceiver::slow = false;
 double IRReceiver::IROffset = 0;
 double IRReceiver::IRPidResult = 0;
 double IRReceiver::zero = 0;
-uint8_t IRReceiver::IRMidAccum;
-uint8_t IRReceiver::IRMidHistory;
+uint8_t IRReceiver::IRMidAccum = 0;
+uint8_t IRReceiver::IRMidHistory = 0;
+uint8_t IRReceiver::IRBackAccum = 0;
+uint8_t IRReceiver::IRBackHistory = 0;
 PID IRReceiver::offsetPid = PID(&IRReceiver::IROffset, &IRReceiver::IRPidResult, &IRReceiver::zero, 1, 0.2, 0.1, DIRECT);
