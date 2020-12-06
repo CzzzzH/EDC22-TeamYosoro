@@ -29,6 +29,8 @@ void IRReceiver::updateValue()
 {
     IRMidHistory = IRMidAccum;
     IRMidAccum = 0;
+    IRBackHistory = IRBackAccum;
+    IRBackAccum = 0;
     for (uint8_t i = 0; i < MID_IR_COUNT; ++i)
     {
         midValue[i] = digitalRead(MID_BEGIN + i);
@@ -56,6 +58,8 @@ void IRReceiver::updateValue()
             else
                 totalMidBackValue[i] = max(totalMidBackValue[i], midBackValue[i]);
         }
+        if(midBackValue[i])
+            IRBackAccum++;
     }
     rightFrontValue = digitalRead(RIGHT_FRONT);
     leftFrontValue = digitalRead(LEFT_FRONT);
@@ -138,7 +142,9 @@ bool IRReceiver::atCrossroad(int16_t angle)
     else if (!turn && !ahead)
     {
         uint8_t IRCount = (StateMachine::motorDirection == 1) ? midCount : midBackCount;
-        uint8_t threshold = (StateMachine::motorDirection == 1) ? 9 : 6;
+        uint8_t IRAccum = (StateMachine::motorDirection == 1) ? IRMidAccum : IRBackAccum;
+        uint8_t IRHistory = (StateMachine::motorDirection == 1) ? IRMidHistory : IRBackHistory;
+        uint8_t threshold = (StateMachine::motorDirection == 1) ? 9 : 5;
         uint8_t leftValue = (StateMachine::motorDirection == 1) ? leftFrontValue : leftBackValue;
         uint8_t rightValue = (StateMachine::motorDirection == 1) ? rightFrontValue : rightBackValue;
 
@@ -160,8 +166,8 @@ bool IRReceiver::atCrossroad(int16_t angle)
                     slowRight = true;
             }
         }
-
-        if ((IRCount >= threshold && IRMidAccum >= 1 && IRMidAccum >= IRMidHistory) || StateMachine::restart)
+        
+        if ((IRCount >= threshold && IRAccum >= 1 && IRAccum >= IRHistory) || StateMachine::restart)
         {
             Serial.println("[CROSS at time " + String(millis()) + "]");
             if (StateMachine::restart)
@@ -271,6 +277,8 @@ bool IRReceiver::slow = false;
 double IRReceiver::IROffset = 0;
 double IRReceiver::IRPidResult = 0;
 double IRReceiver::zero = 0;
-uint8_t IRReceiver::IRMidAccum;
-uint8_t IRReceiver::IRMidHistory;
+uint8_t IRReceiver::IRMidAccum = 0;
+uint8_t IRReceiver::IRMidHistory = 0;
+uint8_t IRReceiver::IRBackAccum = 0;
+uint8_t IRReceiver::IRBackHistory = 0;
 PID IRReceiver::offsetPid = PID(&IRReceiver::IROffset, &IRReceiver::IRPidResult, &IRReceiver::zero, 1, 0.2, 0.1, DIRECT);
