@@ -111,7 +111,7 @@ float diffVelocity(const double angle)
 {
     if (AngleControl::target == 0)
         return 0;
-    float result_angle = 0.85 * angle + pow(angle / 17, 3);
+    float result_angle = 0.85 * angle + pow(angle / 16, 3);
     return result_angle;
 }
 
@@ -121,7 +121,7 @@ void Motor::updatePWM()
     float IRcoff = 28;
     if (targetSpeed < 0)
         IRcoff = -0.99 * IRcoff;
-    float IR_in = (fabs(AngleControl::getOutput()) < 10 ? IRcoff : 0) * IRReceiver::IRPidResult;
+    float IR_in = (fabs(AngleControl::getOutput()) < 25 ? IRcoff : 0) * IRReceiver::IRPidResult;
     // float IR_in = (fabs(AngleControl::getOutput()) < 6 ? IRcoff : 0) * 0;
     float diff_velocity_in = -AngleControl::getOutput();
     // if (StateMachine::getInstance().motorDirection == -1)
