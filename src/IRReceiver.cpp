@@ -210,6 +210,7 @@ float IRReceiver::compute_weight(uint8_t index, uint8_t total_count, float slope
 void IRReceiver::updateOffset()
 {
     IROffset = 0;
+    double aidOffset = 0;
     if (turn)
         return;
     if (StateMachine::nowMission == SEARCH_MAZE || StateMachine::nowMission == GO_OUT_MAZE)
@@ -236,6 +237,32 @@ void IRReceiver::updateOffset()
             IROffset = 0;
         else if (count > 0)
             IROffset = IROffset / (double)count;
+        
+        uint8_t mid_count = (StateMachine::motorDirection == 1) ? MID_BACK_IR_COUNT : MID_IR_COUNT;
+        uint8_t *mid_value = (StateMachine::motorDirection == 1) ? midBackValue : midValue;
+
+        int8_t i = mid_count / 2 - 1;
+        int8_t j = mid_count / 2;
+        uint8_t count = 0;
+        while (i >= 0)
+        {
+            aidOffset += mid_value[i] * compute_weight(i, mid_count, 0.25) + mid_value[j] * compute_weight(j, mid_count, 0.25);
+            count += mid_value[i];
+            count += mid_value[j];
+            if (mid_value[i] == 0 && mid_value[i + 1] == 1)
+                break;
+            if (mid_value[j] == 0 && mid_value[j - 1] == 1)
+                break;
+            i--;
+            j++;
+        }
+        if (count > 5)
+            aidOffset = 0;
+        else if (count > 0)
+            aidOffset = fabs(aidOffset / (double)count);
+        
+        if (IROffset > 0) IROffset += aidOffset;
+        else IROffset -= aidOffset;
     }
     else if (StateMachine::nowMission == GO_TO_MAZE)
     {
