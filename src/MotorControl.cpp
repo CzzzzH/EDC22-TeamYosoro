@@ -127,7 +127,7 @@ void Motor::updatePWM()
     // if (StateMachine::getInstance().motorDirection == -1)
     //     diff_velocity_in = -diff_velocity_in;
     // Serial.println("Angle output : " + String(AngleControl::getOutput()));
-    Serial.println("IR_in : " + String(IR_in));
+    // Serial.println("IR_in : " + String(IR_in));
     float angle_slow = abs(30.0 / AngleControl::getOutput());
     angle_slow = min(angle_slow, 1);
     // Serial.print("Calc OK!");

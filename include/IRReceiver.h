@@ -34,6 +34,8 @@ public:
     static bool turn, ahead;
     static uint8_t IRMidAccum;
     static uint8_t IRMidHistory;
+    static uint8_t IRBackAccum;
+    static uint8_t IRBackHistory;
     static void initialize();
     static void updateValue();
     static float compute_weight(uint8_t index, uint8_t total_count, float slope);
