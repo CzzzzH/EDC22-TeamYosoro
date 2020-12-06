@@ -108,10 +108,11 @@ bool IRReceiver::atCrossroad(int16_t angle)
     // 直走结束
     else if (ahead)
     {
-        uint8_t IRCount = (StateMachine::motorDirection == 1) ? midCount : midBackCount;
+        uint8_t IRCount = (StateMachine::motorDirection == 1) ? midBackCount : midCount;
         uint8_t threshold = (StateMachine::motorDirection == 1) ? 9 : 5;
-        uint8_t IRAccum = (StateMachine::motorDirection == 1) ? IRMidAccum : IRBackAccum;
-        uint8_t IRHistory = (StateMachine::motorDirection == 1) ? IRMidHistory : IRBackHistory;
+        uint8_t IRAccum = (StateMachine::motorDirection == 1) ? IRBackAccum : IRMidAccum;
+        uint8_t IRHistory = (StateMachine::motorDirection == 1) ? IRBackHistory : IRMidHistory;
+
         if ((IRCount >= threshold && IRAccum >= 1 && IRAccum >= IRHistory) && millis() - restartTime > 200 && millis() - StateMachine::lastCrossTime > 200)
         {
             ahead = false;
