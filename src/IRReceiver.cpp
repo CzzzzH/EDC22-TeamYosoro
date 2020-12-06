@@ -27,6 +27,8 @@ void IRReceiver::initialize()
 
 void IRReceiver::updateValue()
 {
+    IRMidHistory = IRMidAccum;
+    IRMidAccum = 0;
     for (uint8_t i = 0; i < MID_IR_COUNT; ++i)
     {
         midValue[i] = digitalRead(MID_BEGIN + i);
@@ -39,6 +41,8 @@ void IRReceiver::updateValue()
             else
                 totalMidValue[i] = max(totalMidValue[i], midValue[i]);
         }
+        if(midValue[i])
+            IRMidAccum++;
     }
     for (uint8_t i = 0; i < MID_BACK_IR_COUNT; ++i)
     {
@@ -75,8 +79,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
     uint8_t midCount = 0;
     uint8_t midBackCount = 0;
     for (uint8_t i = 0; i < MID_IR_COUNT; ++i)
-        if(i<6 || i >9)
-            midCount += totalMidValue[i];
+        midCount += totalMidValue[i];
     for (uint8_t i = 0; i < MID_BACK_IR_COUNT; ++i)
         midBackCount += totalMidBackValue[i];
 
@@ -108,8 +111,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
             {
                 ahead = false;
                 slowRight = false;
-                if (leftBackValue || rightBackValue)
-                    slowLeft = false;
+                slowLeft = false;
                 Motor::targetSpeed = AHEAD_SPEED;
                 #ifdef DEBUG_CROSS_ACTION
                     Serial.println("[END AHEAD at time " + String(millis()) + "]");
@@ -136,7 +138,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
     else if (!turn && !ahead)
     {
         uint8_t IRCount = (StateMachine::motorDirection == 1) ? midCount : midBackCount;
-        uint8_t threshold = (StateMachine::motorDirection == 1) ? 8 : 6;
+        uint8_t threshold = (StateMachine::motorDirection == 1) ? 9 : 6;
         uint8_t leftValue = (StateMachine::motorDirection == 1) ? leftFrontValue : leftBackValue;
         uint8_t rightValue = (StateMachine::motorDirection == 1) ? rightFrontValue : rightBackValue;
 
@@ -159,7 +161,7 @@ bool IRReceiver::atCrossroad(int16_t angle)
             }
         }
 
-        if (IRCount >= threshold || StateMachine::restart)
+        if ((IRCount >= threshold && IRMidAccum >= 1 && IRMidAccum >= IRMidHistory) || StateMachine::restart)
         {
             Serial.println("[CROSS at time " + String(millis()) + "]");
             if (StateMachine::restart)
@@ -269,4 +271,6 @@ bool IRReceiver::slow = false;
 double IRReceiver::IROffset = 0;
 double IRReceiver::IRPidResult = 0;
 double IRReceiver::zero = 0;
+uint8_t IRReceiver::IRMidAccum;
+uint8_t IRReceiver::IRMidHistory;
 PID IRReceiver::offsetPid = PID(&IRReceiver::IROffset, &IRReceiver::IRPidResult, &IRReceiver::zero, 1, 0.2, 0.1, DIRECT);

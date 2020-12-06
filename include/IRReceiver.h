@@ -7,7 +7,7 @@
 #define SLOW_SPEED 2
 
 #define RIGHT_FRONT 49
-#define LEFT_FRONT 48
+#define LEFT_FRONT 53
 #define RIGHT_BACK 46
 #define LEFT_BACK 47
 
@@ -32,6 +32,8 @@ public:
     static double IROffset, zero;
     static bool slowLeft, slowRight, slow;
     static bool turn, ahead;
+    static uint8_t IRMidAccum;
+    static uint8_t IRMidHistory;
     static void initialize();
     static void updateValue();
     static float compute_weight(uint8_t index, uint8_t total_count, float slope);
